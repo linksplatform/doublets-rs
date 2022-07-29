@@ -90,6 +90,7 @@ fn str_as_vec(str: &str) -> Vec<usize> {
 const N: usize = 10000;
 
 #[test]
+#[cfg(not(miri))]
 fn seq() -> Result<(), Box<dyn Error>> {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 

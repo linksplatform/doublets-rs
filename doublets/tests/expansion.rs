@@ -5,6 +5,7 @@ use std::time::Instant;
 const MILLION: usize = 1_000_000;
 
 #[test]
+#[cfg(not(miri))]
 fn unit_million() -> Result<(), Error<usize>> {
     let mut store = unit::Store::<usize, _>::new(Global::new())?;
 
@@ -18,6 +19,7 @@ fn unit_million() -> Result<(), Error<usize>> {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn split_million() -> Result<(), Error<usize>> {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
@@ -31,6 +33,7 @@ fn split_million() -> Result<(), Error<usize>> {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn unit_million_points() -> Result<(), Error<usize>> {
     let mut store = unit::Store::<usize, _>::new(Global::new())?;
 
@@ -46,6 +49,7 @@ fn unit_million_points() -> Result<(), Error<usize>> {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn split_million_points() -> Result<(), Error<usize>> {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 

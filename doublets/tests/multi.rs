@@ -5,6 +5,7 @@ use std::time::Instant;
 mod extensions;
 
 #[test]
+#[cfg(not(miri))]
 fn random_crud_unit() -> Result<(), Error<usize>> {
     let mut store = unit::Store::<usize, _>::new(Global::new())?;
 
@@ -16,6 +17,7 @@ fn random_crud_unit() -> Result<(), Error<usize>> {
 }
 
 #[test]
+#[cfg(not(miri))]
 fn random_crud_split() -> Result<(), Error<usize>> {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
