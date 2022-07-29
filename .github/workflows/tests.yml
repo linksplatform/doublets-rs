@@ -19,7 +19,10 @@ jobs:
         with:
           toolchain: nightly
       - name: Run miri
-        run: ci/miri.sh    
+        run: |
+          cd ci
+          chmod +x miri.sh
+          ./miri.sh
   tests:
     strategy:
       matrix:
