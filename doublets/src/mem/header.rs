@@ -1,6 +1,7 @@
 use data::LinkType;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[repr(C)]
 pub struct LinksHeader<T: LinkType> {
     pub allocated: T,
     pub reserved: T,
