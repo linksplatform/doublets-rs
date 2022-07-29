@@ -12,25 +12,18 @@ A basic CRUD in doublets
 use doublets::{
     data::Flow::Continue,
     mem::FileMapped,
-    unit, Doublets, Error
+    unit, Doublets,
 };
-use std::fs::File;
 
-fn main() -> Result<(), Error<usize>> {
-    // create or open read/write file
-    let file = File::options()
-        .create(true)
-        .read(true)
-        .write(true)
-        .open("db.links")?;
-
-    let mem = FileMapped::new(file)?;
+fn main() -> Result<(), doublets::Error<usize>> {
+    // use file as memory for doublets
+    let mem = FileMapped::from_path("db.links")?;
     let mut links = united::Store::<usize, _>::new(mem)?;
 
-    // Creation of the empty doublet in tiny style
+    // Create empty doublet in tiny style
     let mut point = links.create()?;
 
-    // Update of the doublet in handler style
+    // Update doublet in handler style
     // The link is updated to reference itself twice (as source and target):
     links.update_with(point, point, point, |_, after| {
         // link is { index, source, target }
@@ -41,7 +34,7 @@ fn main() -> Result<(), Error<usize>> {
 
     // print all links from store
     links.each(|link| {
-        println!("{link}");
+        println!("{link:?}");
         Continue
     });
 
@@ -53,7 +46,6 @@ fn main() -> Result<(), Error<usize>> {
     links.delete_by_with([point, any, any], |before, _| {
         println!("Goodbye {}", before);
         Continue
-    })?;
-    Ok(())
+    })
 }
 ```
