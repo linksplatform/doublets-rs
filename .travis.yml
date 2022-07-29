@@ -1,0 +1,19 @@
+language: rust
+
+matrix:
+  include:
+    # Nightly
+    - rust: nightly
+      script:
+        - cargo test --verbose
+        - cargo test --all-features --verbose
+
+    # Miri
+    - rust: nightly
+      name: "Miri"
+      script:
+        - ci/miri.sh
+jobs:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
