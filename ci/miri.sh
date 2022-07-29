@@ -9,4 +9,4 @@ rustup default "$MIRI_NIGHTLY"
 rustup component add miri
 cargo miri setup
 
-MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo miri test --all-features
+MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo miri test --all-features --package doublets
