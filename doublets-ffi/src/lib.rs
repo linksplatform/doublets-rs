@@ -2,7 +2,6 @@
 #![feature(box_syntax)]
 #![feature(try_trait_v2)]
 
-use data::ToQuery;
 use std::{
     error::Error,
     ffi::CStr,
@@ -17,10 +16,10 @@ use doublets::{
     data::{
         query,
         Flow::{Break, Continue},
-        LinksConstants, Query,
+        LinksConstants, Query, ToQuery,
     },
-    mem::FileMappedMem,
-    num::LinkType,
+    mem::FileMapped,
+    data::LinkType,
     Link, Links,
 };
 use libc::c_char;
@@ -64,7 +63,7 @@ unsafe fn unnull_or_error<'a, P, R>(ptr: *mut P) -> &'a mut R {
 }
 
 // TODO: remove ::mem:: in doublets crate
-type UnitedLinks<T> = unit::Store<T, FileMappedMem<parts::LinkPart<T>>>;
+type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
 type WrappedLinks<T> = Box<dyn Doublets<T>>;
 
@@ -111,7 +110,7 @@ impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
             external_range: c
                 .clone()
                 .external_range
-                .map_or(Range(T::zero(), T::zero()), |r| Range(*r.start(), *r.end())),
+                .map_or(Range(T::funty(0), T::funty(0)), |r| Range(*r.start(), *r.end())),
             _opt_marker: c.external_range.is_some(),
         }
     }
@@ -175,7 +174,7 @@ unsafe fn new_with_constants_united_links<T: LinkType>(
             .read(true)
             .write(true)
             .open(path)?;
-        let mem = FileMappedMem::new(file)?;
+        let mem = FileMapped::new(file)?;
         let mut links: Box<dyn Doublets<T>> =
             box UnitedLinks::<T>::with_constants(mem, constants.into())?;
         let ptr = links.as_mut() as *mut _ as *mut c_void;

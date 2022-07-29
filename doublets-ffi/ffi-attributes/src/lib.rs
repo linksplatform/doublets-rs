@@ -23,7 +23,7 @@ fn csharp_convention(s: String) -> String {
         "i64" => "Int64",
         "u64" => "UInt64",
         s => {
-            panic!("{} is incompatible with ffi type", s)
+            panic!("{} is incompatible with doublets-ffi type", s)
         }
     }
     .to_string()
@@ -59,7 +59,7 @@ fn ty_from_to(ty: Type, from: &str, to: &str) -> Type {
                                     *gty = ty_from_to(gty.clone(), from, to);
                                 }
                                 _ => {
-                                    panic!("not ffi compatible generic")
+                                    panic!("not doublets-ffi compatible generic")
                                 }
                             }
                         }
@@ -81,7 +81,7 @@ fn ty_from_to(ty: Type, from: &str, to: &str) -> Type {
             Type::Reference(refer)
         }
         _ => {
-            panic!("unexpected ffi type");
+            panic!("unexpected doublets-ffi type");
         }
     }
 }
