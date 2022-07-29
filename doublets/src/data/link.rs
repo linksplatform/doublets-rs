@@ -4,7 +4,7 @@ use std::{
     ops::Index,
     slice::{from_raw_parts, SliceIndex},
 };
-
+use std::mem::transmute;
 
 
 use data::{Query, ToQuery};
@@ -60,7 +60,7 @@ impl<T: LinkType> Link<T> {
 
     pub fn as_slice(&self) -> &[T] {
         // SAFETY: Link is repr(C) and therefore is safe to transmute to a slice
-        unsafe { from_raw_parts(&self.index, 3) }
+        unsafe { transmute::<_, &[T; 3]>(self) }
     }
 }
 
