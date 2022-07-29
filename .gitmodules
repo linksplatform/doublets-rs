@@ -1,0 +1,9 @@
+[submodule "dev-deps/data-rs"]
+	path = dev-deps/data-rs
+	url = https://github.com/linksplatform/data-rs
+[submodule "dev-deps/trees-rs"]
+	path = dev-deps/trees-rs
+	url = https://github.com/linksplatform/trees-rs
+[submodule "dev-deps/mem-rs"]
+	path = dev-deps/mem-rs
+	url = https://github.com/linksplatform/mem-rs
