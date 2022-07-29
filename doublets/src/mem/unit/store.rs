@@ -37,7 +37,10 @@ pub struct Store<
 impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
     Store<T, M, TS, TT, TU>
 {
-    pub const SIZE_STEP: usize = 2_usize.pow(20);
+    #[cfg(not(miri))]
+    const SIZE_STEP: usize = 2_usize.pow(20);
+    #[cfg(miri)]
+    const SIZE_STEP: usize = 2_usize.pow(10);
 
     pub fn new(mem: M) -> Result<Store<T, M>, LinksError<T>> {
         Self::with_constants(mem, LinksConstants::new())

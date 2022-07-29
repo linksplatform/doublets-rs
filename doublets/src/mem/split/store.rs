@@ -60,7 +60,10 @@ impl<
 > Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     const USE_LIST: bool = false;
+    #[cfg(not(miri))]
     const SIZE_STEP: usize = 2_usize.pow(20);
+    #[cfg(miri)]
+    const SIZE_STEP: usize = 2_usize.pow(10);
 
     // TODO: create Options
     pub fn with_constants(
