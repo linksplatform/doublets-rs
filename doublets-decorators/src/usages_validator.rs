@@ -59,7 +59,7 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for UsagesValidator<T, L> {
     {
         let links = self.links.borrow_mut();
         let query = query.to_query();
-        let index = query[links.constants().index_part.as_()];
+        let index = query[links.constants().index_part.as_usize()];
         let usages = links.usages(index)?;
         if usages.is_empty() {
             links.update_by_with(query, change, handler)
@@ -79,7 +79,7 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for UsagesValidator<T, L> {
     {
         let links = self.links.borrow_mut();
         let query = query.to_query();
-        let index = query[links.constants().index_part.as_()];
+        let index = query[links.constants().index_part.as_usize()];
         let usages = links.usages(index)?;
         if usages.is_empty() {
             links.delete_by_with(query, handler)

@@ -1,4 +1,4 @@
-use num::LinkType;
+use data::LinkType;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct LinksHeader<T: LinkType> {

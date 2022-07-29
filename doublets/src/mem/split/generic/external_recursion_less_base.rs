@@ -7,8 +7,8 @@ use crate::{
     Link,
 };
 use data::LinksConstants;
-use methods::NoRecurSzbTree;
-use num::LinkType;
+use trees::NoRecurSzbTree;
+use data::LinkType;
 use std::ptr::NonNull;
 
 // TODO: why is there so much duplication in OOP!!! FIXME

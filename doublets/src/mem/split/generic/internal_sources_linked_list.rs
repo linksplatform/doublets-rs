@@ -10,8 +10,8 @@ use crate::mem::{
     SplitUpdateMem,
 };
 
-use methods::{LinkedList, RelativeCircularLinkedList, RelativeLinkedList};
-use num::LinkType;
+use trees::{LinkedList, RelativeCircularLinkedList, RelativeLinkedList};
+use data::LinkType;
 
 pub struct InternalSourcesLinkedList<T: LinkType> {
     data: NonNull<[DataPart<T>]>,
@@ -43,19 +43,19 @@ impl<T: LinkType> InternalSourcesLinkedList<T> {
     }
 
     fn get_data_part(&self, link: T) -> &DataPart<T> {
-        unsafe { &self.data.as_ref()[link.as_()] }
+        unsafe { &self.data.as_ref()[link.as_usize()] }
     }
 
     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T> {
-        unsafe { &mut self.data.as_mut()[link.as_()] }
+        unsafe { &mut self.data.as_mut()[link.as_usize()] }
     }
 
     fn get_index_part(&self, link: T) -> &IndexPart<T> {
-        unsafe { &self.indexes.as_ref()[link.as_()] }
+        unsafe { &self.indexes.as_ref()[link.as_usize()] }
     }
 
     fn get_mut_index_part(&mut self, link: T) -> &mut IndexPart<T> {
-        unsafe { &mut self.indexes.as_mut()[link.as_()] }
+        unsafe { &mut self.indexes.as_mut()[link.as_usize()] }
     }
 
     fn get_link_value(&self, link: T) -> Link<T> {
@@ -75,7 +75,7 @@ impl<T: LinkType> InternalSourcesLinkedList<T> {
         let mut current = self.get_first(source);
         let first = current;
 
-        while !current.is_zero() {
+        while current != T::funty(0) {
             handler(self.get_link_value(current))?;
             current = self.get_next(current);
             if current == first {
@@ -93,7 +93,7 @@ impl<T: LinkType> RelativeLinkedList<T> for InternalSourcesLinkedList<T> {
 
     fn get_last(&self, head: T) -> T {
         let first = self.get_first(head);
-        if first.is_zero() {
+        if first == T::funty(0) {
             first
         } else {
             self.get_previous(first)

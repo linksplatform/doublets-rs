@@ -1,12 +1,18 @@
 [workspace]
 
 members = [
-    "ffi",
+    "doublets-ffi",
     "doublets",
+
+    # dev
+    "dev-deps/mem-rs",
+    "dev-deps/data-rs",
+    "dev-deps/trees-rs",
 
     # internal
     "integration"
 ]
+# in global rework
 exclude = [
     "doublets-decorators",
 ]

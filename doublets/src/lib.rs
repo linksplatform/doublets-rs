@@ -9,8 +9,7 @@
 
 pub mod data;
 pub mod mem;
-pub mod num;
-pub mod test_extensions;
+
 pub use self::mem::{parts, split, unit};
 
 pub use self::data::{Doublet, Doublets, Error, FuseHandler, Handler, Link, Links};

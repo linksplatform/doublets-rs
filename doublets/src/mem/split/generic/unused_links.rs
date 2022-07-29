@@ -4,8 +4,8 @@ use crate::{
     mem::{header::LinksHeader, split::DataPart, traits::SplitList, LinksList, SplitUpdateMem},
     split::IndexPart,
 };
-use methods::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
-use num::LinkType;
+use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
+use data::LinkType;
 
 pub struct UnusedLinks<T: LinkType> {
     links: NonNull<[DataPart<T>]>,
@@ -26,11 +26,11 @@ impl<T: LinkType> UnusedLinks<T> {
     }
 
     fn get_link(&self, link: T) -> &DataPart<T> {
-        unsafe { &self.links.as_ref()[link.as_()] }
+        unsafe { &self.links.as_ref()[link.as_usize()] }
     }
 
     fn get_mut_link(&mut self, link: T) -> &mut DataPart<T> {
-        unsafe { &mut self.links.as_mut()[link.as_()] }
+        unsafe { &mut self.links.as_mut()[link.as_usize()] }
     }
 }
 

@@ -1,4 +1,4 @@
-use num::LinkType;
+use data::LinkType;
 
 #[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 #[repr(C)]

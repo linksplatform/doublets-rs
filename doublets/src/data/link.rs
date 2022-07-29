@@ -5,10 +5,10 @@ use std::{
     slice::{from_raw_parts, SliceIndex},
 };
 
-use num_traits::zero;
+
 
 use data::{Query, ToQuery};
-use num::LinkType;
+use data::LinkType;
 
 #[derive(Default, Eq, PartialEq, Clone, Hash)]
 #[repr(C)]
@@ -47,7 +47,7 @@ impl<T: LinkType> Link<T> {
     }
 
     pub fn is_null(&self) -> bool {
-        *self == Self::point(zero())
+        *self == Self::point(T::funty(0))
     }
 
     pub fn is_full(&self) -> bool {

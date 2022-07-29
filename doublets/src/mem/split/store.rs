@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
 
-use num_traits::{one, zero};
+
 
 use crate::{
     mem::{
@@ -15,8 +15,8 @@ use crate::{
 };
 use data::{Flow, Flow::Continue, LinksConstants, ToQuery};
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
-use methods::RelativeCircularLinkedList;
-use num::LinkType;
+use trees::RelativeCircularLinkedList;
+use data::LinkType;
 
 pub struct Store<
     T: LinkType,
@@ -147,24 +147,24 @@ impl<
     }
 
     pub fn get_data_part(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
+        Self::get_from_mem(self.data_ptr, index.as_usize()).expect("Data part should be in data memory")
     }
 
     unsafe fn get_data_unchecked(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_()).unwrap_unchecked()
+        Self::get_from_mem(self.data_ptr, index.as_usize()).unwrap_unchecked()
     }
 
     fn mut_data_part(&mut self, index: T) -> &mut DataPart<T> {
-        Self::mut_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
+        Self::mut_from_mem(self.data_ptr, index.as_usize()).expect("Data part should be in data memory")
     }
 
     pub fn get_index_part(&self, index: T) -> &IndexPart<T> {
-        Self::get_from_mem(self.index_ptr, index.as_())
+        Self::get_from_mem(self.index_ptr, index.as_usize())
             .expect("Index part should be in index memory")
     }
 
     fn mut_index_part(&mut self, index: T) -> &mut IndexPart<T> {
-        Self::mut_from_mem(self.index_ptr, index.as_())
+        Self::mut_from_mem(self.index_ptr, index.as_usize())
             .expect("Index part should be in index memory")
     }
 
@@ -284,7 +284,7 @@ impl<
         self.update_mem(data, index);
 
         let header = self.get_header().clone();
-        let allocated = header.allocated.as_();
+        let allocated = header.allocated.as_usize();
 
         let mut data_capacity = allocated;
         data_capacity = data_capacity.max(self.data_mem.allocated());
@@ -301,11 +301,7 @@ impl<
         let index = NonNull::from(self.index_mem.alloc(index_capacity)?);
         self.update_mem(data, index);
 
-        let allocated = header.allocated.as_();
-        self.data_mem.occupy(allocated + 1)?;
-        self.index_mem.occupy(allocated + 1)?;
-
-        self.mut_header().reserved = T::from(self.data_mem.allocated() - 1).unwrap();
+        self.mut_header().reserved = T::try_from(self.data_mem.allocated() - 1).unwrap();
         Ok(())
     }
 
@@ -320,7 +316,7 @@ impl<
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target.is_zero() && !data.source.is_zero()
+            index.size_as_target == T::funty(0) && data.source != T::funty(0)
         } else {
             true
         }
@@ -355,7 +351,7 @@ impl<
         let query = query.to_query();
 
         if query.len() == 0 {
-            for index in one()..=self.get_header().allocated {
+            for index in T::funty(1)..=self.get_header().allocated {
                 if let Some(link) = self.get_link(index) {
                     handler(link)?;
                 }
@@ -366,7 +362,7 @@ impl<
         let constants = self.constants.clone();
         let any = constants.any;
         let _continue = constants.r#continue;
-        let index = query[constants.index_part.as_()];
+        let index = query[constants.index_part.as_usize()];
         if query.len() == 1 {
             return if index == any {
                 self.try_each_by_core(handler, &[])
@@ -398,8 +394,8 @@ impl<
         }
         //
         if query.len() == 3 {
-            let source = query[constants.source_part.as_()];
-            let target = query[constants.target_part.as_()];
+            let source = query[constants.source_part.as_usize()];
+            let target = query[constants.target_part.as_usize()];
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
 
@@ -558,14 +554,14 @@ impl<
 
         let constants = self.constants();
         let any = constants.any;
-        let index = query[constants.index_part.as_()];
+        let index = query[constants.index_part.as_usize()];
         if query.len() == 1 {
             return if index == any {
                 self.total()
             } else if self.exists(index) {
-                one()
+                T::funty(1)
             } else {
-                zero()
+                T::funty(0)
             };
         }
 
@@ -587,22 +583,22 @@ impl<
                         + self.internal_targets.count_usages(value)
                 }
             } else if !self.exists(index) {
-                zero()
+                T::funty(0)
             } else if value == any {
-                one()
+                T::funty(1)
             } else {
                 let stored = self.get_data_part(index);
                 if (stored.source, stored.target) == (value, value) {
-                    one()
+                    T::funty(1)
                 } else {
-                    zero()
+                    T::funty(0)
                 }
             };
         }
 
         if query.len() == 3 {
-            let source = query[constants.source_part.as_()];
-            let target = query[constants.target_part.as_()];
+            let source = query[constants.source_part.as_usize()];
+            let target = query[constants.target_part.as_usize()];
 
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
@@ -653,29 +649,29 @@ impl<
                         self.internal_sources.search(source, target)
                     };
                     return if link == constants.null {
-                        zero()
+                        T::funty(0)
                     } else {
-                        one()
+                        T::funty(1)
                     };
                 }
             } else if !self.exists(index) {
-                zero()
+                T::funty(0)
             } else if (source, target) == (any, any) {
-                one()
+                T::funty(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        one()
+                        T::funty(1)
                     } else {
-                        zero()
+                        T::funty(0)
                     }
                 } else if source == any {
-                    if link.target == target { one() } else { zero() }
+                    if link.target == target { T::funty(1) } else { T::funty(0) }
                 } else if target == any {
-                    if link.source == source { one() } else { zero() }
+                    if link.source == source { T::funty(1) } else { T::funty(0) }
                 } else {
-                    zero()
+                    T::funty(0)
                 }
             };
         }
@@ -697,8 +693,7 @@ impl<
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            // TODO: if header.allocated >= header.reserved - one() {
-            if self.index_mem.allocated() < self.index_mem.occupied() + 1 {
+            if header.allocated >= header.reserved - T::funty(1) {
                 let data = NonNull::from(
                     self.data_mem
                         .alloc(self.data_mem.allocated() + self.data_step)?,
@@ -711,14 +706,12 @@ impl<
                 // let reserved = self.data_mem.allocated();
                 let reserved = self.index_mem.allocated();
                 let header = self.mut_header();
-                // header.reserved = T::from_usize(reserved / Self::DATA_SIZE).unwrap()
-                header.reserved = T::from_usize(reserved).unwrap()
+                // header.reserved = T::try_from(reserved / Self::DATA_SIZE).unwrap()
+                header.reserved = T::try_from(reserved).unwrap()
             }
             let header = self.mut_header();
-            header.allocated = header.allocated + one();
+            header.allocated = header.allocated + T::funty(1);
             free = header.allocated;
-            self.data_mem.occupy(self.data_mem.occupied() + 1)?;
-            self.index_mem.occupy(self.index_mem.occupied() + 1)?;
         } else {
             self.unused.detach(free)
         }
@@ -727,7 +720,7 @@ impl<
 
         Ok(handler(
             Link::nothing(),
-            Link::new(free, T::zero(), T::zero()),
+            Link::new(free, T::funty(0), T::funty(0)),
         ))
     }
 
@@ -747,7 +740,7 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        if link.source != zero() {
+        if link.source != T::funty(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if self.is_virtual(link.source) {
@@ -761,7 +754,7 @@ impl<
             }
         }
 
-        if link.target != zero() {
+        if link.target != T::funty(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if self.is_virtual(link.target) {
@@ -779,7 +772,7 @@ impl<
         place.target = new_target;
         let place = place.clone();
 
-        if place.source != zero() {
+        if place.source != T::funty(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if virtual_source {
@@ -793,7 +786,7 @@ impl<
             }
         }
 
-        if place.target != zero() {
+        if place.target != T::funty(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if virtual_target {
@@ -817,7 +810,7 @@ impl<
 
         self.resolve_danglind_internal(index);
 
-        self.update(index, zero(), zero())?;
+        self.update(index, T::funty(0), T::funty(0))?;
 
         // TODO: move to `delete_core`
         let header = self.get_header();
@@ -826,27 +819,17 @@ impl<
             Ordering::Less => self.unused.attach_as_first(index),
             Ordering::Greater => unreachable!(),
             Ordering::Equal => {
-                self.data_mem.occupy(self.data_mem.occupied() - 1)?;
-                self.index_mem.occupy(self.index_mem.occupied() - 1)?;
-
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - one();
+                header.allocated = allocated - T::funty(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > zero() && self.is_unused(allocated)) {
+                    if !(allocated > T::funty(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - one();
-                    // TODO: create extension `update_used`
-
-                    let used_mem = self.data_mem.occupied();
-                    self.data_mem.occupy(used_mem - 1)?;
-
-                    let used_mem = self.index_mem.occupied();
-                    self.index_mem.occupy(used_mem - 1)?;
+                    self.mut_header().allocated = allocated - T::funty(1);
                 }
             }
         }

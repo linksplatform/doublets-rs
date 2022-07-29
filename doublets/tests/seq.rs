@@ -3,11 +3,11 @@ use doublets::{
         Flow::{Break, Continue},
         ToQuery,
     },
-    mem::GlobalMem,
-    num::LinkType,
+    mem::Global,
+    data::LinkType,
     split, Doublets, Error as LinksError, Link, Links,
 };
-use num_traits::zero;
+
 use std::{error::Error, time::Instant};
 
 fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, LinksError<T>> {
@@ -23,7 +23,7 @@ fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, 
             store.create_link(*cur, *next)?;
         }
     }
-    Ok(*aliases.first().unwrap_or(&zero()))
+    Ok(*aliases.first().unwrap_or(&T::funty(0)))
 }
 
 fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) -> Option<Link<T>> {
@@ -91,7 +91,7 @@ const N: usize = 10000;
 
 #[test]
 fn seq() -> Result<(), Box<dyn Error>> {
-    let mut store = split::Store::<usize, _, _>::new(GlobalMem::new(), GlobalMem::new())?;
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
     let seq = str_as_vec(TEXT);
     let instant = Instant::now();
@@ -111,7 +111,7 @@ fn seq() -> Result<(), Box<dyn Error>> {
 
 #[test]
 fn bug() -> Result<(), Box<dyn Error>> {
-    let mut store = split::Store::<usize, _, _>::new(GlobalMem::new(), GlobalMem::new())?;
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
     let a = store.create_point()?;
     let b = store.create_point()?;

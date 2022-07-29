@@ -13,29 +13,11 @@ keywords = [
     "associative", "doublets", "db",
 ]
 readme = "../README.md"
-license = "LGPL-3.0"
-repository = "https://github.com/linksplatform/Data.Doublets"
-homepage = "https://github.com/linksplatform/Data.Doublets/blob/main/rust"
+license = "Unlicense"
+repository = "https://github.com/linksplatform/doublets-rs"
+homepage = "https://github.com/linksplatform/doublets-rs"
 description = """
-Modular framework to automation by automation
 """
-
-[dependencies]
-rand = "0.8"
-thiserror = "1.0.30"
-num-traits = "^0.2.14"
-leak_slice = "0.2"
-cfg-if = "1.0"
-static_assertions = "1.1"
-
-# platform
-data = { package = "platform-data", version = "0.1.0-beta.1" }
-num = { package = "platform-num", version = "0.1.0-alpha.1" }
-mem = { package = "platform-mem", version = "0.1.0-pre+beta.2" }
-methods = { package = "platform-treesmethods", version = "0.1.0-alpha.2" }
-
-# optional
-smallvec = { version = "1.8", features = ["const_generics"], optional = true }
 
 [features]
 mem = []
@@ -49,8 +31,24 @@ smallvec-optimization = ["smallvec"]
 default = ["platform"]
 full = ["platform", "smallvec-optimization"]
 
+[dependencies]
+cfg-if = { version = "1.0.0" }
+thiserror = { version = "1.0.30" }
+leak_slice = { version = "0.2.0" }
+
+
+# platform
+data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
+mem = { package = "platform-mem", version = "0.1.0-pre+beta.2", path = "../dev-deps/mem-rs" }
+trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-deps/trees-rs" }
+
+# optional
+smallvec = { version = "1.8.1", features = ["const_generics"], optional = true }
+
 [dev-dependencies]
-criterion = "0.3"
+rand = { version = "0.8.5" }
+criterion = { version = "0.3.6" }
+static_assertions = { version = "1.1.0" }
 
 [[bench]]
 name = "iter"

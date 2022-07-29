@@ -11,7 +11,7 @@ A basic CRUD in doublets
 ```rust
 use doublets::{
     data::Flow::Continue,
-    mem::FileMappedMem,
+    mem::FileMapped,
     unit, Doublets, Error
 };
 use std::fs::File;
@@ -24,7 +24,7 @@ fn main() -> Result<(), Error<usize>> {
         .write(true)
         .open("db.links")?;
 
-    let mem = FileMappedMem::new(file)?;
+    let mem = FileMapped::new(file)?;
     let mut links = united::Store::<usize, _>::new(mem)?;
 
     // Creation of the empty doublet in tiny style

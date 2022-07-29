@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 
-use num::LinkType;
+use data::LinkType;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct Doublet<T: LinkType> {

@@ -3,8 +3,8 @@ use std::{mem::transmute, ptr::NonNull};
 use crate::mem::{
     header::LinksHeader, traits::UnitList, unit::raw_link::LinkPart, LinksList, UnitUpdateMem,
 };
-use methods::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
-use num::LinkType;
+use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
+use data::LinkType;
 
 pub struct UnusedLinks<T: LinkType> {
     mem: NonNull<[LinkPart<T>]>,
@@ -24,11 +24,11 @@ impl<T: LinkType> UnusedLinks<T> {
     }
 
     fn get_link(&self, link: T) -> &LinkPart<T> {
-        unsafe { &self.mem.as_ref()[link.as_()] }
+        unsafe { &self.mem.as_ref()[link.as_usize()] }
     }
 
     fn get_mut_link(&mut self, link: T) -> &mut LinkPart<T> {
-        unsafe { &mut self.mem.as_mut()[link.as_()] }
+        unsafe { &mut self.mem.as_mut()[link.as_usize()] }
     }
 }
 

@@ -4,7 +4,7 @@ use crate::{
     Link,
 };
 use data::Flow;
-use num::LinkType;
+use data::LinkType;
 use std::ptr::NonNull;
 
 pub trait LinksTree<T: LinkType> {

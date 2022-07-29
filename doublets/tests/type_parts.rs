@@ -1,22 +1,22 @@
 use doublets::{parts, split, unit, Doublets};
-use mem::GlobalMem;
+use mem::Global;
 
 type LinkType = usize;
-type Mem = GlobalMem<parts::LinkPart<LinkType>>;
+type Mem = Global<parts::LinkPart<LinkType>>;
 type UnitStore = unit::Store<LinkType, Mem>;
 
 #[test]
 fn unit_type_parts() {
-    let mut store = UnitStore::new(GlobalMem::new()).unwrap();
+    let mut store = UnitStore::new(Global::new()).unwrap();
     let _ = store.create();
 }
 
-type DataMem = GlobalMem<parts::DataPart<LinkType>>;
-type IndexMem = GlobalMem<parts::IndexPart<LinkType>>;
+type DataMem = Global<parts::DataPart<LinkType>>;
+type IndexMem = Global<parts::IndexPart<LinkType>>;
 type SplitStore = split::Store<LinkType, DataMem, IndexMem>;
 
 #[test]
 fn split_type_parts() {
-    let mut store = SplitStore::new(GlobalMem::new(), GlobalMem::new()).unwrap();
+    let mut store = SplitStore::new(Global::new(), Global::new()).unwrap();
     let _ = store.create();
 }

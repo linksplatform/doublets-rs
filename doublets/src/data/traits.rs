@@ -1,4 +1,3 @@
-use cfg_if::cfg_if;
 use std::{
     default::default,
     mem::size_of,
@@ -7,8 +6,7 @@ use std::{
 
 use crate::{FuseHandler, Link, LinksError};
 use data::{Flow, LinksConstants, ToQuery};
-use num::LinkType;
-use num_traits::{one, zero};
+use data::LinkType;
 
 pub type Result<T, E = LinksError<T>> = std::result::Result<T, E>;
 
@@ -47,9 +45,9 @@ pub trait Links<T: LinkType>: Send + Sync {
     }
 
     fn each_iter_links(&self, query: &[T]) -> Box<dyn Iterator<Item = Link<T>>> {
-        let capacity = self.count_links(query).as_();
+        let capacity = self.count_links(query).as_usize();
 
-        cfg_if! {
+        cfg_if::cfg_if! {
             if #[cfg(feature = "smallvec-optimization")] {
                 let mut vec = smallvec::SmallVec::<[_; 2]>::with_capacity(capacity);
             } else {
@@ -320,9 +318,9 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        // delete all links while self.count() != zero()
+        // delete all links while self.count() != T::funty(0)
         let mut count = self.count();
-        while count != zero() {
+        while count != T::funty(0) {
             self.delete(count)?;
             count = self.count();
         }
@@ -340,7 +338,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let query = query.to_query();
-        let len = self.count_by(query.to_query()).as_();
+        let len = self.count_by(query.to_query()).as_usize();
         let mut vec = Vec::with_capacity(len);
 
         self.each_by(query, |link| {
@@ -363,7 +361,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     {
         let any = self.constants().any;
         let mut to_delete = Vec::with_capacity(
-            self.count_by([any, index, any]).as_() + self.count_by([any, any, index]).as_(),
+            self.count_by([any, index, any]).as_usize() + self.count_by([any, any, index]).as_usize(),
         );
         self.each_by([any, index, any], |link| {
             if link.index != index {
@@ -439,7 +437,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        self.count_by(query) != zero()
+        self.count_by(query) != T::funty(0)
     }
 
     fn find(&self, query: impl ToQuery<T>) -> Option<Link<T>>
@@ -500,12 +498,12 @@ pub trait Doublets<T: LinkType>: Links<T> {
         let link = self.try_get_link(index)?;
         let mut usage_source = self.count_by([any, index, any]);
         if index == link.source {
-            usage_source = usage_source - one();
+            usage_source = usage_source - T::funty(1);
         }
 
         let mut usage_target = self.count_by([any, any, index]);
         if index == link.target {
-            usage_target = usage_target - one();
+            usage_target = usage_target - T::funty(1);
         }
 
         Ok(usage_source + usage_target)
@@ -516,7 +514,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let any = self.constants().any;
-        let mut usages = Vec::with_capacity(self.count_usages(index)?.as_());
+        let mut usages = Vec::with_capacity(self.count_usages(index)?.as_usize());
 
         self.each_by([any, index, any], |link| {
             if link.index != index {
@@ -542,7 +540,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         if constants.is_external(link) {
             true
         } else {
-            constants.is_internal(link) && self.count_by([link]) != zero()
+            constants.is_internal(link) && self.count_by([link]) != T::funty(0)
         }
     }
 
@@ -550,7 +548,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        self.count_usages(link).map_or(false, |link| link != zero())
+        self.count_usages(link).map_or(false, |link| link != T::funty(0))
     }
 
     fn rebase_with<F, R>(&mut self, old: T, new: T, handler: F) -> Result<(), LinksError<T>>
@@ -567,8 +565,8 @@ pub trait Doublets<T: LinkType>: Links<T> {
         let as_source = [any, old, any];
         let as_target = [any, any, old];
 
-        let sources_count: usize = self.count_by(as_source).as_();
-        let targets_count: usize = self.count_by(as_target).as_();
+        let sources_count: usize = self.count_by(as_source).as_usize();
+        let targets_count: usize = self.count_by(as_target).as_usize();
 
         // not borrowed
         if sources_count + targets_count == 0 {
@@ -616,8 +614,8 @@ pub trait Doublets<T: LinkType>: Links<T> {
         let constants = self.constants();
         let any = constants.any;
 
-        let sources_count = self.count_by([any, old, any]).as_();
-        let targets_count = self.count_by([any, any, old]).as_();
+        let sources_count = self.count_by([any, old, any]).as_usize();
+        let targets_count = self.count_by([any, any, old]).as_usize();
         if sources_count == 0 && targets_count == 0 && link.is_full() {
             return Ok(new);
         }

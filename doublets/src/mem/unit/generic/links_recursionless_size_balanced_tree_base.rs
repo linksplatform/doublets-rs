@@ -5,8 +5,8 @@ use crate::{
     Link,
 };
 use data::LinksConstants;
-use methods::NoRecurSzbTree;
-use num::LinkType;
+use trees::NoRecurSzbTree;
+use data::LinkType;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct LinksRecursionlessSizeBalancedTreeBase<T: LinkType> {

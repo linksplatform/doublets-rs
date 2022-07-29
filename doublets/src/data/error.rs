@@ -1,5 +1,5 @@
 use crate::{Doublet, Link};
-use num::LinkType;
+use data::LinkType;
 use std::{error::Error as StdError, io};
 
 #[derive(thiserror::Error, Debug)]
@@ -19,12 +19,9 @@ pub enum Error<T: LinkType> {
     #[error("unable to allocate memory for links storage: `{0}`")]
     AllocFailed(
         #[from]
-        #[backtrace]
-        io::Error,
+        mem::Error,
     ),
 
     #[error("other internal error: `{0}`")]
     Other(#[from] Box<dyn StdError + Sync + Send>),
 }
-
-static_assertions::assert_impl_all!(Error<usize>: Send, Sync);

@@ -1,4 +1,4 @@
-use num_traits::zero;
+
 use std::ptr::NonNull;
 
 use crate::mem::traits::LinksTree;
@@ -8,8 +8,8 @@ use crate::{
     Link,
 };
 use data::LinksConstants;
-use methods::NoRecurSzbTree;
-use num::LinkType;
+use trees::NoRecurSzbTree;
+use data::LinkType;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
@@ -57,20 +57,22 @@ pub trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
     }
 
     fn search_core(&self, mut root: T, key: T) -> T {
-        while root != zero() {
-            let root_key = self.get_key_part(root);
-            if key < root_key {
-                root = self.get_left_or_default(root);
-            } else if key > root_key {
-                root = self.get_right_or_default(root);
-            } else {
-                return root;
+        unsafe {
+            while root != T::funty(0) {
+                let root_key = self.get_key_part(root);
+                if key < root_key {
+                    root = self.get_left_or_default(root);
+                } else if key > root_key {
+                    root = self.get_right_or_default(root);
+                } else {
+                    return root;
+                }
             }
+            T::funty(0)
         }
-        zero()
     }
 
     fn count_usages_core(&self, link: T) -> T {
-        self.get_size_or_zero(self.get_tree_root(link))
+        unsafe { self.get_size_or_zero(self.get_tree_root(link)) }
     }
 }

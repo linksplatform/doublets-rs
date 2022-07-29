@@ -1,13 +1,15 @@
-use doublets::{split, test_extensions::DoubletsTestExt, unit, Error};
-use mem::GlobalMem;
+use doublets::{Error, split, unit};
+use mem::Global;
 use std::time::Instant;
+
+mod extensions;
 
 #[test]
 fn random_crud_unit() -> Result<(), Error<usize>> {
-    let mut store = unit::Store::<usize, _>::new(GlobalMem::new())?;
+    let mut store = unit::Store::<usize, _>::new(Global::new())?;
 
     let instant = Instant::now();
-    store.test_random_creations_and_deletions(1000);
+    extensions::test_random_creations_and_deletions(&mut store, 1000);
     println!("{:?}", instant.elapsed());
 
     Ok(())
@@ -15,10 +17,10 @@ fn random_crud_unit() -> Result<(), Error<usize>> {
 
 #[test]
 fn random_crud_split() -> Result<(), Error<usize>> {
-    let mut store = split::Store::<usize, _, _>::new(GlobalMem::new(), GlobalMem::new())?;
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
     let instant = Instant::now();
-    store.test_random_creations_and_deletions(1000);
+    extensions::test_random_creations_and_deletions(&mut store, 1000);
     println!("{:?}", instant.elapsed());
 
     Ok(())
