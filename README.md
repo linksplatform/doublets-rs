@@ -13,7 +13,6 @@ A basic operations in doublets:
 ```rust
 use doublets::{data, mem, unit, Doublets, Links};
 
-#[test]
 fn main() -> Result<(), doublets::Error<usize>> {
     // use file as memory for doublets
     let mem = mem::FileMapped::from_path("db.links")?;
