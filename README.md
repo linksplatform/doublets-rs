@@ -1,51 +1,42 @@
 # Doublets
 
-A library that represents database engine that uses doublets.
+later
 
 ## [Overview](https://github.com/linksplatform)
 
+later
+
 ## Example
 
-A basic CRUD in doublets
+A basic operations in doublets:
 
 ```rust
-use doublets::{
-    data::Flow::Continue,
-    mem::FileMapped,
-    unit, Doublets,
-};
+use doublets::{data, mem, unit, Doublets, Links};
 
+#[test]
 fn main() -> Result<(), doublets::Error<usize>> {
     // use file as memory for doublets
-    let mem = FileMapped::from_path("db.links")?;
-    let mut links = united::Store::<usize, _>::new(mem)?;
+    let mem = mem::FileMapped::from_path("db.links")?;
+    let mut store = unit::Store::<usize, _>::new(mem)?;
 
-    // Create empty doublet in tiny style
-    let mut point = links.create()?;
+    // create 1: 1 1 - it's point: link where source and target it self
+    let mut point = store.create_link(1, 1)?;
 
-    // Update doublet in handler style
-    // The link is updated to reference itself twice (as source and target):
-    links.update_with(point, point, point, |_, after| {
-        // link is { index, source, target }
-        point = after.index;
-        // give handler state (any ops::Try)
-        Continue
-    })?;
+    // `any` constant denotes any link
+    let any = store.constants().any;
 
-    // print all links from store
-    links.each(|link| {
+    // print all store from store where (index: any, source: any, target: any)
+    store.each_iter([any, any, any]).for_each(|link| {
         println!("{link:?}");
-        Continue
     });
 
-    // The link deletion in full style:
-    // `any` constant denotes any link
-    let any = links.constants().any;
-    // query in [index source target] style
-    // delete all links with index = point
-    links.delete_by_with([point, any, any], |before, _| {
-        println!("Goodbye {}", before);
-        Continue
-    })
+    // delete point with handler (Link, Link)
+    store
+        .delete_with(point, |before, after| {
+            println!("delete: {before:?} => {after:?}");
+            // track issue: https://github.com/linksplatform/doublets-rs/issues/4
+            data::Flow::Continue
+        })
+        .map(|_| ())
 }
 ```
