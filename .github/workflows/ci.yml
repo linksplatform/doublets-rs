@@ -8,7 +8,8 @@ on:
 
 env:
   RUST_BACKTRACE: 1
-  RUSTFLAGS: -Dwarnings
+#  later
+#  RUSTFLAGS: -Dwarnings
   CARGO_TERM_COLOR: always
 
   rust_nightly: nightly-2022-07-23
