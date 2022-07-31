@@ -11,6 +11,8 @@ env:
   RUSTFLAGS: -Dwarnings
   CARGO_TERM_COLOR: always
 
+  rust_nightly: nightly-2022-07-23
+
 jobs:
   tests-pass:
     name: pass
@@ -58,6 +60,7 @@ jobs:
       - name: Install Rust clippy
         uses: actions-rs/toolchain@v1
         with:
+          toolchain: nightly
           override: true
           components: clippy
       - uses: Swatinem/rust-cache@v1
