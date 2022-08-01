@@ -14,9 +14,8 @@ use crate::mem::{
 };
 
 use crate::{mem::SplitTree, Link};
-use data::{Flow, LinksConstants};
+use data::{Flow, LinkType, LinksConstants};
 use trees::{NoRecurSzbTree, SzbTree};
-use data::LinkType;
 
 pub struct InternalSourcesRecursionlessTree<T: LinkType> {
     base: InternalRecursionlessSizeBalancedTreeBase<T>,
@@ -142,7 +141,7 @@ impl<T: LinkType> SplitUpdateMem<T> for InternalSourcesRecursionlessTree<T> {
 impl<T: LinkType> SplitTree<T> for InternalSourcesRecursionlessTree<T> {}
 
 impl<T: LinkType> InternalRecursionlessSizeBalancedTreeBaseAbstract<T>
-for InternalSourcesRecursionlessTree<T>
+    for InternalSourcesRecursionlessTree<T>
 {
     fn get_index_part(&self, link: T) -> &IndexPart<T> {
         unsafe { &self.base.indexes.as_ref()[link.as_usize()] }

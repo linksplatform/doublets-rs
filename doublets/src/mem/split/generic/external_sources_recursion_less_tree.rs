@@ -16,9 +16,8 @@ use crate::{
     mem::{SplitTree, SplitUpdateMem},
     Link,
 };
-use data::{Flow, LinksConstants};
+use data::{Flow, LinkType, LinksConstants};
 use trees::{NoRecurSzbTree, SzbTree};
-use data::LinkType;
 
 pub struct ExternalSourcesRecursionlessTree<T: LinkType> {
     base: ExternalRecursionlessSizeBalancedTreeBase<T>,
@@ -144,7 +143,8 @@ impl<T: LinkType> LinksTree<T> for ExternalSourcesRecursionlessTree<T> {
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore = total_right_ignore + (self.get_right_size(root) + T::funty(1));
+                    total_right_ignore =
+                        total_right_ignore + (self.get_right_size(root) + T::funty(1));
                     root = self.get_left_or_default(root);
                 }
             }
@@ -155,7 +155,8 @@ impl<T: LinkType> LinksTree<T> for ExternalSourcesRecursionlessTree<T> {
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore = total_left_ignore + (self.get_left_size(root) + T::funty(1));
+                    total_left_ignore =
+                        total_left_ignore + (self.get_left_size(root) + T::funty(1));
                     root = self.get_right_or_default(root);
                 }
             }
@@ -210,7 +211,7 @@ impl<T: LinkType> SplitUpdateMem<T> for ExternalSourcesRecursionlessTree<T> {
 impl<T: LinkType> SplitTree<T> for ExternalSourcesRecursionlessTree<T> {}
 
 impl<T: LinkType> ExternalRecursionlessSizeBalancedTreeBaseAbstract<T>
-for ExternalSourcesRecursionlessTree<T>
+    for ExternalSourcesRecursionlessTree<T>
 {
     fn get_header(&self) -> &LinksHeader<T> {
         unsafe { transmute(&self.base.indexes.as_ref()[0]) }

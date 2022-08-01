@@ -1,6 +1,6 @@
 #![feature(box_syntax)]
 
-use doublets::{Doublets, Error, unit};
+use doublets::{unit, Doublets, Error};
 use mem::Global;
 
 pub mod extensions;

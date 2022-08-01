@@ -3,8 +3,7 @@ use crate::{
     split::{DataPart, IndexPart},
     Link,
 };
-use data::Flow;
-use data::LinkType;
+use data::{Flow, LinkType};
 use std::ptr::NonNull;
 
 pub trait LinksTree<T: LinkType> {

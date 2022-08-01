@@ -1,4 +1,3 @@
-
 use std::ptr::NonNull;
 
 use crate::mem::traits::LinksTree;
@@ -15,9 +14,8 @@ use crate::{
     mem::{SplitTree, SplitUpdateMem},
     Link,
 };
-use data::{Flow, LinksConstants};
+use data::{Flow, LinkType, LinksConstants};
 use trees::{NoRecurSzbTree, SzbTree};
-use data::LinkType;
 
 pub struct InternalTargetsRecursionlessTree<T: LinkType> {
     base: InternalRecursionlessSizeBalancedTreeBase<T>,

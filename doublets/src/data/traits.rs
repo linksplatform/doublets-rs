@@ -5,8 +5,7 @@ use std::{
 };
 
 use crate::{FuseHandler, Link, LinksError};
-use data::{Flow, LinksConstants, ToQuery};
-use data::LinkType;
+use data::{Flow, LinkType, LinksConstants, ToQuery};
 
 pub type Result<T, E = LinksError<T>> = std::result::Result<T, E>;
 
@@ -361,7 +360,8 @@ pub trait Doublets<T: LinkType>: Links<T> {
     {
         let any = self.constants().any;
         let mut to_delete = Vec::with_capacity(
-            self.count_by([any, index, any]).as_usize() + self.count_by([any, any, index]).as_usize(),
+            self.count_by([any, index, any]).as_usize()
+                + self.count_by([any, any, index]).as_usize(),
         );
         self.each_by([any, index, any], |link| {
             if link.index != index {
@@ -548,7 +548,8 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        self.count_usages(link).map_or(false, |link| link != T::funty(0))
+        self.count_usages(link)
+            .map_or(false, |link| link != T::funty(0))
     }
 
     fn rebase_with<F, R>(&mut self, old: T, new: T, handler: F) -> Result<(), LinksError<T>>

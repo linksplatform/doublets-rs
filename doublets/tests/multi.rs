@@ -1,4 +1,4 @@
-use doublets::{Error, split, unit};
+use doublets::{split, unit, Error};
 use mem::Global;
 use std::time::Instant;
 

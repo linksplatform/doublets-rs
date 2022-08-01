@@ -10,8 +10,8 @@ use crate::mem::{
     SplitUpdateMem,
 };
 
-use trees::{LinkedList, RelativeCircularLinkedList, RelativeLinkedList};
 use data::LinkType;
+use trees::{LinkedList, RelativeCircularLinkedList, RelativeLinkedList};
 
 pub struct InternalSourcesLinkedList<T: LinkType> {
     data: NonNull<[DataPart<T>]>,

@@ -4,8 +4,8 @@ use crate::{
     mem::{header::LinksHeader, split::DataPart, traits::SplitList, LinksList, SplitUpdateMem},
     split::IndexPart,
 };
-use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
 use data::LinkType;
+use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
 
 pub struct UnusedLinks<T: LinkType> {
     links: NonNull<[DataPart<T>]>,

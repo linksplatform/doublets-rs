@@ -1,14 +1,12 @@
 use std::{
     fmt,
     fmt::{Debug, Formatter},
+    mem::transmute,
     ops::Index,
     slice::{from_raw_parts, SliceIndex},
 };
-use std::mem::transmute;
 
-
-use data::{Query, ToQuery};
-use data::LinkType;
+use data::{LinkType, Query, ToQuery};
 
 #[derive(Default, Eq, PartialEq, Clone, Hash)]
 #[repr(C)]

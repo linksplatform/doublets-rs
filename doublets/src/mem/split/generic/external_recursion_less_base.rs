@@ -6,10 +6,9 @@ use crate::{
     },
     Link,
 };
-use data::LinksConstants;
-use trees::NoRecurSzbTree;
-use data::LinkType;
+use data::{LinkType, LinksConstants};
 use std::ptr::NonNull;
+use trees::NoRecurSzbTree;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct ExternalRecursionlessSizeBalancedTreeBase<T: LinkType> {

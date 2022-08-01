@@ -10,10 +10,9 @@ use crate::{
     },
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, Flow::Continue, LinksConstants, ToQuery};
+use data::{Flow, Flow::Continue, LinkType, LinksConstants, ToQuery};
 use leak_slice::LeakSliceExt;
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
-use data::LinkType;
 
 use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
 
@@ -130,7 +129,8 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     fn get_link_part(&self, index: T) -> &LinkPart<T> {
-        Self::get_from_mem(self.mem_ptr, index.as_usize()).expect("Data part should be in data memory")
+        Self::get_from_mem(self.mem_ptr, index.as_usize())
+            .expect("Data part should be in data memory")
     }
 
     unsafe fn get_link_part_unchecked(&self, index: T) -> &LinkPart<T> {
@@ -138,7 +138,8 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     fn mut_link_part(&mut self, index: T) -> &mut LinkPart<T> {
-        Self::mut_from_mem(self.mem_ptr, index.as_usize()).expect("Data part should be in data memory")
+        Self::mut_from_mem(self.mem_ptr, index.as_usize())
+            .expect("Data part should be in data memory")
     }
 
     unsafe fn mut_source_root(&mut self) -> *mut T {
@@ -409,9 +410,17 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                         T::funty(0)
                     }
                 } else if source == any {
-                    if link.target == target { T::funty(1) } else { T::funty(0) }
+                    if link.target == target {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
                 } else if target == any {
-                    if link.source == source { T::funty(1) } else { T::funty(0) }
+                    if link.source == source {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
                 } else {
                     T::funty(0)
                 }

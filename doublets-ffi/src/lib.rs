@@ -16,10 +16,9 @@ use doublets::{
     data::{
         query,
         Flow::{Break, Continue},
-        LinksConstants, Query, ToQuery,
+        LinkType, LinksConstants, Query, ToQuery,
     },
     mem::FileMapped,
-    data::LinkType,
     Link, Links,
 };
 use libc::c_char;
@@ -110,7 +109,9 @@ impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
             external_range: c
                 .clone()
                 .external_range
-                .map_or(Range(T::funty(0), T::funty(0)), |r| Range(*r.start(), *r.end())),
+                .map_or(Range(T::funty(0), T::funty(0)), |r| {
+                    Range(*r.start(), *r.end())
+                }),
             _opt_marker: c.external_range.is_some(),
         }
     }

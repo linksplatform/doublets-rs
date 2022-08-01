@@ -14,9 +14,8 @@ use crate::mem::{
 };
 
 use crate::{mem::SplitUpdateMem, Link};
-use data::{Flow, LinksConstants};
+use data::{Flow, LinkType, LinksConstants};
 use trees::{NoRecurSzbTree, SzbTree};
-use data::LinkType;
 
 pub struct ExternalTargetsRecursionlessTree<T: LinkType> {
     base: ExternalRecursionlessSizeBalancedTreeBase<T>,
@@ -142,7 +141,8 @@ impl<T: LinkType> LinksTree<T> for ExternalTargetsRecursionlessTree<T> {
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore = total_right_ignore + (self.get_right_size(root) + T::funty(1));
+                    total_right_ignore =
+                        total_right_ignore + (self.get_right_size(root) + T::funty(1));
                     root = self.get_left_or_default(root);
                 }
             }
@@ -153,13 +153,13 @@ impl<T: LinkType> LinksTree<T> for ExternalTargetsRecursionlessTree<T> {
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore = total_left_ignore + (self.get_left_size(root) + T::funty(1));
+                    total_left_ignore =
+                        total_left_ignore + (self.get_left_size(root) + T::funty(1));
                     root = self.get_right_or_default(root);
                 }
-            }total - total_right_ignore - total_left_ignore
-
+            }
+            total - total_right_ignore - total_left_ignore
         }
-
     }
 
     fn search(&self, source: T, target: T) -> T {
@@ -209,7 +209,7 @@ impl<T: LinkType> SplitUpdateMem<T> for ExternalTargetsRecursionlessTree<T> {
 impl<T: LinkType> SplitTree<T> for ExternalTargetsRecursionlessTree<T> {}
 
 impl<T: LinkType> ExternalRecursionlessSizeBalancedTreeBaseAbstract<T>
-for ExternalTargetsRecursionlessTree<T>
+    for ExternalTargetsRecursionlessTree<T>
 {
     fn get_header(&self) -> &LinksHeader<T> {
         unsafe { transmute(&self.base.indexes.as_ref()[0]) }

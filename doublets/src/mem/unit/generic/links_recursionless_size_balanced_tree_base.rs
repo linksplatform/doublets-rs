@@ -4,9 +4,8 @@ use crate::{
     mem::{header::LinksHeader, unit::raw_link::LinkPart, LinksTree},
     Link,
 };
-use data::LinksConstants;
+use data::{LinkType, LinksConstants};
 use trees::NoRecurSzbTree;
-use data::LinkType;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct LinksRecursionlessSizeBalancedTreeBase<T: LinkType> {

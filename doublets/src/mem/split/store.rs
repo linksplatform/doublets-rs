@@ -1,7 +1,5 @@
 use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
 
-
-
 use crate::{
     mem::{
         split::{
@@ -13,10 +11,9 @@ use crate::{
     },
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, Flow::Continue, LinksConstants, ToQuery};
+use data::{Flow, Flow::Continue, LinkType, LinksConstants, ToQuery};
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
 use trees::RelativeCircularLinkedList;
-use data::LinkType;
 
 pub struct Store<
     T: LinkType,
@@ -150,7 +147,8 @@ impl<
     }
 
     pub fn get_data_part(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_usize()).expect("Data part should be in data memory")
+        Self::get_from_mem(self.data_ptr, index.as_usize())
+            .expect("Data part should be in data memory")
     }
 
     unsafe fn get_data_unchecked(&self, index: T) -> &DataPart<T> {
@@ -158,7 +156,8 @@ impl<
     }
 
     fn mut_data_part(&mut self, index: T) -> &mut DataPart<T> {
-        Self::mut_from_mem(self.data_ptr, index.as_usize()).expect("Data part should be in data memory")
+        Self::mut_from_mem(self.data_ptr, index.as_usize())
+            .expect("Data part should be in data memory")
     }
 
     pub fn get_index_part(&self, index: T) -> &IndexPart<T> {
@@ -670,9 +669,17 @@ impl<
                         T::funty(0)
                     }
                 } else if source == any {
-                    if link.target == target { T::funty(1) } else { T::funty(0) }
+                    if link.target == target {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
                 } else if target == any {
-                    if link.source == source { T::funty(1) } else { T::funty(0) }
+                    if link.source == source {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
                 } else {
                     T::funty(0)
                 }

@@ -1,8 +1,7 @@
 use rand::Rng;
 
-use data::{Flow, Hybrid};
-use data::LinkType;
-use doublets::{Link, Doublets};
+use data::{Flow, Hybrid, LinkType};
+use doublets::{Doublets, Link};
 
 pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     let constants = store.constants().clone();
@@ -113,7 +112,10 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(result, Some(address2));
 }
 
-pub fn test_random_creations_and_deletions<T: LinkType>(store: &mut impl Doublets<T>, per_cycle: usize) {
+pub fn test_random_creations_and_deletions<T: LinkType>(
+    store: &mut impl Doublets<T>,
+    per_cycle: usize,
+) {
     for n in 1..per_cycle {
         let mut created = 0;
         let mut _deleted = 0;
@@ -125,10 +127,7 @@ pub fn test_random_creations_and_deletions<T: LinkType>(store: &mut impl Doublet
                 let source = rand::thread_rng().gen_range(address.clone());
                 let target = rand::thread_rng().gen_range(address);
                 let result = store
-                    .get_or_create(
-                        T::try_from(source).unwrap(),
-                        T::try_from(target).unwrap(),
-                    )
+                    .get_or_create(T::try_from(source).unwrap(), T::try_from(target).unwrap())
                     .unwrap()
                     .as_usize();
 

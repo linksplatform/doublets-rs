@@ -1,10 +1,9 @@
 use doublets::{
     data::{
         Flow::{Break, Continue},
-        ToQuery,
+        LinkType, ToQuery,
     },
     mem::Global,
-    data::LinkType,
     split, Doublets, Error as LinksError, Link, Links,
 };
 

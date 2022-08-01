@@ -1,4 +1,3 @@
-
 use std::ptr::NonNull;
 
 use crate::mem::traits::LinksTree;
@@ -7,9 +6,8 @@ use crate::{
     mem::split::{DataPart, IndexPart},
     Link,
 };
-use data::LinksConstants;
+use data::{LinkType, LinksConstants};
 use trees::NoRecurSzbTree;
-use data::LinkType;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {

@@ -1,6 +1,5 @@
 use crate::Link;
-use data::Flow;
-use data::LinkType;
+use data::{Flow, LinkType};
 use std::{marker::PhantomData, ops::Try};
 
 pub trait Handler<T, R>: FnMut(Link<T>, Link<T>) -> R
