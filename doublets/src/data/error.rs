@@ -17,11 +17,14 @@ pub enum Error<T: LinkType> {
     LimitReached(T),
 
     #[error("unable to allocate memory for links storage: `{0}`")]
-    AllocFailed(
-        #[from]
-        mem::Error,
-    ),
+    AllocFailed(#[from] mem::Error),
 
     #[error("other internal error: `{0}`")]
     Other(#[from] Box<dyn StdError + Sync + Send>),
+}
+
+impl<T: LinkType> From<io::Error> for Error<T> {
+    fn from(err: io::Error) -> Self {
+        Self::AllocFailed(err.into())
+    }
 }
