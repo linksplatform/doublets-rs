@@ -1,9 +1,6 @@
 use std::{
-    fmt,
-    fmt::{Debug, Formatter},
+    fmt::{self, Debug, Formatter},
     mem::transmute,
-    ops::Index,
-    slice::{from_raw_parts, SliceIndex},
 };
 
 use data::{LinkType, Query, ToQuery};
@@ -33,15 +30,18 @@ impl<T: LinkType> Link<T> {
         Self::new(val, val, val)
     }
 
-    pub fn from_slice(slice: &[T]) -> Link<T> {
+    pub fn from_slice(slice: &[T]) -> Self {
         assert!(slice.len() >= 3);
 
-        Self::from_slice_unchecked(slice)
+        // SAFETY: slice has at least 3 elements.
+        unsafe { Self::from_slice_unchecked(slice) }
     }
 
-    pub fn from_slice_unchecked(slice: &[T]) -> Link<T> {
-        let (index, source, target) = (slice[0], slice[1], slice[2]);
-        Self::new(index, source, target)
+    pub(crate) unsafe fn from_slice_unchecked(slice: &[T]) -> Self {
+        match slice {
+            [index, source, target] => Self::new(*index, *source, *target),
+            _ => std::hint::unreachable_unchecked(),
+        }
     }
 
     pub fn is_null(&self) -> bool {
@@ -64,7 +64,7 @@ impl<T: LinkType> Link<T> {
 
 impl<T: LinkType> Debug for Link<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "({}: {} {})", self.index, self.source, self.target)
+        write!(f, "{}: {} {}", self.index, self.source, self.target)
     }
 }
 
