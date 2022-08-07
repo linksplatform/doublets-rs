@@ -12,5 +12,5 @@ pub mod mem;
 
 pub use self::mem::{parts, split, unit};
 
-pub use self::data::{Doublet, Doublets, Error, FuseHandler, Handler, Link, Links};
+pub use self::data::{Doublet, Doublets, DoubletsExt, Error, FuseHandler, Handler, Link, Links};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
