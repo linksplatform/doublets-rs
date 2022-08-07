@@ -289,29 +289,11 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_by([index])
     }
 
-    fn try_get_link(&self, index: T) -> Result<Link<T>, LinksError<T>>
-    where
-        Self: Sized,
-    {
+    fn try_get_link(&self, index: T) -> Result<Link<T>, LinksError<T>> {
         self.get_link(index).ok_or(LinksError::NotExists(index))
     }
 
-    fn get_link(&self, index: T) -> Option<Link<T>>
-    where
-        Self: Sized,
-    {
-        let constants = self.constants();
-        if constants.is_external(index) {
-            Some(Link::point(index))
-        } else {
-            let mut slice = None;
-            self.each_by([index], |link| {
-                slice = Some(link);
-                Flow::Continue
-            });
-            slice
-        }
-    }
+    fn get_link(&self, index: T) -> Option<Link<T>>;
 
     fn delete_all(&mut self) -> Result<(), LinksError<T>>
     where
@@ -460,6 +442,14 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .map(|link| link.index)
     }
 
+    #[deprecated(note = "use `search` instead")]
+    fn search_or(&self, source: T, target: T, default: T) -> T
+    where
+        Self: Sized,
+    {
+        self.search(source, target).unwrap_or(default)
+    }
+
     fn single(&self, query: impl ToQuery<T>) -> Option<Link<T>>
     where
         Self: Sized,
@@ -492,18 +482,18 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let constants = self.constants();
-        let any = constants.any;
+        let any = self.constants().any;
 
         let link = self.try_get_link(index)?;
+
         let mut usage_source = self.count_by([any, index, any]);
         if index == link.source {
-            usage_source = usage_source - T::funty(1);
+            usage_source -= T::funty(1);
         }
 
         let mut usage_target = self.count_by([any, any, index]);
         if index == link.target {
-            usage_target = usage_target - T::funty(1);
+            usage_target -= T::funty(1);
         }
 
         Ok(usage_source + usage_target)
@@ -558,100 +548,34 @@ pub trait Doublets<T: LinkType>: Links<T> {
         R: Try<Output = ()>,
         Self: Sized,
     {
+        // guard
+        let _ = self.try_get_link(old)?;
+
         if old == new {
             return Ok(());
         }
 
         let any = self.constants().any;
-        let as_source = [any, old, any];
-        let as_target = [any, any, old];
-
-        let sources_count: usize = self.count_by(as_source).as_usize();
-        let targets_count: usize = self.count_by(as_target).as_usize();
-
-        // not borrowed
-        if sources_count + targets_count == 0 {
-            return Ok(());
-        }
 
         let mut handler = FuseHandler::new(handler);
 
-        let mut usages = Vec::with_capacity(sources_count);
-        self.each_by(as_source, |link| {
-            usages.push(link);
-            Flow::Continue
-        });
-
-        for usage in usages {
-            if usage.index != old {
-                self.update_with(usage.index, new, usage.target, &mut handler)?;
-            }
-        }
-
-        let mut usages = Vec::with_capacity(sources_count);
-        self.each_by(as_target, |link| {
-            usages.push(link);
-            Flow::Continue
-        });
-
-        for usage in usages {
-            if usage.index != old {
-                self.update_with(usage.index, usage.source, new, &mut handler)?;
-            }
-        }
-        Ok(())
+        None.into_iter()
+            // best readability
+            .chain(self.each_iter([any, old, any]))
+            .chain(self.each_iter([any, any, old]))
+            .filter(|usage| usage.index != old)
+            .try_for_each(|usage| {
+                self.update_with(usage.index, usage.source, new, &mut handler)
+                    .map(|_| ())
+            })
     }
 
     fn rebase(&mut self, old: T, new: T) -> Result<T>
     where
         Self: Sized,
     {
-        let link = self.try_get_link(old)?;
-
-        if old == new {
-            return Ok(new);
-        }
-
-        let constants = self.constants();
-        let any = constants.any;
-
-        let sources_count = self.count_by([any, old, any]).as_usize();
-        let targets_count = self.count_by([any, any, old]).as_usize();
-        if sources_count == 0 && targets_count == 0 && link.is_full() {
-            return Ok(new);
-        }
-
-        let total = sources_count + targets_count;
-        if total == 0 {
-            return Ok(new);
-        }
-
-        let mut usages = Vec::with_capacity(sources_count);
-        self.each_by([any, old, any], |link| {
-            usages.push(link.index);
-            Flow::Continue
-        });
-
-        for index in usages {
-            if index != old {
-                let usage = self.try_get_link(index)?;
-                self.update(index, new, usage.target)?;
-            }
-        }
-
-        let mut usages = Vec::with_capacity(sources_count);
-        self.each_by([any, any, old], |link| {
-            usages.push(link.index);
-            Flow::Continue
-        });
-
-        for index in usages {
-            if index != old {
-                let usage = self.try_get_link(index)?;
-                self.update(index, usage.source, new)?;
-            }
-        }
-        Ok(new)
+        self.rebase_with(old, new, |_, _| Flow::Continue)
+            .map(|_| new)
     }
 
     fn rebase_and_delete(&mut self, old: T, new: T) -> Result<T>
@@ -706,4 +630,8 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
     }
 }
 
-impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {}
+impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
+    fn get_link(&self, index: T) -> Option<Link<T>> {
+        (**self).get_link(index)
+    }
+}
