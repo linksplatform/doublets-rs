@@ -86,7 +86,7 @@ fn str_as_vec(str: &str) -> Vec<usize> {
     str.chars().map(|c| c as usize).collect()
 }
 
-const N: usize = 10000;
+const N: usize = 100;
 
 #[test]
 #[cfg(not(miri))]
