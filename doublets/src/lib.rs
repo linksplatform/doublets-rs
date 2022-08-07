@@ -1,4 +1,3 @@
-#![feature(backtrace)]
 #![feature(fn_traits)]
 #![feature(generators)]
 #![feature(try_trait_v2)]
