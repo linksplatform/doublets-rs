@@ -44,6 +44,7 @@ default = ["platform"]
 full = ["platform", "smallvec", "rayon"]
 
 [dev-dependencies]
+tap = { version = "1.0.1" }
 rand = { version = "0.8.5" }
 criterion = { version = "0.3.6" }
 static_assertions = { version = "1.1.0" }

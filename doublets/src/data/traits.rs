@@ -567,8 +567,13 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .chain(self.each_iter([any, any, old]))
             .filter(|usage| usage.index != old)
             .try_for_each(|usage| {
-                self.update_with(usage.index, usage.source, new, &mut handler)
-                    .map(|_| ())
+                if usage.source == old {
+                    self.update_with(usage.index, new, usage.target, &mut handler)?;
+                }
+                if usage.target == old {
+                    self.update_with(usage.index, usage.source, new, &mut handler)?;
+                }
+                Ok(())
             })
     }
 
