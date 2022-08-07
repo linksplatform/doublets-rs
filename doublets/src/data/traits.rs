@@ -161,11 +161,11 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.each_by([], handler)
     }
 
-    fn iter(&self) -> Box<dyn Iterator<Item = Link<T>>> {
+    fn iter(&self) -> Box<dyn Iterator<Item = Link<T>> + 'static> {
         self.iter_links()
     }
 
-    fn each_iter(&self, query: impl ToQuery<T>) -> Box<dyn Iterator<Item = Link<T>>>
+    fn each_iter(&self, query: impl ToQuery<T>) -> Box<dyn Iterator<Item = Link<T>> + 'static>
     where
         Self: Sized,
     {
