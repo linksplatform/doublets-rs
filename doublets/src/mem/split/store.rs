@@ -11,7 +11,7 @@ use crate::{
     },
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, Flow::Continue, LinkType, LinksConstants, ToQuery};
+use data::{Flow, LinkType, LinksConstants, ToQuery};
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
 use trees::RelativeCircularLinkedList;
 
@@ -352,7 +352,7 @@ impl<
     fn try_each_by_core(&self, handler: ReadHandler<T>, query: &[T]) -> Flow {
         let query = query.to_query();
 
-        if query.len() == 0 {
+        if query.is_empty() {
             for index in T::funty(1)..=self.get_header().allocated {
                 if let Some(link) = self.get_link(index) {
                     handler(link)?;
@@ -720,7 +720,7 @@ impl<
                 header.reserved = T::try_from(reserved).unwrap()
             }
             let header = self.mut_header();
-            header.allocated = header.allocated + T::funty(1);
+            header.allocated += T::funty(1);
             free = header.allocated;
         } else {
             self.unused.detach(free)

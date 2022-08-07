@@ -2,14 +2,11 @@
 use rayon::prelude::*;
 use std::{
     default::default,
-    mem::size_of,
     ops::{ControlFlow, Try},
 };
 
-use crate::{FuseHandler, Link, LinksError};
+use crate::{Error, FuseHandler, Link};
 use data::{Flow, LinkType, LinksConstants, ToQuery};
-
-pub type Result<T, E = LinksError<T>> = std::result::Result<T, E>;
 
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
 
@@ -20,11 +17,7 @@ pub trait Links<T: LinkType>: Send + Sync {
 
     fn count_links(&self, query: &[T]) -> T;
 
-    fn create_links(
-        &mut self,
-        query: &[T],
-        handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>>;
+    fn create_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>>;
 
     fn each_links(&self, query: &[T], handler: ReadHandler<T>) -> Flow;
 
@@ -33,13 +26,9 @@ pub trait Links<T: LinkType>: Send + Sync {
         query: &[T],
         change: &[T],
         handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>>;
+    ) -> Result<Flow, Error<T>>;
 
-    fn delete_links(
-        &mut self,
-        query: &[T],
-        handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>>;
+    fn delete_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>>;
 
     fn iter_links(&self) -> Box<dyn Iterator<Item = Link<T>>> {
         self.each_iter_links(&[])
@@ -84,7 +73,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, LinksError<T>>
+    ) -> Result<R, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -106,7 +95,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| output)
     }
 
-    fn create_by(&mut self, query: impl ToQuery<T>) -> Result<T, LinksError<T>>
+    fn create_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -118,7 +107,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| index)
     }
 
-    fn create_with<F, R>(&mut self, handler: F) -> Result<R, LinksError<T>>
+    fn create_with<F, R>(&mut self, handler: F) -> Result<R, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -127,7 +116,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_by_with([], handler)
     }
 
-    fn create(&mut self) -> Result<T>
+    fn create(&mut self) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -179,7 +168,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         query: impl ToQuery<T>,
         change: impl ToQuery<T>,
         mut handler: H,
-    ) -> Result<R, LinksError<T>>
+    ) -> Result<R, Error<T>>
     where
         H: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -203,7 +192,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| output)
     }
 
-    fn update_by(&mut self, query: impl ToQuery<T>, change: impl ToQuery<T>) -> Result<T>
+    fn update_by(&mut self, query: impl ToQuery<T>, change: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -221,7 +210,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         source: T,
         target: T,
         handler: F,
-    ) -> Result<R, LinksError<T>>
+    ) -> Result<R, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -230,7 +219,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_by_with([index], [index, source, target], handler)
     }
 
-    fn update(&mut self, index: T, source: T, target: T) -> Result<T>
+    fn update(&mut self, index: T, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -241,7 +230,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, LinksError<T>>
+    ) -> Result<R, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -263,7 +252,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| output)
     }
 
-    fn delete_by(&mut self, query: impl ToQuery<T>) -> Result<T>
+    fn delete_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -275,7 +264,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
-    fn delete_with<F, R>(&mut self, index: T, handler: F) -> Result<R, LinksError<T>>
+    fn delete_with<F, R>(&mut self, index: T, handler: F) -> Result<R, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -284,20 +273,20 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_by_with([index], handler)
     }
 
-    fn delete(&mut self, index: T) -> Result<T>
+    fn delete(&mut self, index: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
         self.delete_by([index])
     }
 
-    fn try_get_link(&self, index: T) -> Result<Link<T>, LinksError<T>> {
-        self.get_link(index).ok_or(LinksError::NotExists(index))
+    fn try_get_link(&self, index: T) -> Result<Link<T>, Error<T>> {
+        self.get_link(index).ok_or(Error::NotExists(index))
     }
 
     fn get_link(&self, index: T) -> Option<Link<T>>;
 
-    fn delete_all(&mut self) -> Result<(), LinksError<T>>
+    fn delete_all(&mut self) -> Result<(), Error<T>>
     where
         Self: Sized,
     {
@@ -314,7 +303,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         &mut self,
         query: impl ToQuery<T>,
         handler: F,
-    ) -> Result<(), LinksError<T>>
+    ) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -336,7 +325,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
-    fn delete_usages_with<F, R>(&mut self, index: T, handler: F) -> Result<(), LinksError<T>>
+    fn delete_usages_with<F, R>(&mut self, index: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -368,14 +357,14 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
-    fn delete_usages(&mut self, index: T) -> Result<(), LinksError<T>>
+    fn delete_usages(&mut self, index: T) -> Result<(), Error<T>>
     where
         Self: Sized,
     {
         self.delete_usages_with(index, |_, _| Flow::Continue)
     }
 
-    fn create_point(&mut self) -> Result<T>
+    fn create_point(&mut self) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -383,12 +372,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update(new, new, new)
     }
 
-    fn create_link_with<F, R>(
-        &mut self,
-        source: T,
-        target: T,
-        handler: F,
-    ) -> Result<Flow, LinksError<T>>
+    fn create_link_with<F, R>(&mut self, source: T, target: T, handler: F) -> Result<Flow, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -405,7 +389,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_with(new, source, target, handler)
     }
 
-    fn create_link(&mut self, source: T, target: T) -> Result<T>
+    fn create_link(&mut self, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -469,7 +453,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         result
     }
 
-    fn get_or_create(&mut self, source: T, target: T) -> Result<T>
+    fn get_or_create(&mut self, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -480,7 +464,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         }
     }
 
-    fn count_usages(&self, index: T) -> Result<T>
+    fn count_usages(&self, index: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -501,7 +485,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(usage_source + usage_target)
     }
 
-    fn usages(&self, index: T) -> Result<Vec<T>, LinksError<T>>
+    fn usages(&self, index: T) -> Result<Vec<T>, Error<T>>
     where
         Self: Sized,
     {
@@ -544,7 +528,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .map_or(false, |link| link != T::funty(0))
     }
 
-    fn rebase_with<F, R>(&mut self, old: T, new: T, handler: F) -> Result<(), LinksError<T>>
+    fn rebase_with<F, R>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
         R: Try<Output = ()>,
@@ -577,7 +561,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             })
     }
 
-    fn rebase(&mut self, old: T, new: T) -> Result<T>
+    fn rebase(&mut self, old: T, new: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -585,7 +569,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .map(|_| new)
     }
 
-    fn rebase_and_delete(&mut self, old: T, new: T) -> Result<T>
+    fn rebase_and_delete(&mut self, old: T, new: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
@@ -607,11 +591,7 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         (**self).count_links(query)
     }
 
-    fn create_links(
-        &mut self,
-        query: &[T],
-        handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>> {
+    fn create_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>> {
         (**self).create_links(query, handler)
     }
 
@@ -624,15 +604,11 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         query: &[T],
         change: &[T],
         handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>> {
+    ) -> Result<Flow, Error<T>> {
         (**self).update_links(query, change, handler)
     }
 
-    fn delete_links(
-        &mut self,
-        query: &[T],
-        handler: WriteHandler<T>,
-    ) -> Result<Flow, LinksError<T>> {
+    fn delete_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>> {
         (**self).delete_links(query, handler)
     }
 }

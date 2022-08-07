@@ -10,7 +10,7 @@ use crate::{
     },
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, Flow::Continue, LinkType, LinksConstants, ToQuery};
+use data::{Flow, LinkType, LinksConstants, ToQuery};
 use leak_slice::LeakSliceExt;
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
 
@@ -454,7 +454,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 header.reserved = T::try_from(reserved).unwrap()
             }
             let header = self.mut_header();
-            header.allocated = header.allocated + T::funty(1);
+            header.allocated += T::funty(1);
             free = header.allocated;
         } else {
             self.unused.detach(free)

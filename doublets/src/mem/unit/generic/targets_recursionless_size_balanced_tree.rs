@@ -138,8 +138,7 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore =
-                        total_right_ignore + (self.get_right_size(root) + T::funty(1));
+                    total_right_ignore += self.get_right_size(root) + T::funty(1);
                     root = self.get_left_or_default(root);
                 }
             }
@@ -150,8 +149,7 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore =
-                        total_left_ignore + (self.get_left_size(root) + T::funty(1));
+                    total_left_ignore += self.get_left_size(root) + T::funty(1);
                     root = self.get_right_or_default(root);
                 }
             }
