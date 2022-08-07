@@ -44,6 +44,7 @@ trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-
 
 # optional
 smallvec = { version = "1.8.1", features = ["const_generics"], optional = true }
+rayon = { version = "1.5.3", optional = true }
 
 [dev-dependencies]
 rand = { version = "0.8.5" }

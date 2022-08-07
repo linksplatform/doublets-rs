@@ -250,6 +250,7 @@ dependencies = [
  "platform-mem 0.1.0-pre+beta.2",
  "platform-trees",
  "rand",
+ "rayon",
  "smallvec",
  "static_assertions",
  "thiserror",

@@ -1,3 +1,5 @@
+#[cfg(feature = "rayon")]
+use rayon::prelude::*;
 use std::{
     default::default,
     mem::size_of,
@@ -633,5 +635,28 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
 impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         (**self).get_link(index)
+    }
+}
+
+pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
+    #[cfg(feature = "rayon")]
+    type IdxParIterEach: IndexedParallelIterator<Item = Link<T>>;
+
+    #[cfg(feature = "rayon")]
+    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIterEach;
+}
+
+impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
+    #[cfg(feature = "rayon")]
+    type IdxParIterEach = impl IndexedParallelIterator<Item = Link<T>>;
+
+    #[cfg(feature = "rayon")]
+    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIterEach {
+        let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
+        self.each_by(query, |link| {
+            vec.push(link);
+            Flow::Continue
+        });
+        vec.into_par_iter()
     }
 }
