@@ -49,7 +49,7 @@ pub trait Links<T: LinkType>: Send + Sync {
         let capacity = self.count_links(query).as_usize();
 
         cfg_if::cfg_if! {
-            if #[cfg(feature = "smallvec-optimization")] {
+            if #[cfg(feature = "smallvec")] {
                 let mut vec = smallvec::SmallVec::<[_; 2]>::with_capacity(capacity);
             } else {
                 let mut vec = Vec::with_capacity(capacity);
@@ -640,18 +640,26 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
 
 pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
     #[cfg(feature = "rayon")]
-    type IdxParIterEach: IndexedParallelIterator<Item = Link<T>>;
+    type IdxParIter: IndexedParallelIterator<Item = Link<T>>;
 
     #[cfg(feature = "rayon")]
-    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIterEach;
+    fn par_iter(&self) -> Self::IdxParIter;
+
+    #[cfg(feature = "rayon")]
+    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter;
 }
 
 impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     #[cfg(feature = "rayon")]
-    type IdxParIterEach = impl IndexedParallelIterator<Item = Link<T>>;
+    type IdxParIter = impl IndexedParallelIterator<Item = Link<T>>;
 
     #[cfg(feature = "rayon")]
-    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIterEach {
+    fn par_iter(&self) -> Self::IdxParIter {
+        self.par_each_iter([self.constants().any; 3])
+    }
+
+    #[cfg(feature = "rayon")]
+    fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter {
         let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
         self.each_by(query, |link| {
             vec.push(link);

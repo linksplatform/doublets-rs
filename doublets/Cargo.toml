@@ -19,23 +19,10 @@ homepage = "https://github.com/linksplatform/doublets-rs"
 description = """
 """
 
-[features]
-mem = []
-num = []
-data = []
-# todo: may be internal_platform
-platform = ["mem", "num", "data"]
-
-smallvec-optimization = ["smallvec"]
-
-default = ["platform"]
-full = ["platform", "smallvec-optimization"]
-
 [dependencies]
 cfg-if = { version = "1.0.0" }
 thiserror = { version = "1.0.30" }
 leak_slice = { version = "0.2.0" }
-
 
 # platform
 data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
@@ -45,6 +32,16 @@ trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-
 # optional
 smallvec = { version = "1.8.1", features = ["const_generics"], optional = true }
 rayon = { version = "1.5.3", optional = true }
+
+[features]
+mem = []
+num = []
+data = []
+# todo: may be internal_platform
+platform = ["mem", "num", "data"]
+
+default = ["platform"]
+full = ["platform", "smallvec", "rayon"]
 
 [dev-dependencies]
 rand = { version = "0.8.5" }
