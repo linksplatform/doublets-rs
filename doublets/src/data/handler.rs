@@ -1,13 +1,20 @@
 use crate::Link;
 use data::{Flow, LinkType};
-use std::{marker::PhantomData, ops::Try};
+use std::{marker::PhantomData, mem::MaybeUninit, ops::Try};
 
 pub trait Handler<T, R>: FnMut(Link<T>, Link<T>) -> R
 where
     T: LinkType,
     R: Try<Output = ()>,
 {
+    fn fuse(self) -> Fuse<T, Self, R>
+    where
+        Self: Sized,
+    {
+        Fuse::new(self)
+    }
 }
+
 impl<T, R, All> Handler<T, R> for All
 where
     T: LinkType,
@@ -16,7 +23,7 @@ where
 {
 }
 
-pub struct FuseHandler<T, H, R>
+pub struct Fuse<T, H, R>
 where
     T: LinkType,
     H: Handler<T, R>,
@@ -24,27 +31,25 @@ where
 {
     handler: H,
     done: bool,
-    _marker1: PhantomData<R>,
-    _marker2: PhantomData<T>,
+    _marker: PhantomData<fn(T) -> R>,
 }
 
-impl<T, F, R> FuseHandler<T, F, R>
+impl<T, F, R> Fuse<T, F, R>
 where
     T: LinkType,
     F: FnMut(Link<T>, Link<T>) -> R,
     R: Try<Output = ()>,
 {
     pub fn new(handler: F) -> Self {
-        FuseHandler {
+        Self {
             handler,
             done: false,
-            _marker1: PhantomData,
-            _marker2: PhantomData,
+            _marker: PhantomData,
         }
     }
 }
 
-impl<T, H, R> From<H> for FuseHandler<T, H, R>
+impl<T, H, R> From<H> for Fuse<T, H, R>
 where
     T: LinkType,
     H: Handler<T, R>,
@@ -55,7 +60,7 @@ where
     }
 }
 
-impl<T, H, R> FnOnce<(Link<T>, Link<T>)> for FuseHandler<T, H, R>
+impl<T, H, R> FnOnce<(Link<T>, Link<T>)> for Fuse<T, H, R>
 where
     H: FnMut(Link<T>, Link<T>) -> R,
     R: Try<Output = ()>,
@@ -68,14 +73,16 @@ where
     }
 }
 
-impl<T, H, R> FnMut<(Link<T>, Link<T>)> for FuseHandler<T, H, R>
+impl<T, H, R> FnMut<(Link<T>, Link<T>)> for Fuse<T, H, R>
 where
     T: LinkType,
     H: Handler<T, R>,
     R: Try<Output = ()>,
 {
     extern "rust-call" fn call_mut(&mut self, args: (Link<T>, Link<T>)) -> Self::Output {
-        if !self.done {
+        if self.done {
+            Flow::Break
+        } else {
             let result = self.handler.call_mut(args);
             if result.branch().is_break() {
                 self.done = false;
@@ -83,8 +90,6 @@ where
             } else {
                 Flow::Continue
             }
-        } else {
-            Flow::Break
         }
     }
 }

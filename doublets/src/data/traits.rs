@@ -1,3 +1,4 @@
+use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
@@ -5,7 +6,7 @@ use std::{
     ops::{ControlFlow, Try},
 };
 
-use crate::{Error, FuseHandler, Link};
+use crate::{Error, Fuse, Link};
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
@@ -17,41 +18,20 @@ pub trait Links<T: LinkType>: Send + Sync {
 
     fn count_links(&self, query: &[T]) -> T;
 
-    fn create_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>>;
+    fn create_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
+    -> Result<Flow, Error<T>>;
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<T>) -> Flow;
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow;
 
     fn update_links(
         &mut self,
         query: &[T],
         change: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, Error<T>>;
 
-    fn delete_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>>;
-
-    fn iter_links(&self) -> Box<dyn Iterator<Item = Link<T>>> {
-        self.each_iter_links(&[])
-    }
-
-    fn each_iter_links(&self, query: &[T]) -> Box<dyn Iterator<Item = Link<T>>> {
-        let capacity = self.count_links(query).as_usize();
-
-        cfg_if::cfg_if! {
-            if #[cfg(feature = "smallvec")] {
-                let mut vec = smallvec::SmallVec::<[_; 2]>::with_capacity(capacity);
-            } else {
-                let mut vec = Vec::with_capacity(capacity);
-            }
-        }
-
-        self.each_links(query, &mut |link| {
-            vec.push(link);
-            Flow::Continue
-        });
-
-        Box::new(vec.into_iter())
-    }
+    fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
+    -> Result<Flow, Error<T>>;
 }
 
 pub trait Doublets<T: LinkType>: Links<T> {
@@ -150,17 +130,6 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         self.each_by([], handler)
-    }
-
-    fn iter(&self) -> Box<dyn Iterator<Item = Link<T>> + 'static> {
-        self.iter_links()
-    }
-
-    fn each_iter(&self, query: impl ToQuery<T>) -> Box<dyn Iterator<Item = Link<T>> + 'static>
-    where
-        Self: Sized,
-    {
-        self.each_iter_links(&query.to_query()[..])
     }
 
     fn update_by_with<H, R>(
@@ -318,7 +287,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             Flow::Continue
         });
 
-        let mut handler = FuseHandler::new(handler);
+        let mut handler = Fuse::new(handler);
         for index in vec.into_iter().rev() {
             self.delete_with(index, &mut handler)?;
         }
@@ -350,7 +319,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             Flow::Continue
         });
 
-        let mut handler = FuseHandler::new(handler);
+        let mut handler = Fuse::new(handler);
         for index in to_delete.into_iter().rev() {
             self.delete_with(index, &mut handler)?;
         }
@@ -379,7 +348,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let mut new = default();
-        let mut handler = FuseHandler::new(handler);
+        let mut handler = Fuse::new(handler);
         self.create_with(|before, after| {
             new = after.index;
             handler(before, after);
@@ -543,7 +512,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let any = self.constants().any;
 
-        let mut handler = FuseHandler::new(handler);
+        let mut handler = Fuse::new(handler);
 
         None.into_iter()
             // best readability
@@ -591,11 +560,15 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         (**self).count_links(query)
     }
 
-    fn create_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>> {
+    fn create_links(
+        &mut self,
+        query: &[T],
+        handler: WriteHandler<'_, T>,
+    ) -> Result<Flow, Error<T>> {
         (**self).create_links(query, handler)
     }
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<T>) -> Flow {
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
         (**self).each_links(query, handler)
     }
 
@@ -603,12 +576,16 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         &mut self,
         query: &[T],
         change: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, Error<T>> {
         (**self).update_links(query, change, handler)
     }
 
-    fn delete_links(&mut self, query: &[T], handler: WriteHandler<T>) -> Result<Flow, Error<T>> {
+    fn delete_links(
+        &mut self,
+        query: &[T],
+        handler: WriteHandler<'_, T>,
+    ) -> Result<Flow, Error<T>> {
         (**self).delete_links(query, handler)
     }
 }
@@ -628,6 +605,26 @@ pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
 
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter;
+
+    // Box<dyn Iterator<Item = T>> must used while `-> impl Trait` is not stabilized
+    // Box<dyn> than easier `Self::ImplIterator1,2,...`
+    // and have same performance if has only one possible dyn variant
+
+    type ImplIter: Iterator<Item = Link<T>>;
+    fn iter(&self) -> Self::ImplIter;
+
+    type ImplIterEach: Iterator<Item = Link<T>>;
+    fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach;
+
+    #[cfg(feature = "small-search")]
+    type ImplIterSmall: Iterator<Item = Link<T>>;
+    #[cfg(feature = "small-search")]
+    fn iter_small(&self) -> Self::ImplIterSmall;
+
+    #[cfg(feature = "small-search")]
+    type ImplIterEachSmall: Iterator<Item = Link<T>>;
+    #[cfg(feature = "small-search")]
+    fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall;
 }
 
 impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
@@ -647,5 +644,58 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
             Flow::Continue
         });
         vec.into_par_iter()
+    }
+
+    type ImplIter = Self::ImplIterEach;
+
+    #[inline]
+    fn iter(&self) -> Self::ImplIter {
+        self.each_iter([self.constants().any; 3])
+    }
+
+    type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+
+    #[cfg_attr(feature = "more-inline", inline)]
+    fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
+        // for safety `.into_iter`
+        use bumpalo::collections::Vec;
+
+        let cap = self.count_by(query.to_query()).as_usize();
+
+        let arena = Bump::new();
+        let mut vec = Vec::with_capacity_in(cap, &arena);
+        self.each_by(query, &mut |link| {
+            vec.push(link);
+            Flow::Continue
+        });
+        vec.into_iter()
+    }
+
+    #[cfg(feature = "small-search")]
+    type ImplIterSmall = Self::ImplIterEachSmall;
+
+    #[inline]
+    #[cfg(feature = "small-search")]
+    fn iter_small(&self) -> Self::ImplIterSmall {
+        self.each_iter_small([self.constants().any; 3])
+    }
+
+    #[cfg(feature = "small-search")]
+    type ImplIterEachSmall = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+
+    #[cfg(feature = "small-search")]
+    #[cfg_attr(feature = "more-inline", inline)]
+    fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall {
+        // fixme: later use const generics
+        const SIZE_HINT: usize = 2;
+
+        let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(
+            self.count_by(query.to_query()).as_usize(),
+        );
+        self.each_by(query, |link| {
+            vec.push(link);
+            Flow::Continue
+        });
+        vec.into_iter()
     }
 }
