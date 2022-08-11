@@ -64,37 +64,3 @@ pub use self::mem::{parts, split, unit};
 
 pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
-
-#[test]
-pub fn small_iter_1() {
-    use self::{data::Flow::Continue, mem::Global, unit, Doublets, DoubletsExt};
-
-    let mut store = unit::Store::<usize, _>::new(Global::new()).unwrap();
-    let _any = store.constants().any;
-
-    for _ in 0..2 {
-        store.create_point().unwrap();
-    }
-
-    store.iter_small().for_each(|item| {
-        std::hint::black_box(item);
-    });
-}
-
-#[test]
-pub fn small_iter_2() {
-    use self::{data::Flow::Continue, mem::Global, unit, Doublets, DoubletsExt};
-
-    let mut store = unit::Store::<usize, _>::new(Global::new()).unwrap();
-    let _any = store.constants().any;
-
-    for _ in 0..2 {
-        store.create_point().unwrap();
-    }
-
-    let mut vec = Vec::with_capacity(store.count());
-    store.each(|link| {
-        vec.push(std::hint::black_box(link));
-        Continue
-    });
-}
