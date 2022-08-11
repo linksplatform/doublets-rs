@@ -1,7 +1,4 @@
-use std::{
-    fmt::{self, Debug, Formatter},
-    mem::transmute,
-};
+use std::fmt::{self, Debug, Formatter};
 
 use data::{LinkType, Query, ToQuery};
 
@@ -14,11 +11,15 @@ pub struct Link<T: LinkType> {
 }
 
 impl<T: LinkType> Link<T> {
-    #[must_use] pub fn nothing() -> Self {
+    #[inline]
+    #[must_use]
+    pub fn nothing() -> Self {
         Self::default()
     }
 
-    pub fn new(index: T, source: T, target: T) -> Self {
+    #[inline]
+    #[must_use]
+    pub const fn new(index: T, source: T, target: T) -> Self {
         Self {
             index,
             source,
@@ -26,39 +27,52 @@ impl<T: LinkType> Link<T> {
         }
     }
 
-    pub fn point(val: T) -> Self {
+    #[inline]
+    #[must_use]
+    pub const fn point(val: T) -> Self {
         Self::new(val, val, val)
     }
 
-    pub fn from_slice(slice: &[T]) -> Self {
+    #[inline]
+    pub const fn from_slice(slice: &[T]) -> Self {
         assert!(slice.len() >= 3);
 
         // SAFETY: slice has at least 3 elements.
         unsafe { Self::from_slice_unchecked(slice) }
     }
 
-    pub(crate) unsafe fn from_slice_unchecked(slice: &[T]) -> Self {
+    #[inline]
+    #[must_use]
+    pub(crate) const unsafe fn from_slice_unchecked(slice: &[T]) -> Self {
         match slice {
             [index, source, target] => Self::new(*index, *source, *target),
             _ => std::hint::unreachable_unchecked(),
         }
     }
 
+    #[inline]
+    #[must_use]
     pub fn is_null(&self) -> bool {
         *self == Self::point(T::funty(0))
     }
 
+    #[inline]
+    #[must_use]
     pub fn is_full(&self) -> bool {
         self.index == self.source && self.index == self.target
     }
 
+    #[inline]
+    #[must_use]
     pub fn is_partial(&self) -> bool {
         self.index == self.source || self.index == self.target
     }
 
-    pub fn as_slice(&self) -> &[T] {
+    #[inline]
+    #[must_use]
+    pub const fn as_slice(&self) -> &[T] {
         // SAFETY: Link is repr(C) and therefore is safe to transmute to a slice
-        unsafe { transmute::<_, &[T; 3]>(self) }
+        unsafe { &*(self as *const Self).cast::<[T; 3]>() }
     }
 }
 
