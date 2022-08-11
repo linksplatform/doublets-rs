@@ -37,19 +37,19 @@ impl<T: LinkType> ExternalSourcesRecursionlessTree<T> {
 
 impl<T: LinkType> SzbTree<T> for ExternalSourcesRecursionlessTree<T> {
     unsafe fn get_left_reference(&self, node: T) -> *const T {
-        &self.get_index_part(node).left_as_source as *const _
+        std::ptr::addr_of!(self.get_index_part(node).left_as_source)
     }
 
     unsafe fn get_right_reference(&self, node: T) -> *const T {
-        &self.get_index_part(node).right_as_source as *const _
+        std::ptr::addr_of!(self.get_index_part(node).right_as_source)
     }
 
     unsafe fn get_mut_left_reference(&mut self, node: T) -> *mut T {
-        &mut self.get_mut_index_part(node).left_as_source as *mut _
+        std::ptr::addr_of_mut!(self.get_mut_index_part(node).left_as_source)
     }
 
     unsafe fn get_mut_right_reference(&mut self, node: T) -> *mut T {
-        &mut self.get_mut_index_part(node).right_as_source as *mut _
+        std::ptr::addr_of_mut!(self.get_mut_index_part(node).right_as_source)
     }
 
     unsafe fn get_left(&self, node: T) -> T {
@@ -65,15 +65,15 @@ impl<T: LinkType> SzbTree<T> for ExternalSourcesRecursionlessTree<T> {
     }
 
     unsafe fn set_left(&mut self, node: T, left: T) {
-        self.get_mut_index_part(node).left_as_source = left
+        self.get_mut_index_part(node).left_as_source = left;
     }
 
     unsafe fn set_right(&mut self, node: T, right: T) {
-        self.get_mut_index_part(node).right_as_source = right
+        self.get_mut_index_part(node).right_as_source = right;
     }
 
     unsafe fn set_size(&mut self, node: T, size: T) {
-        self.get_mut_index_part(node).size_as_source = size
+        self.get_mut_index_part(node).size_as_source = size;
     }
 
     unsafe fn first_is_to_the_left_of_second(&self, first: T, second: T) -> bool {
@@ -109,7 +109,7 @@ impl<T: LinkType> SzbTree<T> for ExternalSourcesRecursionlessTree<T> {
 impl<T: LinkType> NoRecurSzbTree<T> for ExternalSourcesRecursionlessTree<T> {}
 
 fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
-    _self: &ExternalSourcesRecursionlessTree<T>,
+    this: &ExternalSourcesRecursionlessTree<T>,
     base: T,
     link: T,
     handler: &mut H,
@@ -117,16 +117,16 @@ fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     if link == T::funty(0) {
         return Flow::Continue;
     }
-    let link_base_part = _self.get_base_part(link);
+    let link_base_part = this.get_base_part(link);
     unsafe {
         if link_base_part > base {
-            each_usages_core(_self, base, _self.get_left_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
         } else if link_base_part < base {
-            each_usages_core(_self, base, _self.get_right_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
         } else {
-            handler(_self.get_link_value(link))?;
-            each_usages_core(_self, base, _self.get_left_or_default(link), handler)?;
-            each_usages_core(_self, base, _self.get_right_or_default(link), handler)?;
+            handler(this.get_link_value(link))?;
+            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
         }
     }
     Flow::Continue

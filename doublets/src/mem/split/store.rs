@@ -9,7 +9,7 @@ use crate::{
         },
         LinksHeader, LinksTree, SplitList, SplitTree, SplitUpdateMem,
     },
-    Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
+    Doublets, DoubletsExt, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 use mem::{RawMem, DEFAULT_PAGE_SIZE};
@@ -187,35 +187,35 @@ impl<
     }
 
     unsafe fn detach_internal_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.internal_sources.detach(&mut *root, index)
+        self.internal_sources.detach(&mut *root, index);
     }
 
     unsafe fn detach_internal_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.internal_targets.detach(&mut *root, index)
+        self.internal_targets.detach(&mut *root, index);
     }
 
     unsafe fn attach_internal_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.internal_sources.attach(&mut *root, index)
+        self.internal_sources.attach(&mut *root, index);
     }
 
     unsafe fn attach_internal_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.internal_targets.attach(&mut *root, index)
+        self.internal_targets.attach(&mut *root, index);
     }
 
     unsafe fn detach_external_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.external_sources.detach(&mut *root, index)
+        self.external_sources.detach(&mut *root, index);
     }
 
     unsafe fn detach_external_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.external_targets.detach(&mut *root, index)
+        self.external_targets.detach(&mut *root, index);
     }
 
     unsafe fn attach_external_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.external_sources.attach(&mut *root, index)
+        self.external_sources.attach(&mut *root, index);
     }
 
     unsafe fn attach_external_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.external_targets.attach(&mut *root, index)
+        self.external_targets.attach(&mut *root, index);
     }
 
     unsafe fn detach_internal_source(&mut self, root: T, index: T) {
@@ -303,7 +303,7 @@ impl<
         let index = NonNull::from(self.index_mem.alloc(index_capacity)?);
         self.update_mem(data, index);
 
-        self.mut_header().reserved = T::try_from(self.data_mem.allocated() - 1).unwrap();
+        self.mut_header().reserved = T::try_from(self.data_mem.allocated() - 1).expect("always ok");
         Ok(())
     }
 
@@ -349,7 +349,7 @@ impl<
         Link::new(index, raw.source, raw.target)
     }
 
-    fn try_each_by_core(&self, handler: ReadHandler<T>, query: &[T]) -> Flow {
+    fn try_each_by_core(&self, handler: ReadHandler<'_, T>, query: &[T]) -> Flow {
         let query = query.to_query();
 
         if query.is_empty() {
@@ -363,7 +363,6 @@ impl<
 
         let constants = self.constants.clone();
         let any = constants.any;
-        let _continue = constants.r#continue;
         let index = query[constants.index_part.as_usize()];
         if query.len() == 1 {
             return if index == any {
@@ -692,7 +691,7 @@ impl<
     fn create_links(
         &mut self,
         _query: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let constants = self.constants().clone();
         let header = self.get_header();
@@ -717,13 +716,13 @@ impl<
                 let reserved = self.index_mem.allocated();
                 let header = self.mut_header();
                 // header.reserved = T::try_from(reserved / Self::DATA_SIZE).unwrap()
-                header.reserved = T::try_from(reserved).unwrap()
+                header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
             header.allocated += T::funty(1);
             free = header.allocated;
         } else {
-            self.unused.detach(free)
+            self.unused.detach(free);
         }
 
         self.resolve_danglind_external(free);
@@ -734,7 +733,7 @@ impl<
         ))
     }
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<T>) -> Flow {
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
         self.try_each_by_core(handler, query)
     }
 
@@ -742,7 +741,7 @@ impl<
         &mut self,
         query: &[T],
         change: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let index = query[0];
         let new_source = change[1];
@@ -813,7 +812,7 @@ impl<
     fn delete_links(
         &mut self,
         query: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let index = query[0];
         let link = self.try_get_link(index)?;

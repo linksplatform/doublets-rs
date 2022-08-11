@@ -14,7 +14,7 @@ pub struct Link<T: LinkType> {
 }
 
 impl<T: LinkType> Link<T> {
-    pub fn nothing() -> Self {
+    #[must_use] pub fn nothing() -> Self {
         Self::default()
     }
 

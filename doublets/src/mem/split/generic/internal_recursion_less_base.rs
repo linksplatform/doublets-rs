@@ -10,15 +10,15 @@ use data::{LinkType, LinksConstants};
 use trees::NoRecurSzbTree;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
-pub struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
-    pub data: NonNull<[DataPart<T>]>,
-    pub indexes: NonNull<[IndexPart<T>]>,
-    pub r#break: T,
-    pub r#continue: T,
+pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+    pub(crate) data: NonNull<[DataPart<T>]>,
+    pub(crate) indexes: NonNull<[IndexPart<T>]>,
+    pub(crate) r#break: T,
+    pub(crate) r#continue: T,
 }
 
 impl<T: LinkType> InternalRecursionlessSizeBalancedTreeBase<T> {
-    pub fn new(
+    pub(crate) fn new(
         constants: LinksConstants<T>,
         data: NonNull<[DataPart<T>]>,
         indexes: NonNull<[IndexPart<T>]>,
@@ -32,7 +32,7 @@ impl<T: LinkType> InternalRecursionlessSizeBalancedTreeBase<T> {
     }
 }
 
-pub trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
+pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
     NoRecurSzbTree<T> + LinksTree<T>
 {
     fn get_index_part(&self, link: T) -> &IndexPart<T>;

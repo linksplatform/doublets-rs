@@ -7,6 +7,9 @@ mod internal_sources_recursion_less_tree;
 mod internal_targets_recursion_less_tree;
 mod unused_links;
 
+pub use external_recursion_less_base::{
+    ExternalRecursionlessSizeBalancedTreeBase, ExternalRecursionlessSizeBalancedTreeBaseAbstract,
+};
 pub use external_sources_recursion_less_tree::ExternalSourcesRecursionlessTree;
 pub use external_targets_recursion_less_tree::ExternalTargetsRecursionlessTree;
 

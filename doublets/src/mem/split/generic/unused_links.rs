@@ -13,6 +13,7 @@ pub struct UnusedLinks<T: LinkType> {
 }
 
 impl<T: LinkType> UnusedLinks<T> {
+    #[must_use]
     pub fn new(links: NonNull<[DataPart<T>]>, header: NonNull<[IndexPart<T>]>) -> Self {
         Self { links, header }
     }
@@ -48,15 +49,15 @@ impl<T: LinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
     }
 
     fn set_first(&mut self, element: T) {
-        self.get_mut_header().first_free = element
+        self.get_mut_header().first_free = element;
     }
 
     fn set_last(&mut self, element: T) {
-        self.get_mut_header().last_free = element
+        self.get_mut_header().last_free = element;
     }
 
     fn set_size(&mut self, size: T) {
-        self.get_mut_header().free = size
+        self.get_mut_header().free = size;
     }
 }
 
@@ -70,11 +71,11 @@ impl<T: LinkType> LinkedList<T> for UnusedLinks<T> {
     }
 
     fn set_previous(&mut self, element: T, previous: T) {
-        self.get_mut_link(element).source = previous
+        self.get_mut_link(element).source = previous;
     }
 
     fn set_next(&mut self, element: T, next: T) {
-        self.get_mut_link(element).target = next
+        self.get_mut_link(element).target = next;
     }
 }
 
@@ -89,11 +90,11 @@ impl<T: LinkType> SplitUpdateMem<T> for UnusedLinks<T> {
 
 impl<T: LinkType> LinksList<T> for UnusedLinks<T> {
     fn detach(&mut self, link: T) {
-        AbsoluteCircularLinkedList::detach(self, link)
+        AbsoluteCircularLinkedList::detach(self, link);
     }
 
     fn attach_as_first(&mut self, link: T) {
-        AbsoluteCircularLinkedList::attach_as_first(self, link)
+        AbsoluteCircularLinkedList::attach_as_first(self, link);
     }
 }
 

@@ -105,7 +105,7 @@ impl<T: LinkType> RelativeLinkedList<T> for InternalSourcesLinkedList<T> {
     }
 
     fn set_first(&mut self, head: T, element: T) {
-        self.get_mut_index_part(head).root_as_source = element
+        self.get_mut_index_part(head).root_as_source = element;
     }
 
     fn set_last(&mut self, _head: T, _element: T) {
@@ -133,11 +133,11 @@ impl<T: LinkType> LinkedList<T> for InternalSourcesLinkedList<T> {
     }
 
     fn set_previous(&mut self, element: T, previous: T) {
-        self.get_mut_index_part(element).left_as_source = previous
+        self.get_mut_index_part(element).left_as_source = previous;
     }
 
     fn set_next(&mut self, element: T, next: T) {
-        self.get_mut_index_part(element).right_as_source = next
+        self.get_mut_index_part(element).right_as_source = next;
     }
 }
 

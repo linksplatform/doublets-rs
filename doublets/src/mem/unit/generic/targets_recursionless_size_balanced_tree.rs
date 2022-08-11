@@ -31,19 +31,19 @@ impl<T: LinkType> LinksTargetsRecursionlessSizeBalancedTree<T> {
 
 impl<T: LinkType> SzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     unsafe fn get_left_reference(&self, node: T) -> *const T {
-        &self.get_link(node).left_as_target as *const _
+        std::ptr::addr_of!(self.get_link(node).left_as_target)
     }
 
     unsafe fn get_right_reference(&self, node: T) -> *const T {
-        &self.get_link(node).right_as_target as *const _
+        std::ptr::addr_of!(self.get_link(node).right_as_target)
     }
 
     unsafe fn get_mut_left_reference(&mut self, node: T) -> *mut T {
-        &mut self.get_mut_link(node).left_as_target as *mut _
+        std::ptr::addr_of_mut!(self.get_mut_link(node).left_as_target)
     }
 
     unsafe fn get_mut_right_reference(&mut self, node: T) -> *mut T {
-        &mut self.get_mut_link(node).right_as_target as *mut _
+        std::ptr::addr_of_mut!(self.get_mut_link(node).right_as_target)
     }
 
     unsafe fn get_left(&self, node: T) -> T {
@@ -59,15 +59,15 @@ impl<T: LinkType> SzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     }
 
     unsafe fn set_left(&mut self, node: T, left: T) {
-        self.get_mut_link(node).left_as_target = left
+        self.get_mut_link(node).left_as_target = left;
     }
 
     unsafe fn set_right(&mut self, node: T, right: T) {
-        self.get_mut_link(node).right_as_target = right
+        self.get_mut_link(node).right_as_target = right;
     }
 
     unsafe fn set_size(&mut self, node: T, size: T) {
-        self.get_mut_link(node).size_as_target = size
+        self.get_mut_link(node).size_as_target = size;
     }
 
     unsafe fn first_is_to_the_left_of_second(&self, first: T, second: T) -> bool {
@@ -103,7 +103,7 @@ impl<T: LinkType> SzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
 impl<T: LinkType> NoRecurSzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
 
 fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
-    _self: &LinksTargetsRecursionlessSizeBalancedTree<T>,
+    this: &LinksTargetsRecursionlessSizeBalancedTree<T>,
     base: T,
     link: T,
     handler: &mut H,
@@ -112,16 +112,15 @@ fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
         return Flow::Continue;
     }
     unsafe {
-        let link_base_part = _self.get_base_part(link);
-        let _break = _self.base.r#break;
+        let link_base_part = this.get_base_part(link);
         if link_base_part > base {
-            each_usages_core(_self, base, _self.get_left_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
         } else if link_base_part < base {
-            each_usages_core(_self, base, _self.get_right_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
         } else {
-            handler(_self.get_link_value(link))?;
-            each_usages_core(_self, base, _self.get_left_or_default(link), handler)?;
-            each_usages_core(_self, base, _self.get_right_or_default(link), handler)?;
+            handler(this.get_link_value(link))?;
+            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
+            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
         }
     }
     Flow::Continue

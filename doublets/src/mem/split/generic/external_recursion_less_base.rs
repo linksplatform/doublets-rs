@@ -12,14 +12,14 @@ use trees::NoRecurSzbTree;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
 pub struct ExternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
-    pub data: NonNull<[DataPart<T>]>,
-    pub indexes: NonNull<[IndexPart<T>]>,
-    pub r#break: T,
-    pub r#continue: T,
+    pub(crate) data: NonNull<[DataPart<T>]>,
+    pub(crate) indexes: NonNull<[IndexPart<T>]>,
+    pub(crate) r#break: T,
+    pub(crate) r#continue: T,
 }
 
 impl<T: LinkType> ExternalRecursionlessSizeBalancedTreeBase<T> {
-    pub fn new(
+    pub(crate) fn new(
         constants: LinksConstants<T>,
         data: NonNull<[DataPart<T>]>,
         indexes: NonNull<[IndexPart<T>]>,

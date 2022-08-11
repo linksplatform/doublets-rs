@@ -90,7 +90,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         let reserved = self.mem.allocated();
 
         let header = self.mut_header();
-        header.reserved = T::try_from(reserved - 1).unwrap();
+        header.reserved = T::try_from(reserved - 1).expect("always ok");
         Ok(())
     }
 
@@ -151,19 +151,19 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     unsafe fn detach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.detach(&mut *root, index)
+        self.sources.detach(&mut *root, index);
     }
 
     unsafe fn detach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.detach(&mut *root, index)
+        self.targets.detach(&mut *root, index);
     }
 
     unsafe fn attach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.attach(&mut *root, index)
+        self.sources.attach(&mut *root, index);
     }
 
     unsafe fn attach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.attach(&mut *root, index)
+        self.targets.attach(&mut *root, index);
     }
 
     unsafe fn detach_source(&mut self, index: T) {
@@ -228,7 +228,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         Link::new(index, raw.source, raw.target)
     }
 
-    fn each_core(&self, handler: ReadHandler<T>, query: &[T]) -> Flow {
+    fn each_core(&self, handler: ReadHandler<'_, T>, query: &[T]) -> Flow {
         let constants = self.constants();
 
         if query.is_empty() {
@@ -286,11 +286,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                     self.sources.each_usages(source, handler)
                 } else {
                     let link = self.sources.search(source, target);
-                    if let Some(link) = self.get_link(link) {
-                        handler(link)
-                    } else {
-                        Flow::Continue
-                    }
+                    self.get_link(link).map_or(Flow::Continue, handler)
                 }
             } else if let Some(link) = self.get_link(index) {
                 if (target, source) == (any, any) {
@@ -366,15 +362,16 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                     return T::funty(1);
                 }
 
-                return if let Some(stored) = self.get_link(index) {
-                    if stored.source == value || stored.target == value {
-                        T::funty(1)
-                    } else {
-                        T::funty(0)
-                    }
-                } else {
-                    T::funty(0)
-                };
+                return self.get_link(index).map_or_else(
+                    || T::funty(0),
+                    |stored| {
+                        if stored.source == value || stored.target == value {
+                            T::funty(1)
+                        } else {
+                            T::funty(0)
+                        }
+                    },
+                );
             };
         }
 
@@ -432,7 +429,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     fn create_links(
         &mut self,
         _query: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let constants = self.constants();
         let header = self.get_header();
@@ -451,13 +448,13 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 self.update_mem(mem);
                 let reserved = self.mem.allocated();
                 let header = self.mut_header();
-                header.reserved = T::try_from(reserved).unwrap()
+                header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
             header.allocated += T::funty(1);
             free = header.allocated;
         } else {
-            self.unused.detach(free)
+            self.unused.detach(free);
         }
         Ok(handler(
             Link::nothing(),
@@ -465,7 +462,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         ))
     }
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<T>) -> Flow {
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
         self.each_core(handler, &query.to_query()[..])
     }
 
@@ -473,7 +470,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         &mut self,
         query: &[T],
         change: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let index = query[0];
         let source = change[1];
@@ -525,7 +522,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     fn delete_links(
         &mut self,
         query: &[T],
-        handler: WriteHandler<T>,
+        handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
         let index = query[0];
 
@@ -549,7 +546,8 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                     self.mut_header().allocated = allocated - T::funty(1);
                 }
             }
-            _ => unreachable!(),
+            // fixme: possible unreachable_unchecked
+            Ordering::Greater => unreachable!(),
         }
 
         Ok(handler(link, Link::nothing()))
