@@ -2,7 +2,6 @@ use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
-    cell::LazyCell,
     default::default,
     ops::{ControlFlow, Try},
 };
