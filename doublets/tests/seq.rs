@@ -4,7 +4,7 @@ use doublets::{
         LinkType, ToQuery,
     },
     mem::Global,
-    split, Doublets, Error as LinksError, Link, Links,
+    split, Doublets, DoubletsExt, Error as LinksError, Link, Links,
 };
 
 use std::{error::Error, time::Instant};

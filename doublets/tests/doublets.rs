@@ -1,5 +1,5 @@
 use data::LinkType;
-use doublets::{unit, Doublets, Link};
+use doublets::{unit, Doublets, DoubletsExt, Link};
 use mem::Global;
 use std::error::Error;
 use tap::Pipe;

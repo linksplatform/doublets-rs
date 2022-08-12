@@ -2,6 +2,7 @@ use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
+    cell::LazyCell,
     default::default,
     ops::{ControlFlow, Try},
 };
@@ -657,13 +658,9 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     #[cfg_attr(feature = "more-inline", inline)]
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
-        // for safety `.into_iter`
-        use bumpalo::collections::Vec;
-
         let cap = self.count_by(query.to_query()).as_usize();
 
-        let arena = Bump::new();
-        let mut vec = Vec::with_capacity_in(cap, &arena);
+        let mut vec = Vec::with_capacity(cap);
         self.each_by(query, &mut |link| {
             vec.push(link);
             Flow::Continue
@@ -681,7 +678,8 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     }
 
     #[cfg(feature = "small-search")]
-    type ImplIterEachSmall = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEachSmall =
+        impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
     #[cfg_attr(feature = "more-inline", inline)]
