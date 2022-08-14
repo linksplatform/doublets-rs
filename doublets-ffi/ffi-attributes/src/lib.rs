@@ -29,10 +29,28 @@ fn csharp_convention(s: String) -> String {
     .to_string()
 }
 
+fn rust_convention(s: String) -> String {
+    match s.as_str() {
+        "i8" => "i8",
+        "u8" => "u8",
+        "i16" => "i16",
+        "u16" => "u16",
+        "i32" => "i32",
+        "u32" => "u32",
+        "i64" => "i64",
+        "u64" => "u64",
+        s => {
+            panic!("{} is incompatible with doublets-ffi type", s)
+        }
+    }
+    .to_string()
+}
+
 #[derive(FromMeta, PartialEq, Eq, Debug)]
 #[allow(non_camel_case_types)]
 enum Conventions {
     csharp,
+    rust,
 }
 
 #[derive(FromMeta)]
@@ -136,6 +154,7 @@ pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
                 '*',
                 match &args.convention {
                     Conventions::csharp => csharp_convention(ty.clone()),
+                    Conventions::rust => rust_convention(ty.clone()),
                     _ => {
                         panic!("unknown convention")
                     }
