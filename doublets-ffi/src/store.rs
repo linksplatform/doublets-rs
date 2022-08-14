@@ -7,7 +7,7 @@ use doublets::{
 use ffi_attributes as ffi;
 use std::{error, ffi::CStr, marker::PhantomData, ptr, slice};
 use tap::Pipe;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, trace, warn};
 
 // TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
@@ -59,13 +59,7 @@ impl<T: LinkType> StoreHandle<T> {
     }
 }
 
-unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
-    // it not require `#[cfg(debug_assertions)]`,
-    // because it is used in debug log mode only (llvm optimization:))
-    if query.is_null() && len != 0 {
-        warn!("if `query` is null then `len` must be 0");
-    }
-
+unsafe fn thin_query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
     // fixme: may be use `assert!(!query.is_null())`
     if query.is_null() {
         query![]
@@ -74,6 +68,23 @@ unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a
     }
 }
 
+unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
+    // it not require `#[cfg(debug_assertions)]`,
+    // because it is used in debug log mode only (llvm optimization:))
+    if query.is_null() && len != 0 {
+        warn!("if `query` is null then `len` must be 0");
+    }
+
+    thin_query_from_raw(query, len)
+}
+
+#[tracing::instrument(
+    skip_all,
+    fields(
+        path = ?CStr::from_ptr(path).to_str(),
+        path.ptr = ?path,
+    ),
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
@@ -82,7 +93,7 @@ unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a
     convention = "rust",
     name = "doublets_create_united_store_*"
 )]
-pub unsafe fn create_united_store<T: LinkType>(
+pub unsafe fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
 ) -> StoreHandle<T> {
@@ -125,15 +136,23 @@ pub unsafe fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T
         .into()
 }
 
+#[tracing::instrument(
+    skip_all,
+    fields(
+        query = ?&thin_query_from_raw(query, len)[..],
+        query.ptr = ?query,
+        query.len = len,
+    ),
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
     types = "u32",
     types = "u64",
     convention = "rust",
-    name = "doublets_create_unit_*"
+    name = "doublets_create_*"
 )]
-pub unsafe fn create_united<T: LinkType>(
+pub unsafe fn create<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
@@ -162,16 +181,23 @@ pub unsafe fn create_united<T: LinkType>(
         })
 }
 
-#[tracing::instrument(level = "debug", name = "united::each")]
+#[tracing::instrument(
+    skip_all,
+    fields(
+        query = ?&thin_query_from_raw(query, len)[..],
+        query.ptr = ?query,
+        query.len = len,
+    ),
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
     types = "u32",
     types = "u64",
     convention = "rust",
-    name = "doublets_each_unit_*"
+    name = "doublets_each_*"
 )]
-pub unsafe fn each_united<T: LinkType>(
+pub unsafe fn each<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
@@ -196,38 +222,58 @@ pub unsafe fn each_united<T: LinkType>(
         .pipe(|flow| if let Flow::Continue = flow { cnt } else { brk })
 }
 
+#[tracing::instrument(
+    skip_all,
+    fields(
+        query = ?&thin_query_from_raw(query, len)[..],
+        query.ptr = ?query,
+        query.len = len,
+    ),
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
     types = "u32",
     types = "u64",
     convention = "rust",
-    name = "doublets_count_unit_*"
+    name = "doublets_count_*"
 )]
-pub unsafe fn count_united<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
+pub unsafe fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
     let query = query_from_raw(query, len);
     handle.assume().count_by(query)
 }
 
+#[tracing::instrument(
+    skip_all,
+    fields(
+        query = ?&thin_query_from_raw(query, len_q)[..],
+        query.ptr = ?query,
+        query.len = len_q,
+
+        change = ?&thin_query_from_raw(query, len_q)[..],
+        change.ptr = ?change,
+        change.len = len_c,
+    ),
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
     types = "u32",
     types = "u64",
     convention = "rust",
-    name = "doublets_update_unit_*"
+    name = "doublets_update_*"
 )]
-pub unsafe fn update_united<T: LinkType>(
+pub unsafe fn update<T: LinkType>(
     this: *mut c_void,
     query: *const T,
-    len_r: u32,
+    len_q: u32,
     change: *const T,
-    len_s: u32,
+    len_c: u32,
     callback: CUDCallback<T>,
 ) -> T {
-    let query = query_from_raw(query, len_r);
-    let change = query_from_raw(change, len_s);
+    let query = query_from_raw(query, len_q);
+    let change = query_from_raw(change, len_c);
     let mut handle = StoreHandle::<T>::from_raw(this);
     let store = handle.assume();
     let constants = store.constants().clone();
@@ -255,9 +301,9 @@ pub unsafe fn update_united<T: LinkType>(
     types = "u32",
     types = "u64",
     convention = "rust",
-    name = "doublets_delete_unit_*"
+    name = "doublets_delete_*"
 )]
-pub unsafe fn delete_united<T: LinkType>(
+pub unsafe fn delete<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
