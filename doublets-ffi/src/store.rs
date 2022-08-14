@@ -1,4 +1,4 @@
-use crate::{c_char, c_void, constants::Constants};
+use crate::{c_char, c_void, constants::Constants, FFICallbackContext};
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
     mem::FileMapped,
@@ -12,9 +12,9 @@ use tracing::{debug, error, trace, warn};
 // TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
-type EachCallback<T> = extern "C" fn(Link<T>) -> T;
+type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> T;
 
-type CUDCallback<T> = extern "C" fn(Link<T>, Link<T>) -> T;
+type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> T;
 
 #[repr(transparent)]
 pub struct StoreHandle<T: LinkType> {
@@ -156,6 +156,7 @@ pub unsafe fn create<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
+    ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
@@ -165,7 +166,7 @@ pub unsafe fn create<T: LinkType>(
 
     let query = query_from_raw(query, len);
     let handler = move |before, after| {
-        if callback(before, after) == cnt {
+        if callback(ctx, before, after) == cnt {
             Flow::Continue
         } else {
             Flow::Break
@@ -201,6 +202,7 @@ pub unsafe fn each<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
+    ctx: FFICallbackContext,
     callback: EachCallback<T>,
 ) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
@@ -210,7 +212,7 @@ pub unsafe fn each<T: LinkType>(
 
     let query = query_from_raw(query, len);
     let handler = move |link| {
-        if callback(link) == cnt {
+        if callback(ctx, link) == cnt {
             Flow::Continue
         } else {
             Flow::Break
@@ -270,6 +272,7 @@ pub unsafe fn update<T: LinkType>(
     len_q: u32,
     change: *const T,
     len_c: u32,
+    ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> T {
     let query = query_from_raw(query, len_q);
@@ -279,7 +282,7 @@ pub unsafe fn update<T: LinkType>(
     let constants = store.constants().clone();
     let (cnt, brk) = (constants.r#continue, constants.r#break);
     let handler = move |before, after| {
-        if callback(before, after) == cnt {
+        if callback(ctx, before, after) == cnt {
             Flow::Continue
         } else {
             Flow::Break
@@ -307,6 +310,7 @@ pub unsafe fn delete<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
+    ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
@@ -316,7 +320,7 @@ pub unsafe fn delete<T: LinkType>(
 
     let query = query_from_raw(query, len);
     let handler = move |before, after| {
-        if callback(before, after) == cnt {
+        if callback(ctx, before, after) == cnt {
             Flow::Continue
         } else {
             Flow::Break
