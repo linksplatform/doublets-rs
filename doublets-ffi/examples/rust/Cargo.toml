@@ -1,0 +1,10 @@
+[package]
+name = "doublets-ffi-examples"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+doublets-ffi = { path = "../../../doublets-ffi" }
+doublets = { path = "../../../doublets" }
+tracing = { version = "0.1.36" }

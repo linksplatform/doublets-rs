@@ -40,14 +40,16 @@ impl MakeWriter<'_> for ChannelWriter {
     }
 }
 
-pub type LogFFICallback = extern "C" fn(FFICallbackContext, *const c_char);
+/// # Safety
+/// This callback is safe if all the rules of Rust are followed
+pub type LogFFICallback = unsafe extern "C" fn(FFICallbackContext, *const c_char);
 
 pub struct DoubletsFFILogHandle {}
 
 impl DoubletsFFILogHandle {
     pub fn new(
-        callback: LogFFICallback,
         ctx: FFICallbackContext,
+        callback: LogFFICallback,
         max_level: &str,
         use_ansi: bool,
         use_json: bool,
@@ -57,7 +59,10 @@ impl DoubletsFFILogHandle {
         let (sender, receiver) = mpsc::bounded(256);
 
         let callback = move |ctx: FFICallbackContextWrapper, ptr| {
-            callback(ctx.0, ptr);
+            // SAFETY: caller must guarantee - we only delegate callback
+            unsafe {
+                callback(ctx.0, ptr);
+            }
         };
 
         thread::spawn(move || {

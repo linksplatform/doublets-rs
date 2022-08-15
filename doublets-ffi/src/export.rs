@@ -15,8 +15,8 @@ pub extern "C" fn doublets_activate_env_logger() {
 
 #[no_mangle]
 pub unsafe extern "C" fn doublets_create_log_handle(
-    callback: LogFFICallback,
     ctx: FFICallbackContext,
+    callback: LogFFICallback,
     max_level: *const c_char,
     use_ansi: bool,
     use_json: bool,
@@ -25,8 +25,8 @@ pub unsafe extern "C" fn doublets_create_log_handle(
     // if str isn't utf-8 just panic
     let max_level_str = CStr::from_ptr(max_level).to_str().unwrap();
     Box::into_raw(Box::new(DoubletsFFILogHandle::new(
-        callback,
         ctx,
+        callback,
         max_level_str,
         use_ansi,
         use_json,
