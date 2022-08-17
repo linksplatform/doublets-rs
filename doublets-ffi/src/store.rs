@@ -29,6 +29,43 @@ impl<T: LinkType> StoreHandle<T> {
         unsafe { Self::from_raw(raw.cast()) }
     }
 
+    /// # Examples
+    ///
+    /// Safe usage:
+    ///
+    /// ```
+    /// # use std::ffi::c_void;
+    /// # use doublets_ffi::store::StoreHandle;
+    /// extern "C" fn create_u64_store() -> *mut c_void {
+    ///     todo!("todo: simple but full example")
+    /// }
+    ///
+    /// // SAFETY: caller must guarantee `from_raw` invariants
+    /// unsafe extern "C" fn free_u64_store(ptr: *mut c_void) {
+    ///     StoreHandle::drop(StoreHandle::<u64>::from_raw(ptr))
+    /// }
+    /// ```
+    ///
+    /// Undefined Behaviour usage:
+    /// ```no_run
+    /// # use std::ffi::c_void;
+    /// # use doublets_ffi::store::StoreHandle;
+    ///
+    /// unsafe extern "C" fn should_crush(ptr: *mut c_void) {
+    ///     // two handle for one store is safe
+    ///     let (mut a, mut b) = (
+    ///         StoreHandle::<u64>::from_raw(ptr),
+    ///         StoreHandle::<u64>::from_raw(ptr),
+    ///     );
+    ///     // but it is ub
+    ///     let (a, b) = (a.assume(), b.assume());
+    /// }
+    /// ```
+    ///
+    /// # Safety
+    /// `raw` must be valid ptr to `Box<dyn Doublets<T>>`
+    /// allocated in `Box`
+    /// without owner
     pub unsafe fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
         Self {
             ptr: raw,
@@ -36,8 +73,11 @@ impl<T: LinkType> StoreHandle<T> {
         }
     }
 
-    pub unsafe fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
-        &mut *self.ptr.cast()
+    pub fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
+        // SAFETY: `StoreHandle` must be create from safe `new()`
+        // or unsafe `Self::from_raw`
+        // then it guarantee by `Self::from_raw()` caller
+        unsafe { &mut *self.ptr.cast() }
     }
 
     pub fn invalid(err: Box<dyn error::Error>) -> Self {
@@ -52,6 +92,8 @@ impl<T: LinkType> StoreHandle<T> {
     pub fn drop(mut handle: Self) {
         // SAFETY: `self.store` is valid `Store` ptr
         unsafe {
+            // assume ptr is not null
+            // guarantee by `from_raw` and `new`
             if !handle.ptr.is_null() {
                 let _ = Box::from_raw(handle.assume());
             }
