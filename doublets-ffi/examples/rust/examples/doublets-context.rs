@@ -31,14 +31,8 @@ unsafe fn magic_create<F>(ptr: *mut c_void, handler: F)
 where
     F: FnMut(Link<u64>, Link<u64>),
 {
-    let mut ctx = (ptr, handler);
-    let _ = create(
-        ptr,
-        null(),
-        0,
-        (&mut ctx as *mut (*mut c_void, F)).cast(),
-        create_cb::<F>,
-    );
+    let ctx = &mut (ptr, handler);
+    let _ = create(ptr, null(), 0, ctx as *mut _ as *mut _, create_cb::<F>);
 }
 
 fn main() {
