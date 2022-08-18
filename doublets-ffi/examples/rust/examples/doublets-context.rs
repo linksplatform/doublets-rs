@@ -1,6 +1,10 @@
-use doublets::{data::LinksConstants, Link};
+use doublets::{
+    data::{Flow, LinksConstants},
+    Link,
+};
 use doublets_ffi::{
     constants::Constants,
+    errors::DoubletsErrorKind,
     export::{doublets_create_log_handle, doublets_free_log_handle},
     store::{create, doublets_constants_u64, doublets_create_united_store_u64},
     FFICallbackContext,
@@ -15,15 +19,14 @@ unsafe extern "C" fn callback(_: FFICallbackContext, ptr: *const c_char) {
     print!("{}", CStr::from_ptr(ptr).to_str().unwrap());
 }
 
-extern "C" fn create_cb<F>(ctx: FFICallbackContext, before: Link<u64>, after: Link<u64>) -> u64
+extern "C" fn create_cb<F>(ctx: FFICallbackContext, before: Link<u64>, after: Link<u64>) -> Flow
 where
     F: FnMut(Link<u64>, Link<u64>),
 {
     unsafe {
-        let &mut (store, ref mut handler) = &mut *(ctx as *mut (*mut c_void, F));
+        let handler = &mut *(ctx as *mut F);
         (*handler)(before, after);
-        let constants = doublets_constants_u64(store);
-        constants.r#continue
+        Flow::Continue
     }
 }
 

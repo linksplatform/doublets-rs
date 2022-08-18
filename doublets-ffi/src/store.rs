@@ -1,20 +1,20 @@
-use crate::{c_char, c_void, constants::Constants, FFICallbackContext};
+use crate::{c_char, c_void, constants::Constants, errors::DoubletsErrorKind, FFICallbackContext};
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
     mem::FileMapped,
-    parts, unit, Doublets, Link, Links,
+    parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
 use std::{error, ffi::CStr, marker::PhantomData, ptr, slice};
 use tap::Pipe;
-use tracing::{debug, error, trace, warn};
+use tracing::{debug, error, warn};
 
 // TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
-type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> T;
+type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> Flow;
 
-type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> T;
+type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> Flow;
 
 #[repr(transparent)]
 pub struct StoreHandle<T: LinkType> {
@@ -73,6 +73,14 @@ impl<T: LinkType> StoreHandle<T> {
         }
     }
 
+    /// # Safety
+    /// should not live more than what is allowed
+    pub unsafe fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
+        let leak = Self::from_raw(raw);
+        // SAFETY: Guarantee by caller
+        &mut *leak.ptr.cast()
+    }
+
     pub fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
         // SAFETY: `StoreHandle` must be create from safe `new()`
         // or unsafe `Self::from_raw`
@@ -118,6 +126,36 @@ unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a
     }
 
     thin_query_from_raw(query, len)
+}
+
+fn place_error<T: LinkType>(err: Error<T>) {
+    // It can be very expensive to handle each error
+    debug!(op_error = % err);
+    super::errors::place_error(err);
+}
+
+impl DoubletsErrorKind {
+    pub fn leak<T: LinkType>(err: &Error<T>) -> Self {
+        match err {
+            Error::NotExists(_) => DoubletsErrorKind::NotExists,
+            Error::HasUsages(_) => DoubletsErrorKind::HasUsages,
+            Error::AlreadyExists(_) => DoubletsErrorKind::AlreadyExists,
+            Error::LimitReached(_) => DoubletsErrorKind::LimitReached,
+            Error::AllocFailed(_) => DoubletsErrorKind::AllocFailed,
+            Error::Other(_) => DoubletsErrorKind::Other,
+        }
+    }
+}
+
+fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsErrorKind {
+    match result {
+        Ok(_) => DoubletsErrorKind::None,
+        Err(err) => {
+            let ret = DoubletsErrorKind::leak(&err);
+            place_error(err);
+            ret
+        }
+    }
 }
 
 #[tracing::instrument(
@@ -200,28 +238,11 @@ pub unsafe fn create<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> T {
-    let mut handle = StoreHandle::<T>::from_raw(this);
-    let store = handle.assume();
-    let constants = store.constants().clone();
-    let (cnt, brk) = (constants.r#continue, constants.r#break);
-
+) -> DoubletsErrorKind {
     let query = query_from_raw(query, len);
-    let handler = move |before, after| {
-        if callback(ctx, before, after) == cnt {
-            Flow::Continue
-        } else {
-            Flow::Break
-        }
-    };
-    store
-        .create_by_with(query, handler)
-        // fixme: add `.is_break` for `Flow`
-        .map(|flow| if let Flow::Continue = flow { cnt } else { brk })
-        .unwrap_or_else(|err| {
-            debug!(operation_error = %err);
-            constants.error
-        })
+    let store = StoreHandle::<T>::from_raw_assume(this);
+    let handler = move |before, after| callback(ctx, before, after);
+    store.create_by_with(query, handler).pipe(acquire_result)
 }
 
 #[tracing::instrument(
@@ -253,13 +274,7 @@ pub unsafe fn each<T: LinkType>(
     let (cnt, brk) = (constants.r#continue, constants.r#break);
 
     let query = query_from_raw(query, len);
-    let handler = move |link| {
-        if callback(ctx, link) == cnt {
-            Flow::Continue
-        } else {
-            Flow::Break
-        }
-    };
+    let handler = move |link| callback(ctx, link);
     store
         .each_by(query, handler)
         // fixme: add `.is_break` for `Flow`
@@ -316,30 +331,24 @@ pub unsafe fn update<T: LinkType>(
     len_c: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> T {
+) -> DoubletsErrorKind {
     let query = query_from_raw(query, len_q);
     let change = query_from_raw(change, len_c);
-    let mut handle = StoreHandle::<T>::from_raw(this);
-    let store = handle.assume();
-    let constants = store.constants().clone();
-    let (cnt, brk) = (constants.r#continue, constants.r#break);
-    let handler = move |before, after| {
-        if callback(ctx, before, after) == cnt {
-            Flow::Continue
-        } else {
-            Flow::Break
-        }
-    };
+    let store = StoreHandle::<T>::from_raw_assume(this);
+    let handler = move |before, after| callback(ctx, before, after);
     store
         .update_by_with(query, change, handler)
-        // fixme: add `.is_break` for `Flow`
-        .map(|flow| if let Flow::Continue = flow { cnt } else { brk })
-        .unwrap_or_else(|err| {
-            debug!(operation_error = %err);
-            constants.error
-        })
+        .pipe(acquire_result)
 }
 
+#[tracing::instrument(
+    skip_all,
+    fields(
+        query = ?&thin_query_from_raw(query, len)[..],
+        query.ptr = ?query,
+        query.len = len,
+    )
+)]
 #[ffi::specialize_for(
     types = "u8",
     types = "u16",
@@ -354,26 +363,9 @@ pub unsafe fn delete<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> T {
-    let mut handle = StoreHandle::<T>::from_raw(this);
-    let store = handle.assume();
-    let constants = store.constants().clone();
-    let (cnt, brk) = (constants.r#continue, constants.r#break);
-
+) -> DoubletsErrorKind {
     let query = query_from_raw(query, len);
-    let handler = move |before, after| {
-        if callback(ctx, before, after) == cnt {
-            Flow::Continue
-        } else {
-            Flow::Break
-        }
-    };
-    store
-        .delete_by_with(query, handler)
-        // fixme: add `.is_break` for `Flow`
-        .map(|flow| if let Flow::Continue = flow { cnt } else { brk })
-        .unwrap_or_else(|err| {
-            debug!(operation_error = %err);
-            constants.error
-        })
+    let store = StoreHandle::<T>::from_raw_assume(this);
+    let handler = move |before, after| callback(ctx, before, after);
+    store.delete_by_with(query, handler).pipe(acquire_result)
 }

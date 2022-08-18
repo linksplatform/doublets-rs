@@ -1,8 +1,12 @@
 #![feature(try_blocks)]
 #![feature(box_syntax)]
 #![feature(try_trait_v2)]
+#![feature(c_size_t)]
+
+extern crate core;
 
 pub mod constants;
+pub mod errors;
 pub mod export;
 pub mod logging;
 pub mod store;

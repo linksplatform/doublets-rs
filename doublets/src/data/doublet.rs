@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display, Formatter};
 use data::LinkType;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
+#[repr(C)]
 pub struct Doublet<T: LinkType> {
     pub source: T,
     pub target: T,
