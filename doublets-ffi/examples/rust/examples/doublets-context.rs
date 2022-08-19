@@ -4,7 +4,7 @@ use doublets::{
 };
 use doublets_ffi::{
     constants::Constants,
-    errors::DoubletsErrorKind,
+    errors::DoubletsResultKind,
     export::{doublets_create_log_handle, doublets_free_log_handle},
     store::{create, doublets_constants_u64, doublets_create_united_store_u64},
     FFICallbackContext,
