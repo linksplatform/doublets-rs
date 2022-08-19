@@ -14,10 +14,8 @@ pub enum DoubletsErrorKind {
     Other,
 }
 
-thread_local! {
-    static ERROR_BUF: RefCell<MaybeUninit<Error<usize>>> =
-        RefCell::new(MaybeUninit::uninit());
-}
+#[thread_local]
+static ERROR_PLACE: RefCell<MaybeUninit<Error<usize>>> = RefCell::new(MaybeUninit::uninit());
 
 fn link_cast<T: LinkType>(
     Link {
@@ -31,17 +29,16 @@ fn link_cast<T: LinkType>(
 
 pub(crate) fn place_error<T: LinkType>(error: Error<T>) {
     use doublets::Error::*;
-    ERROR_BUF.with(|buf| {
-        buf.borrow_mut().write(match error {
-            NotExists(link) => NotExists(link.as_usize()),
-            HasUsages(usages) => HasUsages(usages.into_iter().map(link_cast).collect()),
-            AlreadyExists(Doublet { source, target }) => {
-                AlreadyExists(Doublet::new(source.as_usize(), target.as_usize()))
-            }
-            LimitReached(limit) => LimitReached(limit.as_usize()),
-            AllocFailed(alloc) => AllocFailed(alloc),
-            Other(other) => Other(other),
-        });
+
+    ERROR_PLACE.borrow_mut().write(match error {
+        NotExists(link) => NotExists(link.as_usize()),
+        HasUsages(usages) => HasUsages(usages.into_iter().map(link_cast).collect()),
+        AlreadyExists(Doublet { source, target }) => {
+            AlreadyExists(Doublet::new(source.as_usize(), target.as_usize()))
+        }
+        LimitReached(limit) => LimitReached(limit.as_usize()),
+        AllocFailed(alloc) => AllocFailed(alloc),
+        Other(other) => Other(other),
     });
 }
 
@@ -53,7 +50,7 @@ unsafe fn write_raw_msg(buf: *mut c_char, size: c_short, msg: &str) {
 
 #[no_mangle]
 pub extern "C" fn doublets_read_error() -> *const Error<usize> {
-    ERROR_BUF.with(|buf| buf.borrow().as_ptr())
+    ERROR_PLACE.borrow().as_ptr()
 }
 
 #[no_mangle]
