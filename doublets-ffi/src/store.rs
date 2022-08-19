@@ -119,10 +119,8 @@ unsafe fn thin_query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Que
 }
 
 unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
-    // it not require `#[cfg(debug_assertions)]`,
-    // because it is used in debug log mode only (llvm optimization:))
     if query.is_null() && len != 0 {
-        warn!("if `query` is null then `len` must be 0");
+        warn!("query ptr is null, but len is not null: this could be a potential mistake.");
     }
 
     thin_query_from_raw(query, len)
