@@ -1,4 +1,4 @@
-use crate::{c_char, c_void, constants::Constants, errors::DoubletsErrorKind, FFICallbackContext};
+use crate::{c_char, c_void, constants::Constants, errors::DoubletsResultKind, FFICallbackContext};
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
     mem::FileMapped,
@@ -88,13 +88,17 @@ impl<T: LinkType> StoreHandle<T> {
         unsafe { &mut *self.ptr.cast() }
     }
 
-    pub fn invalid(err: Box<dyn error::Error>) -> Self {
-        error!(err);
+    pub fn invalid(err: Error<T>) -> Self {
+        acquire_error(err);
         // we not have access to self inner
         Self {
             ptr: ptr::null_mut(),
             marker: PhantomData,
         }
+    }
+
+    pub fn as_ptr(&self) -> *const c_void {
+        self.ptr
     }
 
     pub fn drop(mut handle: Self) {
@@ -132,27 +136,37 @@ fn place_error<T: LinkType>(err: Error<T>) {
     super::errors::place_error(err);
 }
 
-impl DoubletsErrorKind {
+impl DoubletsResultKind {
+    pub fn branch(flow: Flow) -> Self {
+        if let Flow::Continue = flow {
+            DoubletsResultKind::Continue
+        } else {
+            DoubletsResultKind::Break
+        }
+    }
+
     pub fn leak<T: LinkType>(err: &Error<T>) -> Self {
         match err {
-            Error::NotExists(_) => DoubletsErrorKind::NotExists,
-            Error::HasUsages(_) => DoubletsErrorKind::HasUsages,
-            Error::AlreadyExists(_) => DoubletsErrorKind::AlreadyExists,
-            Error::LimitReached(_) => DoubletsErrorKind::LimitReached,
-            Error::AllocFailed(_) => DoubletsErrorKind::AllocFailed,
-            Error::Other(_) => DoubletsErrorKind::Other,
+            Error::NotExists(_) => DoubletsResultKind::NotExists,
+            Error::HasUsages(_) => DoubletsResultKind::HasUsages,
+            Error::AlreadyExists(_) => DoubletsResultKind::AlreadyExists,
+            Error::LimitReached(_) => DoubletsResultKind::LimitReached,
+            Error::AllocFailed(_) => DoubletsResultKind::AllocFailed,
+            Error::Other(_) => DoubletsResultKind::Other,
         }
     }
 }
 
-fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsErrorKind {
+fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResultKind {
+    let ret = DoubletsResultKind::leak(&err);
+    place_error(err);
+    ret
+}
+
+fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResultKind {
     match result {
-        Ok(_) => DoubletsErrorKind::None,
-        Err(err) => {
-            let ret = DoubletsErrorKind::leak(&err);
-            place_error(err);
-            ret
-        }
+        Ok(flow) => DoubletsResultKind::branch(flow),
+        Err(err) => acquire_error(err),
     }
 }
 
@@ -175,10 +189,10 @@ pub unsafe fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
 ) -> StoreHandle<T> {
-    let result: Result<_, Box<dyn error::Error>> = try {
+    let result: Result<_, Error<T>> = try {
         let path = CStr::from_ptr(path).to_str().unwrap();
         let mem = FileMapped::from_path(path)?;
-        StoreHandle::new(Box::new(UnitedLinks::<T>::with_constants(
+        StoreHandle::new(Box::new(UnitedLinks::with_constants(
             mem,
             constants.into(),
         )?))
@@ -236,7 +250,7 @@ pub unsafe fn create<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsErrorKind {
+) -> DoubletsResultKind {
     let query = query_from_raw(query, len);
     let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |before, after| callback(ctx, before, after);
@@ -265,18 +279,13 @@ pub unsafe fn each<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: EachCallback<T>,
-) -> T {
-    let mut handle = StoreHandle::<T>::from_raw(this);
-    let store = handle.assume();
-    let constants = store.constants();
-    let (cnt, brk) = (constants.r#continue, constants.r#break);
-
+) -> DoubletsResultKind {
     let query = query_from_raw(query, len);
+    let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |link| callback(ctx, link);
     store
         .each_by(query, handler)
-        // fixme: add `.is_break` for `Flow`
-        .pipe(|flow| if let Flow::Continue = flow { cnt } else { brk })
+        .pipe(DoubletsResultKind::branch)
 }
 
 #[tracing::instrument(
@@ -329,7 +338,7 @@ pub unsafe fn update<T: LinkType>(
     len_c: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsErrorKind {
+) -> DoubletsResultKind {
     let query = query_from_raw(query, len_q);
     let change = query_from_raw(change, len_c);
     let store = StoreHandle::<T>::from_raw_assume(this);
@@ -361,7 +370,7 @@ pub unsafe fn delete<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsErrorKind {
+) -> DoubletsResultKind {
     let query = query_from_raw(query, len);
     let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |before, after| callback(ctx, before, after);
