@@ -1,3 +1,5 @@
+#![allow(clippy::missing_safety_doc)]
+
 use crate::{c_char, c_void, constants::Constants, errors::DoubletsResultKind, FFICallbackContext};
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
@@ -5,9 +7,9 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{error, ffi::CStr, marker::PhantomData, ptr, slice};
+use std::{ffi::CStr, marker::PhantomData, ptr, ptr::NonNull, slice};
 use tap::Pipe;
-use tracing::{debug, error, warn};
+use tracing::{debug, warn};
 
 // TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
@@ -18,7 +20,7 @@ type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> Flo
 
 #[repr(transparent)]
 pub struct StoreHandle<T: LinkType> {
-    pub(crate) ptr: *mut c_void, // dyn Doublets<T>
+    pub(crate) ptr: NonNull<c_void>, // thin ptr to dyn Doublets<T>
     marker: PhantomData<T>,
 }
 
@@ -67,8 +69,10 @@ impl<T: LinkType> StoreHandle<T> {
     /// allocated in `Box`
     /// without owner
     pub unsafe fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
+        debug_assert!(!raw.is_null());
+
         Self {
-            ptr: raw,
+            ptr: NonNull::new_unchecked(raw),
             marker: PhantomData,
         }
     }
@@ -78,37 +82,33 @@ impl<T: LinkType> StoreHandle<T> {
     pub unsafe fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
         let leak = Self::from_raw(raw);
         // SAFETY: Guarantee by caller
-        &mut *leak.ptr.cast()
+        leak.ptr.cast().as_mut()
     }
 
     pub fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
         // SAFETY: `StoreHandle` must be create from safe `new()`
         // or unsafe `Self::from_raw`
         // then it guarantee by `Self::from_raw()` caller
-        unsafe { &mut *self.ptr.cast() }
+        unsafe { self.ptr.cast().as_mut() }
     }
 
     pub fn invalid(err: Error<T>) -> Self {
         acquire_error(err);
         // we not have access to self inner
         Self {
-            ptr: ptr::null_mut(),
+            ptr: NonNull::dangling(),
             marker: PhantomData,
         }
     }
 
     pub fn as_ptr(&self) -> *const c_void {
-        self.ptr
+        self.ptr.as_ptr()
     }
 
     pub fn drop(mut handle: Self) {
         // SAFETY: `self.store` is valid `Store` ptr
         unsafe {
-            // assume ptr is not null
-            // guarantee by `from_raw` and `new`
-            if !handle.ptr.is_null() {
-                let _ = Box::from_raw(handle.assume());
-            }
+            let _ = Box::from_raw(handle.assume());
         }
     }
 }
