@@ -4,7 +4,8 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
 
 use syn::{
-    punctuated::Punctuated, FnArg, GenericParam, ItemFn, PatType, ReturnType, Signature, Token, TypeParam,
+    punctuated::Punctuated, FnArg, GenericParam, ItemFn, PatType, ReturnType, Signature, Token,
+    TypeParam,
 };
 
 fn filter_generics<'gen>(
@@ -142,7 +143,7 @@ fn gen_new_def(mut fn_list: TokenStream, input: ItemFn, args: SpecializeArgs) ->
                 block,
             },
             &real_fn,
-            &lit,
+            &ty,
         );
         fn_list = quote! {
             #fn_list
