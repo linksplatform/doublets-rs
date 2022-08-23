@@ -1,7 +1,7 @@
 use crate::c_char;
 use core::ffi::c_size_t;
 use doublets::{data::LinkType, Doublet, Error, Link};
-use std::{cell::RefCell, cmp, error, ffi::c_short, io, mem::MaybeUninit, ptr};
+use std::{cell::RefCell, cmp, error, ffi::c_short, mem::MaybeUninit, ptr};
 
 #[repr(u8)]
 pub enum DoubletsResultKind {

@@ -2,7 +2,7 @@ use super::{c_char, FFICallbackContext};
 use crate::FFICallbackContextWrapper;
 use crossbeam_channel::{self as mpsc, Sender};
 use std::{ffi::CString, io, str::FromStr, thread};
-use tracing::{error, info_span, warn};
+use tracing::{error};
 use tracing_subscriber::{
     filter::{EnvFilter, LevelFilter},
     fmt::MakeWriter,

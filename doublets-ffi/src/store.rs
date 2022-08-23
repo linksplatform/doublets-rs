@@ -7,7 +7,7 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{ffi::CStr, marker::PhantomData, ptr, ptr::NonNull, slice};
+use std::{ffi::CStr, marker::PhantomData, ptr::NonNull, slice};
 use tap::Pipe;
 use tracing::{debug, warn};
 
@@ -178,12 +178,13 @@ fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult
     ),
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_create_united_store_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_create_united_store_*",
 )]
 pub unsafe fn create_unit_store<T: LinkType>(
     path: *const c_char,
@@ -201,23 +202,25 @@ pub unsafe fn create_unit_store<T: LinkType>(
 }
 
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_free_store_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_free_store_*",
 )]
 pub unsafe fn free_store<T: LinkType>(this: *mut c_void) {
     StoreHandle::drop(StoreHandle::<T>::from_raw(this))
 }
 
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    )
     name = "doublets_constants_*"
 )]
 pub unsafe fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T> {
@@ -237,12 +240,13 @@ pub unsafe fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T
     ),
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_create_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_create_*",
 )]
 pub unsafe fn create<T: LinkType>(
     this: *mut c_void,
@@ -266,12 +270,13 @@ pub unsafe fn create<T: LinkType>(
     ),
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_each_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_each_*",
 )]
 pub unsafe fn each<T: LinkType>(
     this: *mut c_void,
@@ -297,12 +302,13 @@ pub unsafe fn each<T: LinkType>(
     ),
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_count_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_count_*",
 )]
 pub unsafe fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
@@ -323,12 +329,13 @@ pub unsafe fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -
     ),
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_update_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_update_*",
 )]
 pub unsafe fn update<T: LinkType>(
     this: *mut c_void,
@@ -357,12 +364,13 @@ pub unsafe fn update<T: LinkType>(
     )
 )]
 #[ffi::specialize_for(
-    types = "u8",
-    types = "u16",
-    types = "u32",
-    types = "u64",
-    convention = "rust",
-    name = "doublets_delete_*"
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_delete_*",
 )]
 pub unsafe fn delete<T: LinkType>(
     this: *mut c_void,
