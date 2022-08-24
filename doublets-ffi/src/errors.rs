@@ -1,5 +1,4 @@
 use crate::c_char;
-use core::ffi::c_size_t;
 use doublets::{data::LinkType, Doublet, Error, Link};
 use std::{cell::RefCell, cmp, error, ffi::c_short, mem::MaybeUninit, ptr};
 
@@ -8,7 +7,7 @@ pub enum DoubletsResultKind {
     // oks
     Break,
     Continue,
-    // errors 
+    // errors
     NotExists,
     HasUsages,
     AlreadyExists,
@@ -77,9 +76,9 @@ pub unsafe extern "C" fn doublets_read_error_backtrace(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_as_not_found(err: *const Error<usize>) -> c_size_t {
+pub unsafe extern "C" fn doublets_read_error_as_not_found(err: *const Error<usize>) -> usize {
     match &*err {
-        Error::NotExists(link) => *link as c_size_t,
+        Error::NotExists(link) => *link as usize,
         _ => panic!("error type is not `NotExists`"),
     }
 }
@@ -87,21 +86,19 @@ pub unsafe extern "C" fn doublets_read_error_as_not_found(err: *const Error<usiz
 #[no_mangle]
 pub unsafe extern "C" fn doublets_read_error_as_already_exists(
     err: *const Error<usize>,
-) -> Doublet<c_size_t> {
+) -> Doublet<usize> {
     match &*err {
         Error::AlreadyExists(Doublet { source, target }) => {
-            Doublet::new(*source as c_size_t, *target as c_size_t)
+            Doublet::new(*source as usize, *target as usize)
         }
         _ => panic!("error type is not `AlreadyExists`"),
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_as_limit_reached(
-    err: *const Error<usize>,
-) -> c_size_t {
+pub unsafe extern "C" fn doublets_read_error_as_limit_reached(err: *const Error<usize>) -> usize {
     match &*err {
-        Error::LimitReached(limit) => *limit as c_size_t,
+        Error::LimitReached(limit) => *limit as usize,
         _ => panic!("error type is not `LimitReached`"),
     }
 }

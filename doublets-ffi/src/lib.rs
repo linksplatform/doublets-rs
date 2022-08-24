@@ -1,7 +1,6 @@
 #![feature(try_blocks)]
 #![feature(box_syntax)]
 #![feature(try_trait_v2)]
-#![feature(c_size_t)]
 #![feature(thread_local)]
 
 extern crate core;
