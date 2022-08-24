@@ -1,6 +1,9 @@
 use doublets::data::{LinkType, LinksConstants};
 use std::{mem::MaybeUninit, ops::RangeInclusive};
 
+/// FFI repr to [`Inclusive Range`]
+///
+/// [`Inclusive Range`]: https://doc.rust-lang.org/std/ops/struct.RangeInclusive.html
 #[derive(Eq, PartialEq)]
 #[repr(C)]
 pub struct Range<T: LinkType>(pub T, pub T);
