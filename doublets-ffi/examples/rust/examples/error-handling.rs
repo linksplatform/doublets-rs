@@ -15,7 +15,7 @@ use doublets_ffi::{
 use std::{
     ffi::{c_char, CStr, CString},
     fs,
-    ptr::{null_mut},
+    ptr::null_mut,
 };
 
 unsafe extern "C" fn callback(_: FFICallbackContext, ptr: *const c_char) {
