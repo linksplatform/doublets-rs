@@ -66,10 +66,8 @@ impl<T: LinkType> StoreHandle<T> {
     ///
     /// # Safety
     /// `raw` must be valid ptr to `Box<dyn Doublets<T>>`
-    /// allocated in `Box`
-    /// without owner
-    /// #[no_mangle
-    pub unsafe extern "C" fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
+    /// allocated in `Box` without owner
+    pub unsafe fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
         debug_assert!(!raw.is_null());
 
         Self {
@@ -80,8 +78,8 @@ impl<T: LinkType> StoreHandle<T> {
 
     /// # Safety
     /// should not live
-    /// #[no_manglemore than what is allowed
-    pub unsafe extern "C" fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
+    /// more than what is allowed
+    pub unsafe fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
         let leak = Self::from_raw(raw);
         // SAFETY: Guarantee by caller
         leak.ptr.cast().as_mut()
