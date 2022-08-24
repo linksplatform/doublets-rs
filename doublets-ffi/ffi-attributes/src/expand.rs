@@ -1,11 +1,11 @@
-use crate::{prepare, FromMeta, SpecializeArgs};
+use crate::{attributes, prepare, FromMeta, SpecializeArgs};
 use proc_macro::Diagnostic;
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
 
 use syn::{
-    punctuated::Punctuated, FnArg, GenericParam, ItemFn, PatType, ReturnType, Signature, Token,
-    TypeParam,
+    punctuated::Punctuated, Attribute, FnArg, GenericParam, ItemFn, PatType, ReturnType, Signature,
+    Token, TypeParam,
 };
 
 fn filter_generics<'gen>(
@@ -57,7 +57,12 @@ fn args_idents<'args>(
     })
 }
 
-fn build_fn(input: ItemFn, real_fn: &Ident, param: &Ident) -> TokenStream {
+fn build_fn(
+    input: ItemFn,
+    real_fn: &Ident,
+    param: &Ident,
+    attributes: &[Attribute],
+) -> TokenStream {
     let ItemFn {
         attrs, vis, sig, ..
     } = input;
@@ -81,7 +86,10 @@ fn build_fn(input: ItemFn, real_fn: &Ident, param: &Ident) -> TokenStream {
 
     let args = args_idents(params.iter());
     quote! {
-        #(#attrs) *
+        // delegate attributes below the self one
+        #(#attrs)*
+        // delegate provided attributes
+        #(#attributes)*
         #vis #constness #unsafety #asyncness #abi fn #ident<#gen_params>(#params) #return_type
         #where_clause
         {
@@ -144,6 +152,7 @@ fn gen_new_def(mut fn_list: TokenStream, input: ItemFn, args: SpecializeArgs) ->
             },
             &real_fn,
             &ty,
+            &args.attributes,
         );
         fn_list = quote! {
             #fn_list

@@ -12,17 +12,19 @@ use darling::FromMeta;
 
 use syn::punctuated::Punctuated;
 
+use crate::kw::attributes;
 use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
     spanned::Spanned,
     token::Token,
-    Ident, ItemFn, LitStr, Token,
+    Attribute, Ident, ItemFn, LitStr, Token,
 };
 
 mod kw {
     syn::custom_keyword!(types);
     syn::custom_keyword!(name);
+    syn::custom_keyword!(attributes);
 }
 
 #[derive(Clone, Default, Debug)]
@@ -30,6 +32,7 @@ struct SpecializeArgs {
     name: Option<LitStr>,
     param: Option<Ident>,
     aliases: HashMap<Ident, Ident>,
+    attributes: Vec<Attribute>,
     /// Errors describing any unrecognized parse inputs that we skipped.
     parse_warnings: Vec<syn::Error>,
 }
@@ -67,6 +70,14 @@ impl Parse for SpecializeArgs {
                 let AliasArg { param, aliases } = input.parse::<AliasArg>()?;
                 args.param = Some(param);
                 args.aliases = aliases;
+            } else if lookahead.peek(kw::attributes) {
+                if !args.attributes.is_empty() {
+                    return Err(input.error("expected only a single `attributes` argument"));
+                }
+                let _ = input.parse::<kw::attributes>()?;
+                let content;
+                let _ = syn::parenthesized!(content in input);
+                args.attributes = content.call(Attribute::parse_outer)?;
             } else if lookahead.peek(Token![,]) {
                 let _ = input.parse::<Token![,]>()?;
             } else {

@@ -68,7 +68,8 @@ impl<T: LinkType> StoreHandle<T> {
     /// `raw` must be valid ptr to `Box<dyn Doublets<T>>`
     /// allocated in `Box`
     /// without owner
-    pub unsafe fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
+    /// #[no_mangle
+    pub unsafe extern "C" fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
         debug_assert!(!raw.is_null());
 
         Self {
@@ -78,8 +79,9 @@ impl<T: LinkType> StoreHandle<T> {
     }
 
     /// # Safety
-    /// should not live more than what is allowed
-    pub unsafe fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
+    /// should not live
+    /// #[no_manglemore than what is allowed
+    pub unsafe extern "C" fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
         let leak = Self::from_raw(raw);
         // SAFETY: Guarantee by caller
         leak.ptr.cast().as_mut()
@@ -185,8 +187,11 @@ fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult
         u64 => u64,
     ),
     name = "doublets_create_united_store_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn create_unit_store<T: LinkType>(
+pub unsafe extern "C" fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
 ) -> StoreHandle<T> {
@@ -209,8 +214,11 @@ pub unsafe fn create_unit_store<T: LinkType>(
         u64 => u64,
     ),
     name = "doublets_free_store_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn free_store<T: LinkType>(this: *mut c_void) {
+pub unsafe extern "C" fn free_store<T: LinkType>(this: *mut c_void) {
     StoreHandle::drop(StoreHandle::<T>::from_raw(this))
 }
 
@@ -220,10 +228,13 @@ pub unsafe fn free_store<T: LinkType>(this: *mut c_void) {
         u16 => u16,
         u32 => u32,
         u64 => u64,
+    ),
+    name = "doublets_constants_*",
+    attributes(
+        #[no_mangle]
     )
-    name = "doublets_constants_*"
 )]
-pub unsafe fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T> {
+pub unsafe extern "C" fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T> {
     StoreHandle::from_raw(this)
         .assume()
         .constants()
@@ -247,8 +258,11 @@ pub unsafe fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T
         u64 => u64,
     ),
     name = "doublets_create_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn create<T: LinkType>(
+pub unsafe extern "C" fn create<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
@@ -277,8 +291,11 @@ pub unsafe fn create<T: LinkType>(
         u64 => u64,
     ),
     name = "doublets_each_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn each<T: LinkType>(
+pub unsafe extern "C" fn each<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
@@ -309,8 +326,11 @@ pub unsafe fn each<T: LinkType>(
         u64 => u64,
     ),
     name = "doublets_count_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
+pub unsafe extern "C" fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
     let mut handle = StoreHandle::<T>::from_raw(this);
     let query = query_from_raw(query, len);
     handle.assume().count_by(query)
@@ -336,8 +356,11 @@ pub unsafe fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -
         u64 => u64,
     ),
     name = "doublets_update_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn update<T: LinkType>(
+pub unsafe extern "C" fn update<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len_q: u32,
@@ -371,8 +394,11 @@ pub unsafe fn update<T: LinkType>(
         u64 => u64,
     ),
     name = "doublets_delete_*",
+    attributes(
+        #[no_mangle]
+    )
 )]
-pub unsafe fn delete<T: LinkType>(
+pub unsafe extern "C" fn delete<T: LinkType>(
     this: *mut c_void,
     query: *const T,
     len: u32,
