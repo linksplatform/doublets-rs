@@ -4,10 +4,7 @@ use doublets::{
 };
 use doublets_ffi::{
     constants::Constants,
-    errors::{
-        doublets_read_error, doublets_read_error_as_not_found, doublets_read_error_message,
-        DoubletsResultKind,
-    },
+    errors::{free_error, read_error, DoubletsResult},
     export::{doublets_create_log_handle, doublets_free_log_handle},
     store::{constants_from_store, create_unit_store, delete, free_store},
     FFICallbackContext,
@@ -41,14 +38,14 @@ fn main() {
         let query = [1 /* not exists index */, any, any];
         let result = delete::<u64>(&mut handle, query.as_ptr(), 3, null_mut(), create_cb);
 
-        if result as u8 >= DoubletsResultKind::NotExists as u8 {
+        if let DoubletsResult::Continue | DoubletsResult::Break = result {
+            unreachable!()
+        } else {
             let memchr = |buf: &[u8]| buf.iter().position(|x| *x == 0).unwrap();
 
-            // last error - DON'T USE PTR AFTER NEW DOUBLETS OPERATION
-            let err = doublets_read_error();
             let mut msg_buf = vec![0u8; 256];
 
-            doublets_read_error_message(msg_buf.as_mut_ptr().cast(), 256, err);
+            read_error::<u64>(msg_buf.as_mut_ptr().cast(), 256, &result);
 
             msg_buf.drain(memchr(&msg_buf) + 1..);
 
@@ -56,11 +53,7 @@ fn main() {
             let str = cstring.to_str().unwrap();
             tracing::error!("{}", str);
 
-            // forget `err` ptr - we not in manage it deallocation
-            let not_exists = doublets_read_error_as_not_found(err);
-            tracing::error!("duplication: link {} does not exists", not_exists);
-
-            // forget `err` ptr - we not in manage it deallocation
+            free_error::<u64>(result);
         }
 
         free_store::<u64>(handle);

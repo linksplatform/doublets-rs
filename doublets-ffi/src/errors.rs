@@ -1,47 +1,115 @@
-use crate::c_char;
-use doublets::{data::LinkType, Doublet, Error, Link};
-use std::{cell::RefCell, cmp, error, ffi::c_short, mem::MaybeUninit, ptr};
+use crate::{c_char, Marker};
+use doublets::{data::LinkType, mem, Doublet, Error, Link};
+use std::{
+    cell::RefCell,
+    cmp, error,
+    ffi::c_short,
+    fmt,
+    fmt::{Debug, Display, Formatter},
+    mem::MaybeUninit,
+    ptr,
+    ptr::NonNull,
+};
+use tracing::warn;
 
-#[repr(u8)]
-pub enum DoubletsResultKind {
+type OpaqueError = Box<dyn error::Error>;
+
+/// `OpaqueSlice<T>` is a FFI-Safe `Box<[T]>`
+#[repr(C)]
+pub struct OpaqueSlice<T> {
+    pub ptr: NonNull<T>,
+    pub len: usize,
+}
+
+impl<T> OpaqueSlice<T> {
+    pub fn leak(place: Box<[T]>) -> Self {
+        let leak = NonNull::from(Box::leak(place));
+        OpaqueSlice {
+            ptr: leak.as_non_null_ptr(),
+            len: leak.len(),
+        }
+    }
+
+    pub fn as_slice(&self) -> &[T] {
+        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
+        // SAFETY: `Self` is opaque we create Box and we drop it
+        unsafe { slice.as_ref() }
+    }
+}
+
+impl<T: Debug> Debug for OpaqueSlice<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.as_slice())
+    }
+}
+
+impl<T> Drop for OpaqueSlice<T> {
+    fn drop(&mut self) {
+        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
+        let _ = unsafe { Box::from_raw(slice.as_ptr()) };
+    }
+}
+
+#[repr(C, u8)]
+#[derive(Debug)]
+pub enum DoubletsResult<T: LinkType> {
     // oks
     Break,
     Continue,
     // errors
-    NotExists,
-    HasUsages,
-    AlreadyExists,
-    LimitReached,
-    AllocFailed,
-    Other,
+    NotExists(T),
+    LimitReached(T),
+    HasUsages(OpaqueSlice<Link<T>>),
+    AlreadyExists(Doublet<T>),
+    AllocFailed(Box<mem::Error>),
+    Other(Box<OpaqueError>),
 }
 
-#[thread_local]
-static ERROR_PLACE: RefCell<MaybeUninit<Error<usize>>> = RefCell::new(MaybeUninit::uninit());
-
-fn link_cast<T: LinkType>(
-    Link {
-        index,
-        source,
-        target,
-    }: Link<T>,
-) -> Link<usize> {
-    Link::new(index.as_usize(), source.as_usize(), target.as_usize())
-}
-
-pub(crate) fn place_error<T: LinkType>(error: Error<T>) {
-    use doublets::Error::*;
-
-    ERROR_PLACE.borrow_mut().write(match error {
-        NotExists(link) => NotExists(link.as_usize()),
-        HasUsages(usages) => HasUsages(usages.into_iter().map(link_cast).collect()),
-        AlreadyExists(Doublet { source, target }) => {
-            AlreadyExists(Doublet::new(source.as_usize(), target.as_usize()))
+impl<T: LinkType> Display for DoubletsResult<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            DoubletsResult::NotExists(exists) => {
+                write!(f, "link {exists} does not exist.")
+            }
+            DoubletsResult::LimitReached(limit) => {
+                write!(
+                    f,
+                    "limit for the number of links in the storage has been reached: {limit}"
+                )
+            }
+            DoubletsResult::HasUsages(usages) => {
+                write!(f, "link {usages:?} has dependencies")
+            }
+            DoubletsResult::AlreadyExists(exists) => {
+                write!(f, "link {exists} already exists")
+            }
+            DoubletsResult::AllocFailed(alloc) => {
+                write!(f, "unable to allocate memory for links storage: `{alloc}`")
+            }
+            DoubletsResult::Other(other) => {
+                write!(f, "other internal error: `{other}`")
+            }
+            other @ _ => Debug::fmt(other, f),
         }
-        LimitReached(limit) => LimitReached(limit.as_usize()),
-        AllocFailed(alloc) => AllocFailed(alloc),
-        Other(other) => Other(other),
-    });
+    }
+}
+
+use ffi_attributes as ffi;
+
+#[ffi::specialize_for(
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_free_error_*",
+    attributes(
+        #[no_mangle]
+    )
+)]
+pub extern "C" fn free_error<T: LinkType>(err: DoubletsResult<T>) {
+    let _ = err;
 }
 
 unsafe fn write_raw_msg(buf: *mut c_char, size: c_short, msg: &str) {
@@ -50,55 +118,33 @@ unsafe fn write_raw_msg(buf: *mut c_char, size: c_short, msg: &str) {
     ptr::write(buf.add(cap), 0);
 }
 
-#[no_mangle]
-pub extern "C" fn doublets_read_error() -> *const Error<usize> {
-    ERROR_PLACE.borrow().as_ptr()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_message(
+#[ffi::specialize_for(
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_read_error_message_*",
+    attributes(
+        #[no_mangle]
+    )
+)]
+pub unsafe extern "C" fn read_error<T: LinkType>(
     buf: *mut c_char,
     size: c_short,
-    err: *const Error<usize>,
+    error: &DoubletsResult<T>,
 ) {
-    let error_msg = format!("{}", &*err);
-    write_raw_msg(buf, size, &error_msg);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_backtrace(
-    buf: *mut c_char,
-    size: c_short,
-    err: *const Error<usize>,
-) {
-    let error_msg = format!("{:?}", error::Error::source(&*err));
-    write_raw_msg(buf, size, &error_msg);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_as_not_found(err: *const Error<usize>) -> usize {
-    match &*err {
-        Error::NotExists(link) => *link as usize,
-        _ => panic!("error type is not `NotExists`"),
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_as_already_exists(
-    err: *const Error<usize>,
-) -> Doublet<usize> {
-    match &*err {
-        Error::AlreadyExists(Doublet { source, target }) => {
-            Doublet::new(*source as usize, *target as usize)
+    match error {
+        /* invalid @ */
+        DoubletsResult::Break | DoubletsResult::Continue => {
+            warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
         }
-        _ => panic!("error type is not `AlreadyExists`"),
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn doublets_read_error_as_limit_reached(err: *const Error<usize>) -> usize {
-    match &*err {
-        Error::LimitReached(limit) => *limit as usize,
-        _ => panic!("error type is not `LimitReached`"),
+        valid => {
+            let msg = valid.to_string();
+            let cap = cmp::min(size as usize, msg.len()) - 1;
+            ptr::copy_nonoverlapping(msg.as_ptr(), buf.cast(), cap);
+            ptr::write(buf.add(cap), 0);
+        }
     }
 }

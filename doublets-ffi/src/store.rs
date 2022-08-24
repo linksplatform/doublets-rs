@@ -1,6 +1,11 @@
 #![allow(clippy::missing_safety_doc)]
 
-use crate::{c_char, c_void, constants::Constants, errors::DoubletsResultKind, FFICallbackContext};
+use crate::{
+    c_char, c_void,
+    constants::Constants,
+    errors::{DoubletsResult, OpaqueSlice},
+    FFICallbackContext,
+};
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
     mem::FileMapped,
@@ -81,42 +86,38 @@ unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a
     thin_query_from_raw(query, len)
 }
 
-fn place_error<T: LinkType>(err: Error<T>) {
-    // It can be very expensive to handle each error
-    debug!(op_error = % err);
-    super::errors::place_error(err);
-}
-
-impl DoubletsResultKind {
+impl<T: LinkType> DoubletsResult<T> {
     pub fn branch(flow: Flow) -> Self {
         if let Flow::Continue = flow {
-            DoubletsResultKind::Continue
+            DoubletsResult::Continue
         } else {
-            DoubletsResultKind::Break
+            DoubletsResult::Break
         }
     }
 
-    pub fn leak<T: LinkType>(err: &Error<T>) -> Self {
+    pub fn from_err(err: Error<T>) -> Self {
         match err {
-            Error::NotExists(_) => DoubletsResultKind::NotExists,
-            Error::HasUsages(_) => DoubletsResultKind::HasUsages,
-            Error::AlreadyExists(_) => DoubletsResultKind::AlreadyExists,
-            Error::LimitReached(_) => DoubletsResultKind::LimitReached,
-            Error::AllocFailed(_) => DoubletsResultKind::AllocFailed,
-            Error::Other(_) => DoubletsResultKind::Other,
+            Error::NotExists(link) => Self::NotExists(link),
+            Error::HasUsages(usages) => Self::HasUsages(OpaqueSlice::leak(usages)),
+            Error::AlreadyExists(exists) => Self::AlreadyExists(exists),
+            Error::LimitReached(limit) => Self::LimitReached(limit),
+            // these errors are difficult to handle as data
+            // I hope no one will be offended if we alloc them at the heap
+            Error::AllocFailed(alloc) => Self::AllocFailed(Box::new(alloc)),
+            Error::Other(other) => Self::Other(Box::new(other)),
         }
     }
 }
 
-fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResultKind {
-    let ret = DoubletsResultKind::leak(&err);
-    place_error(err);
-    ret
+fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResult<T> {
+    // It can be very expensive to handle each error
+    debug!(op_error = % err);
+    DoubletsResult::from_err(err)
 }
 
-fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResultKind {
+fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult<T> {
     match result {
-        Ok(flow) => DoubletsResultKind::branch(flow),
+        Ok(flow) => DoubletsResult::branch(flow),
         Err(err) => acquire_error(err),
     }
 }
@@ -219,7 +220,7 @@ pub unsafe extern "C" fn create<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResultKind {
+) -> DoubletsResult<T> {
     let query = query_from_raw(query, len);
     let handler = move |before, after| callback(ctx, before, after);
     handle
@@ -254,13 +255,13 @@ pub unsafe extern "C" fn each<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: EachCallback<T>,
-) -> DoubletsResultKind {
+) -> DoubletsResult<T> {
     let query = query_from_raw(query, len);
     let handler = move |link| callback(ctx, link);
     handle
         .assume_ref()
         .each_by(query, handler)
-        .pipe(DoubletsResultKind::branch)
+        .pipe(DoubletsResult::branch)
 }
 
 #[tracing::instrument(
@@ -324,7 +325,7 @@ pub unsafe extern "C" fn update<T: LinkType>(
     len_c: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResultKind {
+) -> DoubletsResult<T> {
     let handler = move |before, after| callback(ctx, before, after);
     let query = query_from_raw(query, len_q);
     let change = query_from_raw(change, len_c);
@@ -360,7 +361,7 @@ pub unsafe extern "C" fn delete<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResultKind {
+) -> DoubletsResult<T> {
     let handler = move |before, after| callback(ctx, before, after);
     let query = query_from_raw(query, len);
     handle

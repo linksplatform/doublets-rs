@@ -2,6 +2,8 @@
 #![feature(box_syntax)]
 #![feature(try_trait_v2)]
 #![feature(thread_local)]
+#![feature(nonnull_slice_from_raw_parts)]
+#![feature(slice_ptr_get)]
 
 use std::marker::{PhantomData, PhantomPinned};
 
