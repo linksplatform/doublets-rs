@@ -7,7 +7,7 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{ffi::CStr, marker::PhantomData, ptr::NonNull, slice};
+use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, ptr::NonNull, slice};
 use tap::Pipe;
 use tracing::{debug, warn};
 
@@ -18,98 +18,49 @@ type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> Flow;
 
 type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> Flow;
 
-#[repr(transparent)]
 pub struct StoreHandle<T: LinkType> {
-    pub(crate) ptr: NonNull<c_void>, // thin ptr to dyn Doublets<T>
-    marker: PhantomData<T>,
+    pointer: MaybeUninit<Box<dyn Doublets<T>>>,
 }
 
 impl<T: LinkType> StoreHandle<T> {
-    pub fn new(store: Box<dyn Doublets<T>>) -> Self {
-        let raw = Box::into_raw(Box::new(store));
-        // SAFETY: box contains valid ptr to store
-        unsafe { Self::from_raw(raw.cast()) }
+    pub fn new(store: Box<dyn Doublets<T>>) -> Box<Self> {
+        Box::new(Self {
+            pointer: MaybeUninit::new(store),
+        })
     }
 
-    /// # Examples
-    ///
-    /// Safe usage:
-    ///
-    /// ```
-    /// # use std::ffi::c_void;
-    /// # use doublets_ffi::store::StoreHandle;
-    /// extern "C" fn create_u64_store() -> *mut c_void {
-    ///     todo!("todo: simple but full example")
-    /// }
-    ///
-    /// // SAFETY: caller must guarantee `from_raw` invariants
-    /// unsafe extern "C" fn free_u64_store(ptr: *mut c_void) {
-    ///     StoreHandle::drop(StoreHandle::<u64>::from_raw(ptr))
-    /// }
-    /// ```
-    ///
-    /// Undefined Behaviour usage:
-    /// ```no_run
-    /// # use std::ffi::c_void;
-    /// # use doublets_ffi::store::StoreHandle;
-    ///
-    /// unsafe extern "C" fn should_crush(ptr: *mut c_void) {
-    ///     // two handle for one store is safe
-    ///     let (mut a, mut b) = (
-    ///         StoreHandle::<u64>::from_raw(ptr),
-    ///         StoreHandle::<u64>::from_raw(ptr),
-    ///     );
-    ///     // but it is ub
-    ///     let (a, b) = (a.assume(), b.assume());
-    /// }
-    /// ```
-    ///
-    /// # Safety
-    /// `raw` must be valid ptr to `Box<dyn Doublets<T>>`
-    /// allocated in `Box` without owner
-    pub unsafe fn from_raw(raw: *mut c_void) -> StoreHandle<T> {
-        debug_assert!(!raw.is_null());
-
-        Self {
-            ptr: NonNull::new_unchecked(raw),
-            marker: PhantomData,
-        }
-    }
-
-    /// # Safety
-    /// should not live
-    /// more than what is allowed
-    pub unsafe fn from_raw_assume<'a>(raw: *mut c_void) -> &'a mut Box<dyn Doublets<T>> {
-        let leak = Self::from_raw(raw);
-        // SAFETY: Guarantee by caller
-        leak.ptr.cast().as_mut()
-    }
-
-    pub fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
+    pub unsafe fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
         // SAFETY: `StoreHandle` must be create from safe `new()`
         // or unsafe `Self::from_raw`
         // then it guarantee by `Self::from_raw()` caller
-        unsafe { self.ptr.cast().as_mut() }
+        self.pointer.assume_init_mut()
     }
 
-    pub fn invalid(err: Error<T>) -> Self {
+    pub unsafe fn assume_ref(&self) -> &Box<dyn Doublets<T>> {
+        // SAFETY: `StoreHandle` must be create from safe `new()`
+        // or unsafe `Self::from_raw`
+        // then it guarantee by `Self::from_raw()` caller
+        self.pointer.assume_init_ref()
+    }
+
+    /// This function is actually unsafe
+    ///
+    /// # Safety
+    ///
+    /// Caller guarantee that will not drop handle
+    pub fn invalid(err: Error<T>) -> Box<Self> {
         acquire_error(err);
         // we not have access to self inner
-        Self {
-            ptr: NonNull::dangling(),
-            marker: PhantomData,
-        }
+        Box::new(Self {
+            pointer: MaybeUninit::uninit(),
+        })
     }
+}
 
-    pub fn as_ptr(&self) -> *const c_void {
-        self.ptr.as_ptr()
-    }
-
-    pub fn drop(mut handle: Self) {
-        // SAFETY: `self.store` is valid `Store` ptr
-        unsafe {
-            let _ = Box::from_raw(handle.assume());
-        }
+impl<T: LinkType> Drop for StoreHandle<T> {
+    fn drop(&mut self) {
+        // Caller guarantee `StoreHandle` is valid
+        unsafe { self.pointer.assume_init_drop() };
     }
 }
 
@@ -124,7 +75,7 @@ unsafe fn thin_query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Que
 
 unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
     if query.is_null() && len != 0 {
-        warn!("query ptr is null, but len is not null: this could be a potential mistake.");
+        warn!("query ptr is null, but len is not null: handle could be a potential mistake.");
     }
 
     thin_query_from_raw(query, len)
@@ -192,7 +143,7 @@ fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult
 pub unsafe extern "C" fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
-) -> StoreHandle<T> {
+) -> Box<StoreHandle<T>> {
     let result: Result<_, Error<T>> = try {
         let path = CStr::from_ptr(path).to_str().unwrap();
         let mem = FileMapped::from_path(path)?;
@@ -216,8 +167,8 @@ pub unsafe extern "C" fn create_unit_store<T: LinkType>(
         #[no_mangle]
     )
 )]
-pub unsafe extern "C" fn free_store<T: LinkType>(this: *mut c_void) {
-    StoreHandle::drop(StoreHandle::<T>::from_raw(this))
+pub unsafe extern "C" fn free_store<T: LinkType>(handle: Box<StoreHandle<T>>) {
+    let _ = handle;
 }
 
 #[ffi::specialize_for(
@@ -232,9 +183,11 @@ pub unsafe extern "C" fn free_store<T: LinkType>(this: *mut c_void) {
         #[no_mangle]
     )
 )]
-pub unsafe extern "C" fn constants_for_store<T: LinkType>(this: *mut c_void) -> Constants<T> {
-    StoreHandle::from_raw(this)
-        .assume()
+pub unsafe extern "C" fn constants_from_store<T: LinkType>(
+    handle: &StoreHandle<T>,
+) -> Constants<T> {
+    handle
+        .assume_ref()
         .constants()
         .clone() // fixme: useless .clone
         .into()
@@ -261,16 +214,18 @@ pub unsafe extern "C" fn constants_for_store<T: LinkType>(this: *mut c_void) -> 
     )
 )]
 pub unsafe extern "C" fn create<T: LinkType>(
-    this: *mut c_void,
+    handle: &mut StoreHandle<T>,
     query: *const T,
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> DoubletsResultKind {
     let query = query_from_raw(query, len);
-    let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |before, after| callback(ctx, before, after);
-    store.create_by_with(query, handler).pipe(acquire_result)
+    handle
+        .assume()
+        .create_by_with(query, handler)
+        .pipe(acquire_result)
 }
 
 #[tracing::instrument(
@@ -294,16 +249,16 @@ pub unsafe extern "C" fn create<T: LinkType>(
     )
 )]
 pub unsafe extern "C" fn each<T: LinkType>(
-    this: *mut c_void,
+    handle: &StoreHandle<T>,
     query: *const T,
     len: u32,
     ctx: FFICallbackContext,
     callback: EachCallback<T>,
 ) -> DoubletsResultKind {
     let query = query_from_raw(query, len);
-    let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |link| callback(ctx, link);
-    store
+    handle
+        .assume_ref()
         .each_by(query, handler)
         .pipe(DoubletsResultKind::branch)
 }
@@ -328,8 +283,11 @@ pub unsafe extern "C" fn each<T: LinkType>(
         #[no_mangle]
     )
 )]
-pub unsafe extern "C" fn count<T: LinkType>(this: *mut c_void, query: *const T, len: u32) -> T {
-    let mut handle = StoreHandle::<T>::from_raw(this);
+pub unsafe extern "C" fn count<T: LinkType>(
+    handle: &mut StoreHandle<T>,
+    query: *const T,
+    len: u32,
+) -> T {
     let query = query_from_raw(query, len);
     handle.assume().count_by(query)
 }
@@ -359,7 +317,7 @@ pub unsafe extern "C" fn count<T: LinkType>(this: *mut c_void, query: *const T, 
     )
 )]
 pub unsafe extern "C" fn update<T: LinkType>(
-    this: *mut c_void,
+    handle: &mut StoreHandle<T>,
     query: *const T,
     len_q: u32,
     change: *const T,
@@ -367,11 +325,11 @@ pub unsafe extern "C" fn update<T: LinkType>(
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> DoubletsResultKind {
+    let handler = move |before, after| callback(ctx, before, after);
     let query = query_from_raw(query, len_q);
     let change = query_from_raw(change, len_c);
-    let store = StoreHandle::<T>::from_raw_assume(this);
-    let handler = move |before, after| callback(ctx, before, after);
-    store
+    handle
+        .assume()
         .update_by_with(query, change, handler)
         .pipe(acquire_result)
 }
@@ -397,14 +355,16 @@ pub unsafe extern "C" fn update<T: LinkType>(
     )
 )]
 pub unsafe extern "C" fn delete<T: LinkType>(
-    this: *mut c_void,
+    handle: &mut StoreHandle<T>,
     query: *const T,
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
 ) -> DoubletsResultKind {
-    let query = query_from_raw(query, len);
-    let store = StoreHandle::<T>::from_raw_assume(this);
     let handler = move |before, after| callback(ctx, before, after);
-    store.delete_by_with(query, handler).pipe(acquire_result)
+    let query = query_from_raw(query, len);
+    handle
+        .assume()
+        .delete_by_with(query, handler)
+        .pipe(acquire_result)
 }

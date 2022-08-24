@@ -3,7 +3,7 @@
 #![feature(try_trait_v2)]
 #![feature(thread_local)]
 
-extern crate core;
+use std::marker::{PhantomData, PhantomPinned};
 
 pub mod constants;
 pub mod errors;
@@ -26,3 +26,5 @@ pub struct FFICallbackContextWrapper(FFICallbackContext);
 
 unsafe impl Send for FFICallbackContextWrapper {}
 unsafe impl Sync for FFICallbackContextWrapper {}
+
+pub(crate) type Marker = PhantomData<(*mut u8, PhantomPinned)>;

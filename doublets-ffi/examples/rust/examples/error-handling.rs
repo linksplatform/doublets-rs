@@ -9,7 +9,7 @@ use doublets_ffi::{
         DoubletsResultKind,
     },
     export::{doublets_create_log_handle, doublets_free_log_handle},
-    store::{constants_for_store, create_unit_store, delete, free_store},
+    store::{constants_from_store, create_unit_store, delete, free_store},
     FFICallbackContext,
 };
 use std::{
@@ -29,23 +29,17 @@ extern "C" fn create_cb(_: FFICallbackContext, _: Link<u64>, _: Link<u64>) -> Fl
 fn main() {
     let level = CString::new("trace").unwrap();
     unsafe {
-        let handle = doublets_create_log_handle(null_mut(), callback, level.as_ptr(), true, false);
+        let log_handle =
+            doublets_create_log_handle(null_mut(), callback, level.as_ptr(), true, false);
 
         let path = CString::new("doublets.links").unwrap();
-        let mut store =
+        let mut handle =
             create_unit_store::<u64>(path.as_ptr(), Constants::from(LinksConstants::external()));
 
-        // `StoreHandle` is transparent - in really FFI we must use raw ptr
-        if store.as_ptr().is_null() {
-            unreachable!("it would be better for errors not to occur in the examples")
-        }
-
-        let ptr = store.assume() as *mut _ as *mut _;
-
-        let any = constants_for_store::<u64>(ptr).any;
+        let any = constants_from_store::<u64>(&handle).any;
 
         let query = [1 /* not exists index */, any, any];
-        let result = delete::<u64>(ptr, query.as_ptr(), 3, null_mut(), create_cb);
+        let result = delete::<u64>(&mut handle, query.as_ptr(), 3, null_mut(), create_cb);
 
         if result as u8 >= DoubletsResultKind::NotExists as u8 {
             let memchr = |buf: &[u8]| buf.iter().position(|x| *x == 0).unwrap();
@@ -69,9 +63,9 @@ fn main() {
             // forget `err` ptr - we not in manage it deallocation
         }
 
-        free_store::<u64>(ptr);
+        free_store::<u64>(handle);
 
-        doublets_free_log_handle(handle);
+        doublets_free_log_handle(log_handle);
     }
     let _ = fs::remove_file("doublets.links");
 }

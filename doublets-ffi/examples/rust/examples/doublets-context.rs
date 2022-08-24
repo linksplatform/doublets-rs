@@ -5,7 +5,7 @@ use doublets::{
 use doublets_ffi::{
     constants::Constants,
     export::{doublets_create_log_handle, doublets_free_log_handle},
-    store::{create, doublets_create_united_store_u64},
+    store::{create, doublets_create_united_store_u64, StoreHandle},
     FFICallbackContext,
 };
 use std::{
@@ -29,12 +29,12 @@ where
     }
 }
 
-unsafe fn magic_create<F>(ptr: *mut c_void, handler: F)
+unsafe fn magic_create<F>(handle: &mut StoreHandle<u64>, mut handler: F)
 where
     F: FnMut(Link<u64>, Link<u64>),
 {
-    let ctx = &mut (ptr, handler);
-    let _ = create(ptr, null(), 0, ctx as *mut _ as *mut _, create_cb::<F>);
+    let ctx = &mut handler as *mut _;
+    let _ = create(handle, null(), 0, ctx as *mut _, create_cb::<F>);
 }
 
 fn main() {
@@ -48,7 +48,7 @@ fn main() {
             Constants::from(LinksConstants::external()),
         );
 
-        magic_create(store.assume() as *mut _ as *mut _, |before, after| {
+        magic_create(&mut store, |before, after| {
             print!("{before:?}\n{after:?}\n");
         });
 
