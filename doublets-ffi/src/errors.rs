@@ -14,17 +14,17 @@ use tracing::warn;
 
 type OpaqueError = Box<dyn error::Error>;
 
-/// `OpaqueSlice<T>` is a FFI-Safe `Box<[T]>`
+/// `OwnedSlice<T>` is a FFI-Safe `Box<[T]>` representation
 #[repr(C)]
-pub struct OpaqueSlice<T> {
-    pub ptr: NonNull<T>,
-    pub len: usize,
+pub struct OwnedSlice<T> {
+    ptr: NonNull<T>,
+    len: usize,
 }
 
-impl<T> OpaqueSlice<T> {
+impl<T> OwnedSlice<T> {
     pub fn leak(place: Box<[T]>) -> Self {
         let leak = NonNull::from(Box::leak(place));
-        OpaqueSlice {
+        OwnedSlice {
             ptr: leak.as_non_null_ptr(),
             len: leak.len(),
         }
@@ -35,18 +35,30 @@ impl<T> OpaqueSlice<T> {
         // SAFETY: `Self` is opaque we create Box and we drop it
         unsafe { slice.as_ref() }
     }
+
+    /// # Safety
+    /// forget `self` after `.keep_own`
+    pub unsafe fn keep_own(&self) -> Box<[T]> {
+        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
+        unsafe { Box::from_raw(slice.as_ptr()) }
+    }
+
+    pub fn into_owned(self) -> Box<[T]> {
+        // SAFETY: `self` drop after call `.into_owned`
+        unsafe { self.keep_own() }
+    }
 }
 
-impl<T: Debug> Debug for OpaqueSlice<T> {
+impl<T: Debug> Debug for OwnedSlice<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.as_slice())
     }
 }
 
-impl<T> Drop for OpaqueSlice<T> {
+impl<T> Drop for OwnedSlice<T> {
     fn drop(&mut self) {
-        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
-        let _ = unsafe { Box::from_raw(slice.as_ptr()) };
+        // SAFETY: `self` drop at end of this scope
+        let _ = unsafe { self.keep_own() };
     }
 }
 
@@ -59,7 +71,7 @@ pub enum DoubletsResult<T: LinkType> {
     // errors
     NotExists(T),
     LimitReached(T),
-    HasUsages(OpaqueSlice<Link<T>>),
+    HasUsages(OwnedSlice<Link<T>>),
     AlreadyExists(Doublet<T>),
     AllocFailed(Box<mem::Error>),
     Other(Box<OpaqueError>),

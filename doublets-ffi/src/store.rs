@@ -3,7 +3,7 @@
 use crate::{
     c_char, c_void,
     constants::Constants,
-    errors::{DoubletsResult, OpaqueSlice},
+    errors::{DoubletsResult, OwnedSlice},
     FFICallbackContext,
 };
 use doublets::{
@@ -98,7 +98,7 @@ impl<T: LinkType> DoubletsResult<T> {
     pub fn from_err(err: Error<T>) -> Self {
         match err {
             Error::NotExists(link) => Self::NotExists(link),
-            Error::HasUsages(usages) => Self::HasUsages(OpaqueSlice::leak(usages)),
+            Error::HasUsages(usages) => Self::HasUsages(OwnedSlice::leak(usages)),
             Error::AlreadyExists(exists) => Self::AlreadyExists(exists),
             Error::LimitReached(limit) => Self::LimitReached(limit),
             // these errors are difficult to handle as data
