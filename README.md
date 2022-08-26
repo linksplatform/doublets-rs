@@ -11,7 +11,7 @@ later
 A basic operations in doublets:
 
 ```rust
-use doublets::{data, mem, unit, Doublets, DoubletsExt, Links};
+use doublets::{data, mem, unit, Doublets, Links};
 
 fn main() -> Result<(), doublets::Error<usize>> {
     // use file as memory for doublets
@@ -19,7 +19,7 @@ fn main() -> Result<(), doublets::Error<usize>> {
     let mut store = unit::Store::<usize, _>::new(mem)?;
 
     // create 1: 1 1 - it's point: link where source and target it self
-    let point = store.create_link(1, 1)?;
+    let mut point = store.create_link(1, 1)?;
 
     // `any` constant denotes any link
     let any = store.constants().any;
