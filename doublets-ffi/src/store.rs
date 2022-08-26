@@ -12,7 +12,14 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, ptr::NonNull, slice};
+use std::{
+    ffi::CStr,
+    marker::PhantomData,
+    mem,
+    mem::MaybeUninit,
+    ptr::{null_mut, NonNull},
+    slice,
+};
 use tap::Pipe;
 use tracing::{debug, warn};
 
@@ -23,28 +30,20 @@ type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> Flow;
 type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> Flow;
 
 pub struct StoreHandle<T: LinkType> {
-    pointer: MaybeUninit<Box<dyn Doublets<T>>>,
+    pointer: Box<dyn Doublets<T>>,
 }
 
 impl<T: LinkType> StoreHandle<T> {
     pub fn new(store: Box<dyn Doublets<T>>) -> Box<Self> {
-        Box::new(Self {
-            pointer: MaybeUninit::new(store),
-        })
+        Box::new(Self { pointer: store })
     }
 
     pub unsafe fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
-        // SAFETY: `StoreHandle` must be create from safe `new()`
-        // or unsafe `Self::from_raw`
-        // then it guarantee by `Self::from_raw()` caller
-        self.pointer.assume_init_mut()
+        &mut self.pointer
     }
 
     pub unsafe fn assume_ref(&self) -> &Box<dyn Doublets<T>> {
-        // SAFETY: `StoreHandle` must be create from safe `new()`
-        // or unsafe `Self::from_raw`
-        // then it guarantee by `Self::from_raw()` caller
-        self.pointer.assume_init_ref()
+        &self.pointer
     }
 
     /// This function is actually unsafe
@@ -52,19 +51,12 @@ impl<T: LinkType> StoreHandle<T> {
     /// # Safety
     ///
     /// Caller guarantee that will not drop handle
+    // fixme: may be we can port `result::Result` to C
     pub fn invalid(err: Error<T>) -> Box<Self> {
         acquire_error(err);
-        // we not have access to self inner
-        Box::new(Self {
-            pointer: MaybeUninit::uninit(),
-        })
-    }
-}
 
-impl<T: LinkType> Drop for StoreHandle<T> {
-    fn drop(&mut self) {
-        // Caller guarantee `StoreHandle` is valid
-        unsafe { self.pointer.assume_init_drop() };
+        // SAFETY: Box<T> is repr to `*mut T` and must forgot
+        unsafe { mem::transmute(null_mut::<Self>()) }
     }
 }
 
