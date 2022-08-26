@@ -16,7 +16,6 @@ use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, ptr::NonNull, slice}
 use tap::Pipe;
 use tracing::{debug, warn};
 
-// TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
 type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> Flow;
