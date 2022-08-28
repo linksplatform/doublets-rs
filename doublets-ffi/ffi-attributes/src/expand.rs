@@ -1,6 +1,6 @@
-use crate::{attributes, prepare, FromMeta, SpecializeArgs};
+use crate::{attributes, prepare, AliasLine, SpecializeArgs};
 use proc_macro::Diagnostic;
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 
 use syn::{
@@ -101,7 +101,7 @@ fn gen_new_def(mut fn_list: TokenStream, input: ItemFn, args: SpecializeArgs) ->
         .unwrap_or_else(|| real_name + "_*");
     let name_pat = name_pat.trim_matches('"');
 
-    for (ty, lit) in args.aliases {
+    for AliasLine { ty, ident: lit, .. } in args.aliases {
         let ItemFn {
             attrs,
             vis,
@@ -124,8 +124,10 @@ fn gen_new_def(mut fn_list: TokenStream, input: ItemFn, args: SpecializeArgs) ->
         prepare_fn_args(params.iter_mut(), param, &ty);
         prepare_output_type(&mut return_type, param, &ty);
 
-        let new_ident: Ident =
-            Ident::from_string(&name_pat.replace('*', &lit.to_token_stream().to_string())).unwrap();
+        let new_ident: Ident = Ident::new(
+            &name_pat.replace('*', &lit.to_token_stream().to_string()),
+            lit.span(),
+        );
 
         let real_fn = sig.ident.clone();
         let sig = Signature {

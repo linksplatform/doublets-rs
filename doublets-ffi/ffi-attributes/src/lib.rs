@@ -6,18 +6,15 @@ mod expand;
 mod prepare;
 
 use proc_macro::{Level, Span};
-use std::{collections::HashMap, marker::PhantomData};
-
-use darling::FromMeta;
-
-use syn::punctuated::Punctuated;
+use std::collections::HashMap;
 
 use crate::kw::attributes;
 use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
+    punctuated::Punctuated,
     spanned::Spanned,
-    token::Token,
+    token::Paren,
     Attribute, Ident, ItemFn, LitStr, Token, Type,
 };
 
@@ -31,7 +28,7 @@ mod kw {
 struct SpecializeArgs {
     name: Option<LitStr>,
     param: Option<Ident>,
-    aliases: HashMap<Type, Ident>,
+    aliases: Punctuated<AliasLine, Token![,]>,
     attributes: Vec<Attribute>,
     /// Errors describing any unrecognized parse inputs that we skipped.
     parse_warnings: Vec<syn::Error>,
@@ -61,13 +58,13 @@ impl Parse for SpecializeArgs {
                 if args.name.is_some() {
                     return Err(input.error("expected only a single `name` argument"));
                 }
-                let name = input.parse::<StrArg<kw::name>>()?.value;
+                let name = input.parse::<StrArg<kw::name>>()?.lit;
                 args.name = Some(name);
             } else if lookahead.peek(kw::types) {
                 if !args.aliases.is_empty() {
                     return Err(input.error("expected only a single `types` argument"));
                 }
-                let AliasArg { param, aliases } = input.parse::<AliasArg>()?;
+                let AliasArg { param, aliases, .. } = input.parse::<AliasArg>()?;
                 args.param = Some(param);
                 args.aliases = aliases;
             } else if lookahead.peek(kw::attributes) {
@@ -92,67 +89,89 @@ impl Parse for SpecializeArgs {
     }
 }
 
+// custom_kw = "literal"
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct StrArg<T> {
-    value: LitStr,
-    _marker: PhantomData<T>,
+    kw: T,
+    // track issue: https://github.com/dtolnay/syn/issues/1209
+    eq: syn::token::Eq,
+    lit: LitStr,
 }
 
 impl<T: Parse> Parse for StrArg<T> {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
-        let _ = input.parse::<T>()?;
-        let _ = input.parse::<Token![=]>()?;
-        let value = input.parse()?;
         Ok(Self {
-            value,
-            _marker: PhantomData,
+            kw: input.parse()?,
+            eq: input.parse()?,
+            lit: input.parse()?,
         })
     }
 }
-struct AliasLine(Type, Ident);
+
+// MyType<i32> => mu_type_suffix
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+struct AliasLine {
+    ty: Type,
+    to: Token![=>],
+    ident: Ident,
+}
 
 impl Parse for AliasLine {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
-        let ty = input.parse::<Type>()?;
-        let _ = input.parse::<Token![=>]>()?;
-        let str = input.parse::<Ident>()?;
-        Ok(Self(ty, str))
+        Ok(Self {
+            ty: input.parse()?,
+            to: input.parse()?,
+            ident: input.parse()?,
+        })
     }
 }
 
+// types::<G>(
+//     u32 => integral,
+//     f32 => floating,
+//     (u32, Option<u32>) => magic,
+// )
+#[allow(dead_code)]
 struct AliasArg {
+    kw: kw::types,
+    colon: Token![::],
+    lt_token: Token![<],
     param: Ident,
-    aliases: HashMap<Type, Ident>,
+    gt_toke: Token![>],
+    paren_token: Paren,
+    aliases: Punctuated<AliasLine, Token![,]>,
+}
+
+fn alias_validation(aliases: &Punctuated<AliasLine, Token![,]>) -> Result<(), syn::Error> {
+    let mut map = HashMap::new();
+    aliases.iter().try_for_each(|AliasLine { ty, ident, .. }| {
+        if let Some(twice) = map.insert(ty.clone(), ident.clone()) {
+            Err(syn::Error::new(
+                ty.span().join(ident.span()).unwrap(),
+                format!("tried to add alias to `{twice}` twice"),
+            ))
+        } else {
+            Ok(())
+        }
+    })
 }
 
 impl Parse for AliasArg {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
-        let _ = input.parse::<kw::types>()?;
-        let _ = input.parse::<Token![::]>()?;
-        let _ = input.parse::<Token![<]>()?;
-        let param = input.parse::<Ident>()?;
-        let _ = input.parse::<Token![>]>()?;
         let content;
-        let _ = syn::parenthesized!(content in input);
-        let aliases: Punctuated<AliasLine, Token![,]> =
-            content.parse_terminated(AliasLine::parse)?;
+        let new = Self {
+            kw: input.parse()?,
+            colon: input.parse()?,
+            lt_token: input.parse()?,
+            param: input.parse()?,
+            gt_toke: input.parse()?,
+            paren_token: syn::parenthesized!(content in input),
+            aliases: content.parse_terminated(AliasLine::parse)?,
+        };
 
-        let mut map = HashMap::new();
-        for AliasLine(ty, lit) in aliases {
-            #[allow(clippy::map_entry)]
-            if map.contains_key(&ty) {
-                return Err(syn::Error::new(
-                    ty.span().join(lit.span()).unwrap(),
-                    "tried to ad lias to same field twice",
-                ));
-            } else {
-                map.insert(ty, lit);
-            }
-        }
-
-        Ok(Self {
-            param,
-            aliases: map,
-        })
+        alias_validation(&new.aliases).map(|_| new)
     }
 }
 
