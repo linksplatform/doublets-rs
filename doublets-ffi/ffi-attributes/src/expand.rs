@@ -5,7 +5,7 @@ use quote::{quote, ToTokens};
 
 use syn::{
     punctuated::Punctuated, Attribute, FnArg, GenericParam, ItemFn, PatType, ReturnType, Signature,
-    Token, TypeParam,
+    Token, Type, TypeParam,
 };
 
 fn filter_generics<'gen>(
@@ -26,7 +26,7 @@ fn filter_generics<'gen>(
 fn prepare_fn_args<'args>(
     fn_args: impl Iterator<Item = &'args mut FnArg>,
     param: &Ident,
-    ident: &Ident,
+    ident: &Type,
 ) {
     for arg in fn_args {
         match arg {
@@ -40,7 +40,7 @@ fn prepare_fn_args<'args>(
     }
 }
 
-fn prepare_output_type(output: &mut ReturnType, param: &Ident, ident: &Ident) {
+fn prepare_output_type(output: &mut ReturnType, param: &Ident, ident: &Type) {
     if let ReturnType::Type(_, box ty) = output {
         *ty = prepare::replace_ty_in_param(ty.clone(), param, ident);
     }
@@ -57,12 +57,7 @@ fn args_idents<'args>(
     })
 }
 
-fn build_fn(
-    input: ItemFn,
-    real_fn: &Ident,
-    param: &Ident,
-    attributes: &[Attribute],
-) -> TokenStream {
+fn build_fn(input: ItemFn, real_fn: &Ident, param: &Type, attributes: &[Attribute]) -> TokenStream {
     let ItemFn {
         attrs, vis, sig, ..
     } = input;

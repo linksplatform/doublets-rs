@@ -18,7 +18,7 @@ use syn::{
     parse_macro_input,
     spanned::Spanned,
     token::Token,
-    Attribute, Ident, ItemFn, LitStr, Token,
+    Attribute, Ident, ItemFn, LitStr, Token, Type,
 };
 
 mod kw {
@@ -31,7 +31,7 @@ mod kw {
 struct SpecializeArgs {
     name: Option<LitStr>,
     param: Option<Ident>,
-    aliases: HashMap<Ident, Ident>,
+    aliases: HashMap<Type, Ident>,
     attributes: Vec<Attribute>,
     /// Errors describing any unrecognized parse inputs that we skipped.
     parse_warnings: Vec<syn::Error>,
@@ -108,11 +108,11 @@ impl<T: Parse> Parse for StrArg<T> {
         })
     }
 }
-struct AliasLine(Ident, Ident);
+struct AliasLine(Type, Ident);
 
 impl Parse for AliasLine {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
-        let ty = input.parse::<Ident>()?;
+        let ty = input.parse::<Type>()?;
         let _ = input.parse::<Token![=>]>()?;
         let str = input.parse::<Ident>()?;
         Ok(Self(ty, str))
@@ -121,7 +121,7 @@ impl Parse for AliasLine {
 
 struct AliasArg {
     param: Ident,
-    aliases: HashMap<Ident, Ident>,
+    aliases: HashMap<Type, Ident>,
 }
 
 impl Parse for AliasArg {

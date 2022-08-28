@@ -3,11 +3,11 @@ use syn::{
     GenericArgument, ParenthesizedGenericArguments, PathArguments, ReturnType, Type, TypePath,
 };
 
-pub(crate) fn prepare_path(mut path: TypePath, from: &Ident, to: &Ident) -> TypePath {
+pub(crate) fn prepare_path(mut path: TypePath, from: &Ident, to: &Type) -> Type {
+    if path.path.is_ident(from) {
+        return to.clone();
+    }
     path.path.segments.iter_mut().for_each(|seg| {
-        if &seg.ident == from {
-            seg.ident = to.clone();
-        }
         match &mut seg.arguments {
             PathArguments::AngleBracketed(angle) => {
                 for arg in &mut angle.args {
@@ -32,12 +32,12 @@ pub(crate) fn prepare_path(mut path: TypePath, from: &Ident, to: &Ident) -> Type
             _ => { /* ignore */ }
         }
     });
-    path
+    Type::Path(path)
 }
 
-pub(crate) fn replace_ty_in_param(ty: Type, from: &Ident, to: &Ident) -> Type {
+pub(crate) fn replace_ty_in_param(ty: Type, from: &Ident, to: &Type) -> Type {
     match ty {
-        Type::Path(path) => Type::Path(prepare_path(path, from, to)),
+        Type::Path(path) => prepare_path(path, from, to),
         Type::Array(mut arr) => {
             *arr.elem = replace_ty_in_param(*arr.elem, from, to);
             Type::Array(arr)
