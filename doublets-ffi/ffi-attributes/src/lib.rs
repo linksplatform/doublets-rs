@@ -142,7 +142,7 @@ impl Parse for AliasArg {
             if map.contains_key(&ty) {
                 return Err(syn::Error::new(
                     ty.span().join(lit.span()).unwrap(),
-                    "tried to skip the same field twice",
+                    "tried to ad lias to same field twice",
                 ));
             } else {
                 map.insert(ty, lit);
