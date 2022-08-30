@@ -62,7 +62,7 @@ impl<T> Drop for OwnedSlice<T> {
     }
 }
 
-#[repr(C, u8)]
+#[repr(C, usize)]
 #[derive(Debug)]
 pub enum DoubletsResult<T: LinkType> {
     // oks

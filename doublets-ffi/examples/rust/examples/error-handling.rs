@@ -6,6 +6,7 @@ use doublets_ffi::{
     constants::Constants,
     errors::{free_error, read_error, DoubletsResult},
     export::{doublets_create_log_handle, doublets_free_log_handle},
+    logging::{Format, Level},
     store::{constants_from_store, create_unit_store, delete, free_store},
     FFICallbackContext,
 };
@@ -24,10 +25,9 @@ extern "C" fn create_cb(_: FFICallbackContext, _: Link<u64>, _: Link<u64>) -> Fl
 }
 
 fn main() {
-    let level = CString::new("trace").unwrap();
     unsafe {
         let log_handle =
-            doublets_create_log_handle(null_mut(), callback, level.as_ptr(), true, false);
+            doublets_create_log_handle(null_mut(), callback, Level::Trace, Format::Virgin, false);
 
         let path = CString::new("doublets.links").unwrap();
         let mut handle =

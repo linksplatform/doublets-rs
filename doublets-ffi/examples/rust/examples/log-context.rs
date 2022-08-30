@@ -1,5 +1,6 @@
 use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
+    logging::{Format, Level},
     FFICallbackContext,
 };
 use std::ffi::{c_char, CStr, CString};
@@ -20,7 +21,8 @@ fn main() {
     let ctx = &mut 0usize as *mut usize;
     let level = CString::new("trace").unwrap();
     unsafe {
-        let handle = doublets_create_log_handle(ctx.cast(), callback, level.as_ptr(), true, false);
+        let handle =
+            doublets_create_log_handle(ctx.cast(), callback, Level::Trace, Format::Virgin, false);
 
         tracing::error!("SOMETHING IS SERIOUSLY WRONG!!!");
         tracing::warn!("important informational messages; might indicate an error");

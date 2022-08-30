@@ -5,6 +5,7 @@ use doublets::{
 use doublets_ffi::{
     constants::Constants,
     export::{doublets_create_log_handle, doublets_free_log_handle},
+    logging::{Format, Level},
     store::{create, doublets_create_united_store_u64, StoreHandle},
     FFICallbackContext,
 };
@@ -38,9 +39,9 @@ where
 }
 
 fn main() {
-    let level = CString::new("trace").unwrap();
     unsafe {
-        let handle = doublets_create_log_handle(null_mut(), callback, level.as_ptr(), true, false);
+        let handle =
+            doublets_create_log_handle(null_mut(), callback, Level::Trace, Format::Virgin, false);
 
         let path = CString::new("doublets.links").unwrap();
         let mut store = doublets_create_united_store_u64(

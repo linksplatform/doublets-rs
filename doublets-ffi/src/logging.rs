@@ -2,10 +2,12 @@ use super::{c_char, FFICallbackContext};
 use crate::FFICallbackContextWrapper;
 use crossbeam_channel::{self as mpsc, Sender};
 use std::{ffi::CString, io, str::FromStr, thread};
-use tracing::error;
+use tap::Pipe;
+use tracing::{dispatcher, error, subscriber, Dispatch, Subscriber};
 use tracing_subscriber::{
     filter::{EnvFilter, LevelFilter},
-    fmt::MakeWriter,
+    fmt::{format, FormatFields, MakeWriter, SubscriberBuilder},
+    util::SubscriberInitExt,
 };
 
 struct ChannelWriter {
@@ -44,15 +46,34 @@ impl MakeWriter<'_> for ChannelWriter {
 /// This callback is safe if all the rules of Rust are followed
 pub type LogFFICallback = unsafe extern "C" fn(FFICallbackContext, *const c_char);
 
-pub struct DoubletsFFILogHandle {}
+#[repr(usize)]
+pub enum Level {
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+    // FFI binding can contain
+    // Off = 5
+    // But `tracing` must ignore it
+}
+
+#[repr(usize)]
+pub enum Format {
+    Virgin,
+    Pretty,
+    Json,
+}
+
+pub struct DoubletsFFILogHandle {/* opaque */}
 
 impl DoubletsFFILogHandle {
     pub fn new(
         ctx: FFICallbackContext,
         callback: LogFFICallback,
-        max_level: &str,
-        use_ansi: bool,
-        use_json: bool,
+        max_level: Level,
+        format: Format,
+        ansi: bool,
     ) -> Self {
         log_panics::init();
         let wrapper = FFICallbackContextWrapper(ctx);
@@ -82,29 +103,41 @@ impl DoubletsFFILogHandle {
             }
         });
 
-        let filter = EnvFilter::from_default_env()
-            .add_directive(LevelFilter::from_str(max_level).unwrap().into());
-        if use_json {
-            if tracing_subscriber::fmt()
-                .json()
-                .with_ansi(use_ansi)
-                .with_writer(ChannelWriter::new(sender))
-                .with_env_filter(filter)
-                .with_filter_reloading()
-                .try_init()
-                .is_err()
-            {
-                error!("Log handler already set, cannot currently change log levels.");
-            }
-        } else if tracing_subscriber::fmt()
-            .with_ansi(use_ansi)
-            .with_writer(ChannelWriter::new(sender))
-            .with_env_filter(filter)
-            .with_filter_reloading()
-            .try_init()
-            .is_err()
+        let filter = EnvFilter::from_default_env().add_directive(
+            LevelFilter::from_level(match max_level {
+                Level::Trace => tracing::Level::TRACE,
+                Level::Debug => tracing::Level::DEBUG,
+                Level::Info => tracing::Level::INFO,
+                Level::Warn => tracing::Level::WARN,
+                Level::Error => tracing::Level::ERROR,
+            })
+            .into(),
+        );
+
+        macro_rules! subscribe {
+            ($($methods:tt)*) => {
+                tracing_subscriber::fmt()
+                    $($methods)*
+                    .with_ansi(ansi)
+                    .with_writer(ChannelWriter::new(sender))
+                    .with_env_filter(filter)
+                    .with_filter_reloading()
+                    .finish()
+            };
+        }
+
+        if match format {
+            Format::Virgin => Box::new(subscribe!()) as Box<dyn Subscriber + Send + Sync>,
+            Format::Pretty => Box::new(subscribe! { .pretty() }),
+            Format::Json => Box::new(subscribe! { .json() }),
+        }
+        .pipe(subscriber::set_global_default)
+        .is_err()
         {
-            error!("Log handler already set, cannot currently change log levels.");
+            error!(
+                "Log handler already set, cannot currently change: track issue \
+                 `https://github.com/linksplatform/doublets-rs/issues/12`"
+            );
         };
 
         Self {}

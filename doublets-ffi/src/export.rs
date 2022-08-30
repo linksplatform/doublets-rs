@@ -1,11 +1,12 @@
 use crate::{
     c_char,
-    logging::{DoubletsFFILogHandle, LogFFICallback},
+    logging::{DoubletsFFILogHandle, Format, Level, LogFFICallback},
     FFICallbackContext,
 };
 use std::ffi::CStr;
 use tracing::error;
 
+/// Basic logger. For advanced use [`doublets_create_log_handle`]
 #[no_mangle]
 pub extern "C" fn doublets_activate_env_logger() {
     if tracing_subscriber::fmt::try_init().is_err() {
@@ -17,21 +18,12 @@ pub extern "C" fn doublets_activate_env_logger() {
 pub unsafe extern "C" fn doublets_create_log_handle(
     ctx: FFICallbackContext,
     callback: LogFFICallback,
-    max_level: *const c_char,
-    use_ansi: bool,
-    use_json: bool,
+    max_level: Level,
+    format: Format,
+    ansi: bool,
 ) -> Box<DoubletsFFILogHandle> {
-    assert!(
-        !max_level.is_null(), /* `CStr` immediately uses `strlen` */
-    );
-    // if str isn't utf-8 just panic
-    let max_level_str = CStr::from_ptr(max_level).to_str().unwrap();
     Box::new(DoubletsFFILogHandle::new(
-        ctx,
-        callback,
-        max_level_str,
-        use_ansi,
-        use_json,
+        ctx, callback, max_level, format, ansi,
     ))
 }
 
