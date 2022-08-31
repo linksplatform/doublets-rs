@@ -2,7 +2,7 @@
 
 ### Basic build library
 
-Before you can start writing an actix application, you’ll need a version of Rust installed.
+Before you can start writing a binding over doublets library, you’ll need a version of Rust installed.
 We recommend you use [rustup](https://rustup.rs/) to install or configure such latest version.
 
 Please note that some platforms support multiple variants of toolchains
