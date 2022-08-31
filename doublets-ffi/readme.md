@@ -9,7 +9,7 @@ Please note that some platforms support multiple variants of toolchains
 
 ```shell
 # windows
-rustup toolchain install nightly-[gnu|msvc]
+rustup toolchain install stable-[gnu|msvc]
 ```
 
 Run cargo build in this folder:
