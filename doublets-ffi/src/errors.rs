@@ -1,12 +1,12 @@
-use crate::{c_char, Marker};
-use doublets::{data::LinkType, mem, Doublet, Error, Link};
+use crate::c_char;
+use doublets::{data::LinkType, mem, Doublet, Link};
+#[cfg(feature = "backtrace")]
+use std::backtrace::Backtrace;
 use std::{
-    cell::RefCell,
     cmp, error,
     ffi::c_short,
     fmt,
     fmt::{Debug, Display, Formatter},
-    mem::MaybeUninit,
     ptr,
     ptr::NonNull,
 };
@@ -22,16 +22,23 @@ pub struct OwnedSlice<T> {
 }
 
 impl<T> OwnedSlice<T> {
+    #[inline]
+    pub fn slice_from_raw_parts(data: NonNull<T>, len: usize) -> NonNull<[T]> {
+        // SAFETY: `data` is a `NonNull` pointer which is necessarily non-null
+        unsafe { NonNull::new_unchecked(ptr::slice_from_raw_parts_mut(data.as_ptr(), len)) }
+    }
+
     pub fn leak(place: Box<[T]>) -> Self {
         let leak = NonNull::from(Box::leak(place));
         OwnedSlice {
-            ptr: leak.as_non_null_ptr(),
+            // ptr: leak.as_non_null_ptr(),
+            ptr: unsafe { NonNull::new_unchecked(leak.as_ptr() as *mut _) },
             len: leak.len(),
         }
     }
 
     pub fn as_slice(&self) -> &[T] {
-        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
+        let slice = Self::slice_from_raw_parts(self.ptr, self.len);
         // SAFETY: `Self` is opaque we create Box and we drop it
         unsafe { slice.as_ref() }
     }
@@ -39,7 +46,7 @@ impl<T> OwnedSlice<T> {
     /// # Safety
     /// forget `self` after `.keep_own`
     pub unsafe fn keep_own(&self) -> Box<[T]> {
-        let slice = NonNull::slice_from_raw_parts(self.ptr, self.len);
+        let slice = Self::slice_from_raw_parts(self.ptr, self.len);
         unsafe { Box::from_raw(slice.as_ptr()) }
     }
 
@@ -77,6 +84,25 @@ pub enum DoubletsResult<T: LinkType> {
     Other(Box<OpaqueError>),
 }
 
+#[rustfmt::skip]
+impl<T: LinkType> DoubletsResult<T> {
+    #[cfg(feature = "backtrace")]
+    fn backtrace(&self) -> Option<&Backtrace> {
+        match self {
+            DoubletsResult::AllocFailed(err) => {
+                (&**err as &dyn error::Error).request_ref::<Backtrace>()
+            }
+            DoubletsResult::Other(err) => {
+                (&***err as &dyn error::Error).request_ref::<Backtrace>() 
+            }
+            DoubletsResult::Break | DoubletsResult::Continue => {
+                panic!("`backtrace` not allowed for ok results")
+            }
+            _ => None,
+        }
+    }
+}
+
 impl<T: LinkType> Display for DoubletsResult<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
@@ -101,7 +127,7 @@ impl<T: LinkType> Display for DoubletsResult<T> {
             DoubletsResult::Other(other) => {
                 write!(f, "other internal error: `{other}`")
             }
-            other @ _ => Debug::fmt(other, f),
+            other => Debug::fmt(other, f),
         }
     }
 }
@@ -147,16 +173,36 @@ pub unsafe extern "C" fn read_error<T: LinkType>(
     size: c_short,
     error: &DoubletsResult<T>,
 ) {
-    match error {
-        /* invalid @ */
-        DoubletsResult::Break | DoubletsResult::Continue => {
-            warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
-        }
-        valid => {
-            let msg = valid.to_string();
-            let cap = cmp::min(size as usize, msg.len()) - 1;
-            ptr::copy_nonoverlapping(msg.as_ptr(), buf.cast(), cap);
-            ptr::write(buf.add(cap), 0);
+    if let DoubletsResult::Break | DoubletsResult::Continue = error {
+        warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
+    } else {
+        write_raw_msg(buf, size, &error.to_string());
+    }
+}
+
+#[cfg(feature = "backtrace")]
+#[ffi::specialize_for(
+    types::<T>(
+        u8  => u8,
+        u16 => u16,
+        u32 => u32,
+        u64 => u64,
+    ),
+    name = "doublets_read_backtrace_*",
+        attributes(
+        #[no_mangle]
+    )
+)]
+pub unsafe extern "C" fn read_backtrace<T: LinkType>(
+    buf: *mut c_char,
+    size: c_short,
+    error: &DoubletsResult<T>,
+) {
+    if let DoubletsResult::Break | DoubletsResult::Continue = error {
+        warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
+    } else {
+        if let Some(backtrace) = error.backtrace() {
+            write_raw_msg(buf, size, &backtrace.to_string());
         }
     }
 }

@@ -1,9 +1,8 @@
 use crate::{
-    c_char,
     logging::{DoubletsFFILogHandle, Format, Level, LogFFICallback},
     FFICallbackContext,
 };
-use std::ffi::CStr;
+
 use tracing::error;
 
 /// Basic logger. For advanced use [`doublets_create_log_handle`]

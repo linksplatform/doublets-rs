@@ -1,10 +1,10 @@
 #![allow(clippy::missing_safety_doc)]
 
 use crate::{
-    c_char, c_void,
+    c_char,
     constants::Constants,
     errors::{DoubletsResult, OwnedSlice},
-    FFICallbackContext,
+    stable_try as tri, FFICallbackContext,
 };
 use doublets::{
     data::{query, Flow, LinkType, Query, ToQuery},
@@ -12,14 +12,7 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{
-    ffi::CStr,
-    marker::PhantomData,
-    mem,
-    mem::MaybeUninit,
-    ptr::{null_mut, NonNull},
-    slice,
-};
+use std::{ffi::CStr, mem, ptr::null_mut, slice};
 use tap::Pipe;
 use tracing::{debug, warn};
 
@@ -61,7 +54,6 @@ impl<T: LinkType> StoreHandle<T> {
 }
 
 unsafe fn thin_query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
-    // fixme: may be use `assert!(!query.is_null())`
     if query.is_null() {
         query![]
     } else {
@@ -78,7 +70,7 @@ unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a
 }
 
 impl<T: LinkType> DoubletsResult<T> {
-    pub fn branch(flow: Flow) -> Self {
+    pub fn from_branch(flow: Flow) -> Self {
         if let Flow::Continue = flow {
             DoubletsResult::Continue
         } else {
@@ -108,7 +100,7 @@ fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResult<T> {
 
 fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult<T> {
     match result {
-        Ok(flow) => DoubletsResult::branch(flow),
+        Ok(flow) => DoubletsResult::from_branch(flow),
         Err(err) => acquire_error(err),
     }
 }
@@ -136,7 +128,7 @@ pub unsafe extern "C" fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
 ) -> Box<StoreHandle<T>> {
-    let result: Result<_, Error<T>> = try {
+    let result: Result<_, Error<T>> = tri! {
         let path = CStr::from_ptr(path).to_str().unwrap();
         let mem = FileMapped::from_path(path)?;
         StoreHandle::new(Box::new(UnitedLinks::with_constants(
@@ -252,7 +244,7 @@ pub unsafe extern "C" fn each<T: LinkType>(
     handle
         .assume_ref()
         .each_by(query, handler)
-        .pipe(DoubletsResult::branch)
+        .pipe(DoubletsResult::from_branch)
 }
 
 #[tracing::instrument(

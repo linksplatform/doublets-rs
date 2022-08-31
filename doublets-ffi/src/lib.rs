@@ -1,17 +1,13 @@
-#![feature(try_blocks)]
-#![feature(box_syntax)]
-#![feature(try_trait_v2)]
-#![feature(thread_local)]
-#![feature(nonnull_slice_from_raw_parts)]
-#![feature(slice_ptr_get)]
-
-use std::marker::{PhantomData, PhantomPinned};
+#![cfg_attr(feature = "backtrace", feature(error_generic_member_access))]
 
 pub mod constants;
 pub mod errors;
 pub mod export;
 pub mod logging;
 pub mod store;
+mod utils;
+
+pub(crate) use utils::stable_try;
 
 // It is not useless: CLion highlight
 // `c_char` as alias - italic
@@ -26,7 +22,6 @@ pub type FFICallbackContext = *mut c_void;
 #[derive(Clone, Copy)]
 pub struct FFICallbackContextWrapper(FFICallbackContext);
 
+/// Guarantee by caller side
 unsafe impl Send for FFICallbackContextWrapper {}
 unsafe impl Sync for FFICallbackContextWrapper {}
-
-pub(crate) type Marker = PhantomData<(*mut u8, PhantomPinned)>;

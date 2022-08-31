@@ -1,13 +1,12 @@
 use super::{c_char, FFICallbackContext};
 use crate::FFICallbackContextWrapper;
 use crossbeam_channel::{self as mpsc, Sender};
-use std::{ffi::CString, io, str::FromStr, thread};
+use std::{ffi::CString, io, thread};
 use tap::Pipe;
-use tracing::{dispatcher, error, subscriber, Dispatch, Subscriber};
+use tracing::{error, subscriber, Subscriber};
 use tracing_subscriber::{
     filter::{EnvFilter, LevelFilter},
-    fmt::{format, FormatFields, MakeWriter, SubscriberBuilder},
-    util::SubscriberInitExt,
+    fmt::MakeWriter,
 };
 
 struct ChannelWriter {
@@ -21,13 +20,13 @@ impl ChannelWriter {
 }
 
 impl io::Write for ChannelWriter {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, io::Error> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let len = buf.len();
         let _ = self.sender.send(buf.to_vec());
         Ok(len)
     }
 
-    fn flush(&mut self) -> Result<(), io::Error> {
+    fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
 }
@@ -65,7 +64,7 @@ pub enum Format {
     Json,
 }
 
-pub struct DoubletsFFILogHandle {/* opaque */}
+pub struct DoubletsFFILogHandle;
 
 impl DoubletsFFILogHandle {
     pub fn new(
@@ -140,6 +139,6 @@ impl DoubletsFFILogHandle {
             );
         };
 
-        Self {}
+        Self
     }
 }
