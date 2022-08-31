@@ -19,7 +19,6 @@ unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
 
 fn main() {
     let ctx = &mut 0usize as *mut usize;
-    let level = CString::new("trace").unwrap();
     unsafe {
         let handle =
             doublets_create_log_handle(ctx.cast(), callback, Level::Trace, Format::Virgin, false);

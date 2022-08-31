@@ -6,7 +6,7 @@ use doublets_ffi::{
     FFICallbackContext,
 };
 use std::{
-    ffi::{c_char, CStr, CString},
+    ffi::{c_char, CStr},
     ptr,
 };
 
