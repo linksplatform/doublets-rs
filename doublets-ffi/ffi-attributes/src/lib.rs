@@ -8,7 +8,7 @@ mod prepare;
 use proc_macro::{Level, Span};
 use std::collections::HashMap;
 
-use crate::kw::attributes;
+
 use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
@@ -189,5 +189,5 @@ pub fn specialize_for(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let args = parse_macro_input!(args as SpecializeArgs);
-    specialize_precise(args, item.clone()).unwrap_or_else(|_err| todo!())
+    specialize_precise(args, item).unwrap_or_else(|_err| todo!())
 }

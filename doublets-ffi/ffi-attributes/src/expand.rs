@@ -1,6 +1,6 @@
-use crate::{attributes, prepare, AliasLine, SpecializeArgs};
+use crate::{prepare, AliasLine, SpecializeArgs};
 use proc_macro::Diagnostic;
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
 
 use syn::{
@@ -185,7 +185,7 @@ pub(crate) fn gen_function(input: ItemFn, args: SpecializeArgs) -> TokenStream {
                 ..
             },
         ..
-    } = sig.clone();
+    } = sig;
 
     let this = quote! {
         #(#attrs) *
