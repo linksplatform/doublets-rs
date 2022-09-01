@@ -52,9 +52,7 @@ pub enum Level {
     Info = 2,
     Warn = 3,
     Error = 4,
-    // FFI binding can contain
-    // Off = 5
-    // But `tracing` must ignore it
+    Off = 5,
 }
 
 #[repr(usize)]
@@ -103,13 +101,14 @@ impl DoubletsFFILogHandle {
         });
 
         let filter = EnvFilter::from_default_env().add_directive(
-            LevelFilter::from_level(match max_level {
-                Level::Trace => tracing::Level::TRACE,
-                Level::Debug => tracing::Level::DEBUG,
-                Level::Info => tracing::Level::INFO,
-                Level::Warn => tracing::Level::WARN,
-                Level::Error => tracing::Level::ERROR,
-            })
+            match max_level {
+                Level::Trace => LevelFilter::TRACE,
+                Level::Debug => LevelFilter::DEBUG,
+                Level::Info => LevelFilter::INFO,
+                Level::Warn => LevelFilter::WARN,
+                Level::Error => LevelFilter::ERROR,
+                Level::Off => LevelFilter::OFF,
+            }
             .into(),
         );
 
