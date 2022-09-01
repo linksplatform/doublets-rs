@@ -1,20 +1,41 @@
+#![feature(try_blocks)]
+
 use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
     FFICallbackContext,
 };
-use std::ffi::{c_char, CStr, CString};
+use std::{
+    ffi::{c_char, CStr, CString},
+    io::{self, Write},
+};
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
     let str = CStr::from_ptr(ptr).to_str().unwrap();
     let ctx = &mut *(ctx as *mut usize);
     *ctx += 1;
 
-    if *ctx % 2 == 0 {
-        print!("{str}");
-    } else {
-        eprint!("{str}");
-    }
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+
+    let _: io::Result<_> = try {
+        match *ctx - 1 % 5 {
+            0..=2 => stdout.set_color(
+                ColorSpec::new()
+                    .set_fg(Some(Color::Green))
+                    .set_bg(Some(Color::Red)),
+            )?,
+
+            3..=5 => stdout.set_color(
+                ColorSpec::new()
+                    .set_fg(Some(Color::Red))
+                    .set_bg(Some(Color::Green)),
+            )?,
+            _ => unreachable!(),
+        }
+
+        write!(&mut stdout, "{str}")?;
+    };
 }
 
 fn main() {
