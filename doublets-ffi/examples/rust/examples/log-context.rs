@@ -14,12 +14,11 @@ use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
     let str = CStr::from_ptr(ptr).to_str().unwrap();
     let ctx = &mut *(ctx as *mut usize);
-    *ctx += 1;
 
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
 
     let _: io::Result<_> = try {
-        match *ctx - 1 % 5 {
+        match *ctx % 5 {
             0..=2 => stdout.set_color(
                 ColorSpec::new()
                     .set_fg(Some(Color::Green))
@@ -36,6 +35,8 @@ unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
 
         write!(&mut stdout, "{str}")?;
     };
+
+    *ctx += 1;
 }
 
 fn main() {
