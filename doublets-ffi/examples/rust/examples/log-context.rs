@@ -19,21 +19,27 @@ unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
 
     let _: io::Result<_> = try {
         match *ctx % 5 {
-            0..=2 => stdout.set_color(
+            0..=1 => stdout.set_color(
                 ColorSpec::new()
-                    .set_fg(Some(Color::Green))
-                    .set_bg(Some(Color::Red)),
+                    .set_fg(Some(Color::Rgb(0, 0, 255)))
+                    .set_bg(Some(Color::Rgb(255, 165, 0))),
             )?,
-
+            2 => stdout.set_color(
+                ColorSpec::new()
+                    .set_fg(Some(Color::Rgb(255, 165, 0)))
+                    .set_bg(Some(Color::Rgb(0, 0, 255))),
+            )?,
             3..=5 => stdout.set_color(
                 ColorSpec::new()
-                    .set_fg(Some(Color::Red))
-                    .set_bg(Some(Color::Green)),
+                    .set_fg(Some(Color::Rgb(0, 0, 255)))
+                    .set_bg(Some(Color::Rgb(255, 165, 0))),
             )?,
             _ => unreachable!(),
         }
 
         write!(&mut stdout, "{str}")?;
+
+        stdout.reset()?;
     };
 
     *ctx += 1;
