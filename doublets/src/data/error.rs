@@ -8,7 +8,7 @@ pub enum Error<T: LinkType> {
     NotExists(T),
 
     #[error("link {0:?} has dependencies")]
-    HasUsages(Vec<Link<T>>),
+    HasUsages(Box<[Link<T>]>),
 
     #[error("link {0} already exists")]
     AlreadyExists(Doublet<T>),

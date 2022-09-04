@@ -7,8 +7,6 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
-syn = "1.0.80"
-proc-macro2 = "1.0.30"
-darling = "0.13.0"
-quote = "1.0.10"
-serde = { version = "1.0.130", features = ["derive"] }
+quote = { version = "1.0.21" }
+proc-macro2 = { version = "1.0.43" }
+syn = { version = "1.0.99", features = ["full", "extra-traits"] }

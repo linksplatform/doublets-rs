@@ -1,189 +1,193 @@
 #![feature(box_syntax)]
+#![feature(proc_macro_diagnostic)]
+#![feature(box_patterns)]
 
-use proc_macro::TokenStream;
+mod expand;
+mod prepare;
 
-use darling::FromMeta;
-use quote::{quote, ToTokens};
+use proc_macro::{Level, Span};
+use std::collections::HashMap;
 
-use syn::{parse::Parser, punctuated::Punctuated};
 
 use syn::{
-    parse_macro_input, AttributeArgs, FnArg, GenericArgument, GenericParam, Ident, ItemFn,
-    PathArguments, ReturnType, Type,
+    parse::{Parse, ParseStream},
+    parse_macro_input,
+    punctuated::Punctuated,
+    spanned::Spanned,
+    token::Paren,
+    Attribute, Ident, ItemFn, LitStr, Token, Type,
 };
 
-fn csharp_convention(s: String) -> String {
-    match s.as_str() {
-        "i8" => "SByte",
-        "u8" => "Byte",
-        "i16" => "Int16",
-        "u16" => "UInt16",
-        "i32" => "Int32",
-        "u32" => "UInt32",
-        "i64" => "Int64",
-        "u64" => "UInt64",
-        s => {
-            panic!("{} is incompatible with doublets-ffi type", s)
-        }
+mod kw {
+    syn::custom_keyword!(types);
+    syn::custom_keyword!(name);
+    syn::custom_keyword!(attributes);
+}
+
+#[derive(Clone, Default, Debug)]
+struct SpecializeArgs {
+    name: Option<LitStr>,
+    param: Option<Ident>,
+    aliases: Punctuated<AliasLine, Token![,]>,
+    attributes: Vec<Attribute>,
+    /// Errors describing any unrecognized parse inputs that we skipped.
+    parse_warnings: Vec<syn::Error>,
+}
+
+impl SpecializeArgs {
+    pub(crate) fn warnings(&self) -> impl Iterator<Item = proc_macro::Diagnostic> + '_ {
+        self.parse_warnings.iter().map(|err| {
+            let msg = format!("found unrecognized input, {}", err);
+            proc_macro::Diagnostic::spanned::<Vec<Span>, _>(
+                vec![err.span().unwrap()],
+                Level::Warning,
+                msg,
+            )
+        })
     }
-    .to_string()
 }
 
-#[derive(FromMeta, PartialEq, Eq, Debug)]
-#[allow(non_camel_case_types)]
-enum Conventions {
-    csharp,
-}
+impl Parse for SpecializeArgs {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+        let mut args = Self::default();
 
-#[derive(FromMeta)]
-struct MacroArgs {
-    convention: Conventions,
-    #[darling(multiple)]
-    types: Vec<String>,
-    name: String,
-}
+        while !input.is_empty() {
+            let lookahead = input.lookahead1();
 
-fn ty_from_to(ty: Type, from: &str, to: &str) -> Type {
-    match ty {
-        Type::Array(arr) => ty_from_to(*arr.elem, from, to),
-        Type::Path(mut path) => {
-            path.path.segments.iter_mut().for_each(|seg| {
-                if seg.ident.to_string().as_str() == from {
-                    seg.ident = Ident::from_string(to).unwrap();
+            if lookahead.peek(kw::name) {
+                if args.name.is_some() {
+                    return Err(input.error("expected only a single `name` argument"));
                 }
-                match seg.arguments {
-                    PathArguments::AngleBracketed(ref mut angle) => {
-                        for arg in angle.args.iter_mut() {
-                            match arg {
-                                GenericArgument::Type(gty) => {
-                                    *gty = ty_from_to(gty.clone(), from, to);
-                                }
-                                _ => {
-                                    panic!("not doublets-ffi compatible generic")
-                                }
-                            }
-                        }
-                    }
-                    PathArguments::Parenthesized(_) => {
-                        todo!()
-                    }
-                    _ => { /* ignore */ }
+                let name = input.parse::<StrArg<kw::name>>()?.lit;
+                args.name = Some(name);
+            } else if lookahead.peek(kw::types) {
+                if !args.aliases.is_empty() {
+                    return Err(input.error("expected only a single `types` argument"));
                 }
-            });
-            Type::Path(path)
+                let AliasArg { param, aliases, .. } = input.parse::<AliasArg>()?;
+                args.param = Some(param);
+                args.aliases = aliases;
+            } else if lookahead.peek(kw::attributes) {
+                if !args.attributes.is_empty() {
+                    return Err(input.error("expected only a single `attributes` argument"));
+                }
+                let _ = input.parse::<kw::attributes>()?;
+                let content;
+                let _ = syn::parenthesized!(content in input);
+                args.attributes = content.call(Attribute::parse_outer)?;
+            } else if lookahead.peek(Token![,]) {
+                let _ = input.parse::<Token![,]>()?;
+            } else {
+                // Parse the unrecognized tokens stream,
+                // and ignore it away so we can keep parsing.
+                args.parse_warnings.push(lookahead.error());
+                let _ = input.parse::<proc_macro2::TokenTree>();
+            }
         }
-        Type::Ptr(mut ptr) => {
-            *ptr.elem = ty_from_to(*ptr.elem, from, to);
-            Type::Ptr(ptr)
-        }
-        Type::Reference(mut refer) => {
-            *refer.elem = ty_from_to(*refer.elem, from, to);
-            Type::Reference(refer)
-        }
-        _ => {
-            panic!("unexpected doublets-ffi type");
-        }
+
+        Ok(args)
     }
+}
+
+// custom_kw = "literal"
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+struct StrArg<T> {
+    kw: T,
+    // track issue: https://github.com/dtolnay/syn/issues/1209
+    eq: syn::token::Eq,
+    lit: LitStr,
+}
+
+impl<T: Parse> Parse for StrArg<T> {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+        Ok(Self {
+            kw: input.parse()?,
+            eq: input.parse()?,
+            lit: input.parse()?,
+        })
+    }
+}
+
+// MyType<i32> => mu_type_suffix
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+struct AliasLine {
+    ty: Type,
+    to: Token![=>],
+    ident: Ident,
+}
+
+impl Parse for AliasLine {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+        Ok(Self {
+            ty: input.parse()?,
+            to: input.parse()?,
+            ident: input.parse()?,
+        })
+    }
+}
+
+// types::<G>(
+//     u32 => integral,
+//     f32 => floating,
+//     (u32, Option<u32>) => magic,
+// )
+#[allow(dead_code)]
+struct AliasArg {
+    kw: kw::types,
+    colon: Token![::],
+    lt_token: Token![<],
+    param: Ident,
+    gt_toke: Token![>],
+    paren_token: Paren,
+    aliases: Punctuated<AliasLine, Token![,]>,
+}
+
+fn alias_validation(aliases: &Punctuated<AliasLine, Token![,]>) -> Result<(), syn::Error> {
+    let mut map = HashMap::new();
+    aliases.iter().try_for_each(|AliasLine { ty, ident, .. }| {
+        if let Some(twice) = map.insert(ty.clone(), ident.clone()) {
+            Err(syn::Error::new(
+                ty.span().join(ident.span()).unwrap(),
+                format!("tried to add alias to `{twice}` twice"),
+            ))
+        } else {
+            Ok(())
+        }
+    })
+}
+
+impl Parse for AliasArg {
+    fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
+        let content;
+        let new = Self {
+            kw: input.parse()?,
+            colon: input.parse()?,
+            lt_token: input.parse()?,
+            param: input.parse()?,
+            gt_toke: input.parse()?,
+            paren_token: syn::parenthesized!(content in input),
+            aliases: content.parse_terminated(AliasLine::parse)?,
+        };
+
+        alias_validation(&new.aliases).map(|_| new)
+    }
+}
+
+fn specialize_precise(
+    args: SpecializeArgs,
+    item: proc_macro::TokenStream,
+) -> syn::Result<proc_macro::TokenStream> {
+    let input = syn::parse::<ItemFn>(item)?;
+    Ok(expand::gen_function(input, args).into())
 }
 
 #[proc_macro_attribute]
-pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as AttributeArgs);
-    let input = parse_macro_input!(input as ItemFn);
-    let input_clone: ItemFn = input.clone();
-    let ident = input.sig.ident;
-    // TODO: use args
-    let args = match MacroArgs::from_list(&attr_args) {
-        Ok(v) => v,
-        Err(e) => {
-            return TokenStream::from(e.write_errors());
-        }
-    };
-    //println!("{:?}", args.types);
-
-    let inputs = input.sig.inputs;
-    let generic_name = {
-        let mut generics_names: Vec<_> = input
-            .sig
-            .generics
-            .params
-            .iter()
-            .map(|param| match param {
-                GenericParam::Lifetime(_) => {
-                    panic!("`lifetime` generic is not supported")
-                }
-                GenericParam::Const(_) => {
-                    panic!("`const` generic is not supported")
-                }
-                GenericParam::Type(ty) => ty.ident.to_string(),
-            })
-            .collect();
-        assert_eq!(generics_names.len(), 1);
-        generics_names.remove(0)
-    };
-
-    let fn_pat = args.name;
-    let asterisk_count = fn_pat.chars().filter(|c| *c == '*').count();
-    assert_eq!(asterisk_count, 1);
-
-    let mut out = quote! { #input_clone };
-
-    for ty in args.types {
-        let ty_str = ty.as_str();
-        let ty_tt: proc_macro2::TokenStream = ty.parse().unwrap();
-        let fn_pat: proc_macro2::TokenStream = fn_pat
-            .replace(
-                '*',
-                match &args.convention {
-                    Conventions::csharp => csharp_convention(ty.clone()),
-                    _ => {
-                        panic!("unknown convention")
-                    }
-                }
-                .as_str(),
-            )
-            .parse()
-            .unwrap();
-
-        let mut inputs: Punctuated<FnArg, _> = inputs.clone();
-
-        let output_ty: proc_macro2::TokenStream = match &input.sig.output {
-            ReturnType::Default => "()".parse().unwrap(),
-            ReturnType::Type(_, ty) => {
-                ty_from_to((**ty).clone(), &generic_name, ty_str).to_token_stream()
-            }
-        };
-
-        inputs.iter_mut().for_each(|arg| match arg {
-            FnArg::Receiver(_) => {
-                panic!("function with `self` is not supported")
-            }
-            FnArg::Typed(pat_type) => {
-                pat_type.ty = box ty_from_to(*(pat_type.ty).clone(), &generic_name, &ty);
-            }
-        });
-
-        let _generic_name: proc_macro2::TokenStream = generic_name.parse().unwrap();
-        let input_args: Vec<_> = inputs
-            .iter()
-            .map(|arg| match arg {
-                FnArg::Receiver(_) => {
-                    unreachable!()
-                }
-                FnArg::Typed(ty) => ty.pat.to_token_stream(),
-            })
-            .collect();
-
-        out = quote! {
-            #out
-            #[no_mangle]
-            pub unsafe extern "C" fn #fn_pat(#inputs) -> #output_ty {
-                #ident::<#ty_tt>(#(#input_args),*)
-            }
-        };
-    }
-
-    //println!("{}", out);
-
-    out.into()
+pub fn specialize_for(
+    args: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    let args = parse_macro_input!(args as SpecializeArgs);
+    specialize_precise(args, item).unwrap_or_else(|_err| todo!())
 }
