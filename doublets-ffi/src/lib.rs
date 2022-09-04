@@ -19,6 +19,12 @@ type c_char = std::ffi::c_char;
 
 pub type FFICallbackContext = *mut c_void;
 
+/// [`Send`] and [`Sync`] wrapper on [`FFICallbackContext`]
+///
+/// WARNING: value of `FFICallbackContext` Context must be transferred across thread boundaries
+/// and safe to share references between threads.
+///
+/// Otherwise value not use in multithreading context
 #[derive(Clone, Copy)]
 pub struct FFICallbackContextWrapper(FFICallbackContext);
 
