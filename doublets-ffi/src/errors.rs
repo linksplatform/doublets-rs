@@ -200,9 +200,7 @@ pub unsafe extern "C" fn read_backtrace<T: LinkType>(
 ) {
     if let DoubletsResult::Break | DoubletsResult::Continue = error {
         warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
-    } else {
-        if let Some(backtrace) = error.backtrace() {
-            write_raw_msg(buf, size, &backtrace.to_string());
-        }
+    } else if let Some(backtrace) = error.backtrace() {
+        write_raw_msg(buf, size, &backtrace.to_string());
     }
 }
