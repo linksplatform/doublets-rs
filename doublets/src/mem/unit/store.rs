@@ -209,7 +209,9 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         let constants = self.constants();
         let header = self.get_header();
 
-        link >= *constants.internal.start() && link <= header.allocated && !self.is_unused(link)
+        link >= *constants.internal_range.start()
+            && link <= header.allocated
+            && !self.is_unused(link)
     }
 
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
@@ -326,43 +328,102 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     fn count_links(&self, query: &[T]) -> T {
-        let [index, source, target] = query;
-        let any = self.constants().any;
+        if query.is_empty() {
+            return self.get_total();
+        };
 
-        if index == any {
-            match (source, target) {
-                (T::ANY, T::ANY) => self.get_total(),
-                (T::ANY, _) => self.targets.count_usages(target),
-                (_, T::ANY) => self.targets.count_usages(source),
-                (_, _) => {
-                    if self.sources.search(source, target) == T::funty(0) {
+        let constants = self.constants();
+        let any = constants.any;
+        let index = query[constants.index_part.as_usize()];
+
+        if query.len() == 1 {
+            return if index == any {
+                self.get_total()
+            } else if self.exists(index) {
+                T::funty(1)
+            } else {
+                T::funty(0)
+            };
+        }
+
+        if query.len() == 2 {
+            let value = query[1];
+            return if index == any {
+                if value == any {
+                    self.get_total()
+                } else {
+                    self.targets.count_usages(value) + self.sources.count_usages(value)
+                }
+            } else {
+                if !self.exists(index) {
+                    return T::funty(0);
+                }
+                if value == any {
+                    return T::funty(1);
+                }
+
+                return self.get_link(index).map_or_else(
+                    || T::funty(0),
+                    |stored| {
+                        if stored.source == value || stored.target == value {
+                            T::funty(1)
+                        } else {
+                            T::funty(0)
+                        }
+                    },
+                );
+            };
+        }
+
+        if query.len() == 3 {
+            let source = query[constants.source_part.as_usize()];
+            let target = query[constants.target_part.as_usize()];
+
+            return if index == any {
+                if (target, source) == (any, any) {
+                    self.get_total()
+                } else if source == any {
+                    self.targets.count_usages(target)
+                } else if target == any {
+                    self.sources.count_usages(source)
+                } else {
+                    let link = self.sources.search(source, target);
+                    if link == constants.null {
                         T::funty(0)
                     } else {
                         T::funty(1)
                     }
                 }
-            }
-        } else {
-            macro_rules! bool {
-                ($bool:expr) => {
-                    if $bool { T::funty(1) } else { T::funty(0) }
-                };
-            }
-
-            if !self.exists(index) {
-                return T::funty(0);
-            }
-
-            let link = unsafe { self.get_link_unchecked(index) };
-            match (source, target) {
-                (T::ANY, T::ANY) => T::funty(1),
-                (T::ANY, _) => bool!(link.target == target),
-                (_, T::ANY) => bool!(link.source == target),
-                (_, _) => {
-                    bool!((link.source, link.target) == (source, target))
+            } else if !self.exists(index) {
+                T::funty(0)
+            } else if (source, target) == (any, any) {
+                T::funty(1)
+            } else {
+                let link = unsafe { self.get_link_unchecked(index) };
+                if source != any && target != any {
+                    if (link.source, link.target) == (source, target) {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
+                } else if source == any {
+                    if link.target == target {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
+                } else if target == any {
+                    if link.source == source {
+                        T::funty(1)
+                    } else {
+                        T::funty(0)
+                    }
+                } else {
+                    T::funty(0)
                 }
-            }
+            };
         }
+        todo!()
     }
 
     fn create_links(
@@ -374,7 +435,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         let header = self.get_header();
         let mut free = header.first_free;
         if free == constants.null {
-            let max_inner = *constants.internal.end();
+            let max_inner = *constants.internal_range.end();
             if header.allocated >= max_inner {
                 return Err(LinksError::LimitReached(max_inner));
             }

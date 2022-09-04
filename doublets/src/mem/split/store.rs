@@ -2,7 +2,6 @@ use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::No
 
 use crate::{
     mem::{
-        detach_query,
         split::{
             DataPart, ExternalSourcesRecursionlessTree, ExternalTargetsRecursionlessTree,
             IndexPart, InternalSourcesLinkedList, InternalSourcesRecursionlessTree,
@@ -337,7 +336,9 @@ impl<
 
         // TODO: use attributes expressions feature
         // TODO: use `Range::contains`
-        link >= constants.internal.start && link <= header.allocated && !self.is_unused(link)
+        link >= *constants.internal_range.start()
+            && link <= header.allocated
+            && !self.is_unused(link)
     }
 
     // SAFETY: must be link exists
@@ -349,39 +350,90 @@ impl<
     }
 
     fn try_each_by_core(&self, handler: ReadHandler<'_, T>, query: &[T]) -> Flow {
-        let [index, source, target] = detach_query(query);
+        let query = query.to_query();
 
-        let is_virtual_source = self.is_virtual(source);
-        let is_virtual_target = self.is_virtual(target);
-
-        let any = T::ANY;
-
-        return if index == any {
-            if (source, target) == (any, any) {
-                self.try_each_by_core(handler, &[any, any, any])
-            } else if source == any {
-                if is_virtual_target {
-                    self.external_targets.each_usages(target, handler)
-                } else {
-                    self.internal_targets.each_usages(target, handler)
+        if query.is_empty() {
+            for index in T::funty(1)..=self.get_header().allocated {
+                if let Some(link) = self.get_link(index) {
+                    handler(link)?;
                 }
-            } else if target == any {
-                if is_virtual_source {
-                    self.external_sources.each_usages(source, handler)
-                } else if Self::USE_LIST {
-                    self.sources_list.each_usages(source, handler)
+            }
+            return Flow::Continue;
+        }
+
+        let constants = self.constants.clone();
+        let any = constants.any;
+        let index = query[constants.index_part.as_usize()];
+        if query.len() == 1 {
+            return if index == any {
+                self.try_each_by_core(handler, &[])
+            } else if let Some(link) = self.get_link(index) {
+                handler(link)
+            } else {
+                Flow::Continue
+            };
+        }
+        //
+        if query.len() == 2 {
+            let value = query[1];
+            return if index == any {
+                if value == any {
+                    self.try_each_by_core(handler, &[])
                 } else {
-                    self.internal_sources.each_usages(source, handler)
+                    self.try_each_by_core(handler, &[index, value, any])?;
+                    self.try_each_by_core(handler, &[index, any, value])
+                }
+            } else if let Some(link) = self.get_link(index) {
+                if value == any || link.source == value || link.target == value {
+                    handler(link)
+                } else {
+                    Flow::Continue
                 }
             } else {
-                let link = if true {
-                    if is_virtual_source && is_virtual_target {
-                        self.external_sources.search(source, target)
-                    } else if is_virtual_source {
-                        self.internal_targets.search(source, target)
-                    } else if is_virtual_target {
-                        if Self::USE_LIST {
+                Flow::Continue
+            };
+        }
+        //
+        if query.len() == 3 {
+            let source = query[constants.source_part.as_usize()];
+            let target = query[constants.target_part.as_usize()];
+            let is_virtual_source = self.is_virtual(source);
+            let is_virtual_target = self.is_virtual(target);
+
+            return if index == any {
+                if (source, target) == (any, any) {
+                    self.try_each_by_core(handler, &[])
+                } else if source == any {
+                    if is_virtual_target {
+                        self.external_targets.each_usages(target, handler)
+                    } else {
+                        self.internal_targets.each_usages(target, handler)
+                    }
+                } else if target == any {
+                    if is_virtual_source {
+                        self.external_sources.each_usages(source, handler)
+                    } else if Self::USE_LIST {
+                        self.sources_list.each_usages(source, handler)
+                    } else {
+                        self.internal_sources.each_usages(source, handler)
+                    }
+                } else {
+                    let link = if true {
+                        if is_virtual_source && is_virtual_target {
                             self.external_sources.search(source, target)
+                        } else if is_virtual_source {
+                            self.internal_targets.search(source, target)
+                        } else if is_virtual_target {
+                            if Self::USE_LIST {
+                                self.external_sources.search(source, target)
+                            } else {
+                                self.internal_sources.search(source, target)
+                            }
+                        } else if Self::USE_LIST
+                            || self.internal_sources.count_usages(source)
+                                > self.internal_targets.count_usages(target)
+                        {
+                            self.internal_targets.search(source, target)
                         } else {
                             self.internal_sources.search(source, target)
                         }
@@ -392,50 +444,44 @@ impl<
                         self.internal_targets.search(source, target)
                     } else {
                         self.internal_sources.search(source, target)
+                    };
+                    return if link == constants.null {
+                        Flow::Continue
+                    } else {
+                        // SAFETY: link 100% exists
+                        let link = unsafe { self.get_link(link).unwrap_unchecked() };
+                        handler(link)
+                    };
+                }
+            } else if let Some(link) = self.get_link(index) {
+                if (source, target) == (any, any) {
+                    handler(link)
+                } else if source != any && target != any {
+                    if (link.source, link.target) == (source, target) {
+                        handler(link)
+                    } else {
+                        Flow::Continue
                     }
-                } else if Self::USE_LIST
-                    || self.internal_sources.count_usages(source)
-                        > self.internal_targets.count_usages(target)
-                {
-                    self.internal_targets.search(source, target)
-                } else {
-                    self.internal_sources.search(source, target)
-                };
-                return if link == constants.null {
-                    Flow::Continue
-                } else {
-                    // SAFETY: link 100% exists
-                    let link = unsafe { self.get_link(link).unwrap_unchecked() };
-                    handler(link)
-                };
-            }
-        } else if let Some(link) = self.get_link(index) {
-            if (source, target) == (any, any) {
-                handler(link)
-            } else if source != any && target != any {
-                if (link.source, link.target) == (source, target) {
-                    handler(link)
-                } else {
-                    Flow::Continue
-                }
-            } else if source == any {
-                if link.target == target {
-                    handler(link)
-                } else {
-                    Flow::Continue
-                }
-            } else if target == any {
-                if link.source == source {
-                    handler(link)
+                } else if source == any {
+                    if link.target == target {
+                        handler(link)
+                    } else {
+                        Flow::Continue
+                    }
+                } else if target == any {
+                    if link.source == source {
+                        handler(link)
+                    } else {
+                        Flow::Continue
+                    }
                 } else {
                     Flow::Continue
                 }
             } else {
                 Flow::Continue
-            }
-        } else {
-            Flow::Continue
-        };
+            };
+        }
+        todo!()
     }
 
     fn resolve_danglind_internal(&mut self, index: T) {
@@ -651,7 +697,7 @@ impl<
         let header = self.get_header();
         let mut free = header.first_free;
         if free == constants.null {
-            let max_inner = *constants.internal.end();
+            let max_inner = *constants.internal_range.end();
             if header.allocated >= max_inner {
                 return Err(LinksError::LimitReached(max_inner));
             }

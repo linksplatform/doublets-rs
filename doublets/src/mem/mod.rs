@@ -6,9 +6,6 @@ mod header;
 pub mod split;
 mod traits;
 pub mod unit;
-mod utils;
-
-pub(crate) use utils::detach_query;
 
 #[cfg(feature = "mem")]
 pub use mem::*;
