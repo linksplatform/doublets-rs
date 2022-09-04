@@ -6,7 +6,58 @@ use std::{mem::MaybeUninit, ops::RangeInclusive};
 /// [`Inclusive Range`]: https://doc.rust-lang.org/std/ops/struct.RangeInclusive.html
 #[derive(Eq, PartialEq)]
 #[repr(C)]
-pub struct Range<T: LinkType>(pub T, pub T);
+pub struct Range<T> {
+    start: T,
+    end: T,
+}
+
+impl<T: Copy> From<RangeInclusive<T>> for Range<T> {
+    fn from(range: RangeInclusive<T>) -> Self {
+        Self {
+            start: *range.start(),
+            end: *range.end(),
+        }
+    }
+}
+
+impl<T: Copy> From<Range<T>> for RangeInclusive<T> {
+    fn from(Range { start, end }: Range<T>) -> Self {
+        RangeInclusive::new(start, end)
+    }
+}
+
+#[repr(C)]
+pub struct Maybe<T> {
+    // `MaybeUninit` is transparent - `Range<T>` is repr(C)
+    value: MaybeUninit<T>,
+    some: bool,
+}
+
+impl<T> From<Option<T>> for Maybe<T> {
+    fn from(opt: Option<T>) -> Self {
+        match opt {
+            Some(val) => Self {
+                value: MaybeUninit::new(val),
+                some: false,
+            },
+            None => Self {
+                value: MaybeUninit::uninit(),
+                some: true,
+            },
+        }
+    }
+}
+
+impl<T> From<Maybe<T>> for Option<T> {
+    fn from(maybe: Maybe<T>) -> Self {
+        if maybe.some {
+            // SAFETY: value is some
+            unsafe { Some(maybe.value.assume_init()) }
+        } else {
+            None
+        }
+    }
+}
 
 #[repr(C)]
 pub struct Constants<T: LinkType> {
@@ -21,14 +72,12 @@ pub struct Constants<T: LinkType> {
     pub itself: T,
     pub error: T,
     pub internal_range: Range<T>,
-    // `MaybeUninit` is transparent - `Range<T>` is repr(C)
-    pub external_range: MaybeUninit<Range<T>>,
-    pub external_is_some: bool,
+    pub external_range: Maybe<Range<T>>,
 }
 
 impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
     fn from(c: LinksConstants<T>) -> Self {
-        let mut new = Self {
+        Self {
             index_part: c.index_part,
             source_part: c.source_part,
             target_part: c.target_part,
@@ -39,16 +88,10 @@ impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
             any: c.any,
             itself: c.itself,
             error: c.error,
-            internal_range: Range(*c.internal_range.start(), *c.internal_range.end()),
+            internal_range: Range::from(c.internal_range),
             // external_range: c.external_range.map(|r| Range(*r.start(), *r.end())),
-            external_range: MaybeUninit::uninit(),
-            external_is_some: false,
-        };
-        if let Some(r) = c.external_range {
-            new.external_is_some = true;
-            new.external_range.write(Range(*r.start(), *r.end()));
+            external_range: c.external_range.map(Range::from).into(),
         }
-        new
     }
 }
 
@@ -66,16 +109,8 @@ impl<T: LinkType> Into<LinksConstants<T>> for Constants<T> {
             any: self.any,
             itself: self.itself,
             error: self.error,
-            internal_range: RangeInclusive::new(self.internal_range.0, self.internal_range.1),
-            external_range: if self.external_is_some {
-                // SAFETY: `self.external_range` is init
-                unsafe {
-                    let range = self.external_range.assume_init();
-                    Some(RangeInclusive::new(range.0, range.1))
-                }
-            } else {
-                None
-            },
+            internal_range: RangeInclusive::from(self.internal_range),
+            external_range: Option::from(self.external_range).map(|range: Range<_>| range.into()),
         }
     }
 }
