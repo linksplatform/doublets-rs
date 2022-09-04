@@ -38,11 +38,11 @@ impl<T> From<Option<T>> for Maybe<T> {
         match opt {
             Some(val) => Self {
                 value: MaybeUninit::new(val),
-                some: false,
+                some: true,
             },
             None => Self {
                 value: MaybeUninit::uninit(),
-                some: true,
+                some: false,
             },
         }
     }
