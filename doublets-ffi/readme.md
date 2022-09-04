@@ -65,4 +65,6 @@ features = ["release_max_level_info"]
 ```
 
 ### Features
-You can build with `--features backtrace` to enable `backtrace` feature and provide appropriate methods
+
+You can build with `--cfg unstable_backtrace` in `RUSTFLAGS`
+to enable `backtrace` feature and provide appropriate methods

@@ -1,6 +1,6 @@
 use crate::c_char;
 use doublets::{data::LinkType, mem, Doublet, Link};
-#[cfg(feature = "backtrace")]
+#[cfg(unstable_backtrace)]
 use std::backtrace::Backtrace;
 use std::{
     cmp, error,
@@ -10,6 +10,7 @@ use std::{
     ptr,
     ptr::NonNull,
 };
+use tap::Pipe;
 use tracing::warn;
 
 type OpaqueError = Box<dyn error::Error>;
@@ -84,17 +85,16 @@ pub enum DoubletsResult<T: LinkType> {
     Other(Box<OpaqueError>),
 }
 
-#[rustfmt::skip]
 impl<T: LinkType> DoubletsResult<T> {
-    #[cfg(feature = "backtrace")]
+    #[cfg(unstable_backtrace)]
     fn backtrace(&self) -> Option<&Backtrace> {
+        fn erasure(err: &mem::Error) -> &dyn error::Error {
+            err as _
+        }
+
         match self {
-            DoubletsResult::AllocFailed(err) => {
-                (&**err as &dyn error::Error).request_ref::<Backtrace>()
-            }
-            DoubletsResult::Other(err) => {
-                (&***err as &dyn error::Error).request_ref::<Backtrace>() 
-            }
+            DoubletsResult::AllocFailed(err) => erasure(err).request_ref(),
+            DoubletsResult::Other(err) => err.request_ref(),
             DoubletsResult::Break | DoubletsResult::Continue => {
                 panic!("`backtrace` not allowed for ok results")
             }
@@ -180,7 +180,7 @@ pub unsafe extern "C" fn read_error<T: LinkType>(
     }
 }
 
-#[cfg(feature = "backtrace")]
+#[cfg(unstable_backtrace)]
 #[ffi::specialize_for(
     types::<T>(
         u8  => u8,

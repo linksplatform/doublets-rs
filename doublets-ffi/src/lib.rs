@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "backtrace", feature(error_generic_member_access))]
+#![cfg_attr(unstable_backtrace, feature(error_generic_member_access))]
 
 pub mod constants;
 pub mod errors;
