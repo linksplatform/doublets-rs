@@ -35,6 +35,7 @@ impl<T: LinkType> StoreHandle<T> {
         &mut self.pointer
     }
 
+    #[allow(clippy::borrowed_box)] // needs for `Self: Sized` also can use `&impl Doublets<T>`
     pub unsafe fn assume_ref(&self) -> &Box<dyn Doublets<T>> {
         &self.pointer
     }
