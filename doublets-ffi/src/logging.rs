@@ -84,20 +84,16 @@ impl DoubletsFFILogHandle {
         };
 
         thread::spawn(move || {
-            // We can't use `while let Ok(msg) = receiver.recv()`
-            // here because the receiver will be blocked
+            // We can use `while let Ok(msg) = receiver.recv()`
+            // `crossbeam::recv` is blocking it is base
 
-            loop {
-                // info_span!("Logging loop").in_scope(|| {
-                if let Ok(msg) = receiver.recv() {
-                    let str = CString::new(msg)
-                        .expect("Only UTF-8 format strings are allowed in logging");
-                    callback(wrapper, str.as_ptr());
-                } else {
-                    break;
-                }
-                // });
+            // info_span!("Logging loop").in_scope(|| {
+            while let Ok(msg) = receiver.recv() {
+                let str =
+                    CString::new(msg).expect("Only UTF-8 format strings are allowed in logging");
+                callback(wrapper, str.as_ptr());
             }
+            // });
         });
 
         let filter = EnvFilter::from_default_env().add_directive(
