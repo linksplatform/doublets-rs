@@ -7,10 +7,10 @@ use std::{
     ffi::c_short,
     fmt,
     fmt::{Debug, Display, Formatter},
+    marker::PhantomData,
     ptr,
     ptr::NonNull,
 };
-use tap::Pipe;
 use tracing::warn;
 
 type OpaqueError = Box<dyn error::Error>;
@@ -20,6 +20,8 @@ type OpaqueError = Box<dyn error::Error>;
 pub struct OwnedSlice<T> {
     ptr: NonNull<T>,
     len: usize,
+    // actually it's still a `Box<[T]>`
+    _marker: PhantomData<Box<[T]>>,
 }
 
 impl<T> OwnedSlice<T> {
@@ -35,6 +37,7 @@ impl<T> OwnedSlice<T> {
             // ptr: leak.as_non_null_ptr(),
             ptr: unsafe { NonNull::new_unchecked(leak.as_ptr() as *mut _) },
             len: leak.len(),
+            _marker: PhantomData,
         }
     }
 
