@@ -7,7 +7,7 @@ use crate::{
     stable_try as tri, FFICallbackContext,
 };
 use doublets::{
-    data::{query, Flow, LinkType, Query, ToQuery},
+    data::{Flow, LinkType},
     mem::FileMapped,
     parts, unit, Doublets, Error, Link, Links,
 };
@@ -54,15 +54,15 @@ impl<T: LinkType> StoreHandle<T> {
     }
 }
 
-unsafe fn thin_query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
+unsafe fn thin_query_from_raw<'a, T>(query: *const T, len: u32) -> &'a [T] {
     if query.is_null() {
-        query![]
+        &[]
     } else {
-        slice::from_raw_parts(query, len as usize).to_query()
+        slice::from_raw_parts(query, len as usize)
     }
 }
 
-unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: u32) -> Query<'a, T> {
+unsafe fn query_from_raw<'a, T>(query: *const T, len: u32) -> &'a [T] {
     if query.is_null() && len != 0 {
         warn!("query ptr is null, but len is not null: handle could be a potential mistake.");
     }
@@ -181,7 +181,7 @@ pub unsafe extern "C" fn constants_from_store<T: LinkType>(
 #[tracing::instrument(
     skip_all,
     fields(
-        query = ?&thin_query_from_raw(query, len)[..],
+        query = ?thin_query_from_raw(query, len),
         query.ptr = ?query,
         query.len = len,
     ),
@@ -216,7 +216,7 @@ pub unsafe extern "C" fn create<T: LinkType>(
 #[tracing::instrument(
     skip_all,
     fields(
-        query = ?&thin_query_from_raw(query, len)[..],
+        query = ?thin_query_from_raw(query, len),
         query.ptr = ?query,
         query.len = len,
     ),
@@ -251,7 +251,7 @@ pub unsafe extern "C" fn each<T: LinkType>(
 #[tracing::instrument(
     skip_all,
     fields(
-        query = ?&thin_query_from_raw(query, len)[..],
+        query = ?thin_query_from_raw(query, len),
         query.ptr = ?query,
         query.len = len,
     ),
@@ -280,11 +280,11 @@ pub unsafe extern "C" fn count<T: LinkType>(
 #[tracing::instrument(
     skip_all,
     fields(
-        query = ?&thin_query_from_raw(query, len_q)[..],
+        query = ?thin_query_from_raw(query, len_q),
         query.ptr = ?query,
         query.len = len_q,
 
-        change = ?&thin_query_from_raw(query, len_q)[..],
+        change = ?thin_query_from_raw(query, len_q),
         change.ptr = ?change,
         change.len = len_c,
     ),
@@ -322,7 +322,7 @@ pub unsafe extern "C" fn update<T: LinkType>(
 #[tracing::instrument(
     skip_all,
     fields(
-        query = ?&thin_query_from_raw(query, len)[..],
+        query = ?thin_query_from_raw(query, len),
         query.ptr = ?query,
         query.len = len,
     )
