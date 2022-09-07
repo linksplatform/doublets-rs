@@ -1,5 +1,6 @@
+use crate::utils::Maybe;
 use doublets::data::{LinkType, LinksConstants};
-use std::{mem::MaybeUninit, ops::RangeInclusive};
+use std::ops::RangeInclusive;
 
 /// FFI repr to [`Inclusive Range`]
 ///
@@ -23,39 +24,6 @@ impl<T: Copy> From<RangeInclusive<T>> for Range<T> {
 impl<T: Copy> From<Range<T>> for RangeInclusive<T> {
     fn from(Range { start, end }: Range<T>) -> Self {
         RangeInclusive::new(start, end)
-    }
-}
-
-#[repr(C)]
-pub struct Maybe<T> {
-    // `MaybeUninit` is transparent - `Range<T>` is repr(C)
-    value: MaybeUninit<T>,
-    some: bool,
-}
-
-impl<T> From<Option<T>> for Maybe<T> {
-    fn from(opt: Option<T>) -> Self {
-        match opt {
-            Some(val) => Self {
-                value: MaybeUninit::new(val),
-                some: true,
-            },
-            None => Self {
-                value: MaybeUninit::uninit(),
-                some: false,
-            },
-        }
-    }
-}
-
-impl<T> From<Maybe<T>> for Option<T> {
-    fn from(maybe: Maybe<T>) -> Self {
-        if maybe.some {
-            // SAFETY: value is some
-            unsafe { Some(maybe.value.assume_init()) }
-        } else {
-            None
-        }
     }
 }
 

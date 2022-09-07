@@ -4,7 +4,9 @@ use crate::{
     c_char,
     constants::Constants,
     errors::{DoubletsResult, OwnedSlice},
-    stable_try as tri, FFICallbackContext,
+    stable_try as tri,
+    utils::Maybe,
+    FFICallbackContext,
 };
 use doublets::{
     data::{Flow, LinkType},
@@ -12,7 +14,11 @@ use doublets::{
     parts, unit, Doublets, Error, Link, Links,
 };
 use ffi_attributes as ffi;
-use std::{ffi::CStr, mem, ptr::null_mut, slice};
+use std::{
+    ffi::CStr,
+    fmt::{self, Debug, Formatter},
+    slice,
+};
 use tap::Pipe;
 use tracing::{debug, warn};
 
@@ -26,9 +32,17 @@ pub struct StoreHandle<T: LinkType> {
     pointer: Box<dyn Doublets<T>>,
 }
 
+impl<T: LinkType> Debug for StoreHandle<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StoreHandle")
+            .field("pointer", &(self.pointer.as_ref() as *const _))
+            .finish()
+    }
+}
+
 impl<T: LinkType> StoreHandle<T> {
-    pub fn new(store: Box<dyn Doublets<T>>) -> Box<Self> {
-        Box::new(Self { pointer: store })
+    pub fn new(store: Box<dyn Doublets<T>>) -> Self {
+        Self { pointer: store }
     }
 
     pub unsafe fn assume(&mut self) -> &mut Box<dyn Doublets<T>> {
@@ -46,11 +60,10 @@ impl<T: LinkType> StoreHandle<T> {
     ///
     /// Caller guarantee that will not drop handle
     // fixme: may be we can port `result::Result` to C
-    pub fn invalid(err: Error<T>) -> Box<Self> {
+    pub fn invalid<Any>(err: Error<T>) -> Maybe<Any> {
         acquire_error(err);
 
-        // SAFETY: Box<T> is repr to `*mut T` and must forgot
-        unsafe { mem::transmute(null_mut::<Self>()) }
+        Maybe::none()
     }
 }
 
@@ -93,15 +106,31 @@ impl<T: LinkType> DoubletsResult<T> {
     }
 }
 
+impl<T: LinkType> From<Flow> for DoubletsResult<T> {
+    fn from(flow: Flow) -> Self {
+        Self::from_branch(flow)
+    }
+}
+
+impl<T: LinkType> From<Box<StoreHandle<T>>> for DoubletsResult<T> {
+    fn from(handle: Box<StoreHandle<T>>) -> Self {
+        Self::Handle(handle)
+    }
+}
+
 fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResult<T> {
     // It can be very expensive to handle each error
     debug!(op_error = % err);
     DoubletsResult::from_err(err)
 }
 
-fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult<T> {
+fn acquire_result<Ok, T>(result: Result<Ok, Error<T>>) -> DoubletsResult<T>
+where
+    T: LinkType,
+    Ok: Into<DoubletsResult<T>>,
+{
     match result {
-        Ok(flow) => DoubletsResult::from_branch(flow),
+        Ok(ok) => ok.into(),
         Err(err) => acquire_error(err),
     }
 }
@@ -128,7 +157,7 @@ fn acquire_result<T: LinkType>(result: Result<Flow, Error<T>>) -> DoubletsResult
 pub unsafe extern "C" fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
-) -> Box<StoreHandle<T>> {
+) -> DoubletsResult<T> {
     let result: Result<_, Error<T>> = tri! {
         let path = CStr::from_ptr(path).to_str().unwrap();
         let mem = FileMapped::from_path(path)?;
@@ -137,7 +166,7 @@ pub unsafe extern "C" fn create_unit_store<T: LinkType>(
             constants.into(),
         )?))
     };
-    result.unwrap_or_else(StoreHandle::invalid)
+    result.map(Box::new).pipe(acquire_result)
 }
 
 #[ffi::specialize_for(

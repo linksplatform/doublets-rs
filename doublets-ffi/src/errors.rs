@@ -79,6 +79,7 @@ pub enum DoubletsResult<T: LinkType> {
     // oks
     Break,
     Continue,
+    Handle(Box<StoreHandle<T>>),
     // errors
     NotExists(T),
     LimitReached(T),
@@ -135,6 +136,7 @@ impl<T: LinkType> Display for DoubletsResult<T> {
     }
 }
 
+use crate::store::StoreHandle;
 use ffi_attributes as ffi;
 
 #[ffi::specialize_for(
@@ -176,7 +178,7 @@ pub unsafe extern "C" fn read_error<T: LinkType>(
     size: c_short,
     error: &DoubletsResult<T>,
 ) {
-    if let DoubletsResult::Break | DoubletsResult::Continue = error {
+    if let DoubletsResult::Break | DoubletsResult::Continue | DoubletsResult::Handle(_) = error {
         warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
     } else {
         write_raw_msg(buf, size, &error.to_string());
@@ -201,7 +203,7 @@ pub unsafe extern "C" fn read_backtrace<T: LinkType>(
     size: c_short,
     error: &DoubletsResult<T>,
 ) {
-    if let DoubletsResult::Break | DoubletsResult::Continue = error {
+    if let DoubletsResult::Break | DoubletsResult::Continue | DoubletsResult::Handle(_) = error {
         warn!("`DoubletsResult` is expected to contain an error, got: `{error:?}`");
     } else if let Some(backtrace) = error.backtrace() {
         write_raw_msg(buf, size, &backtrace.to_string());

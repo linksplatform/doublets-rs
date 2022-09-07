@@ -30,8 +30,15 @@ fn main() {
             doublets_create_log_handle(null_mut(), callback, Level::Trace, Format::Virgin, false);
 
         let path = CString::new("doublets.links").unwrap();
-        let mut handle =
+        let result =
             create_unit_store::<u64>(path.as_ptr(), Constants::from(LinksConstants::external()));
+        let mut handle = match result {
+            DoubletsResult::Handle(handle) => handle,
+            DoubletsResult::Continue | DoubletsResult::Break => unreachable!(),
+            error => {
+                panic!("unexpected error: {}", error)
+            }
+        };
 
         let any = constants_from_store::<u64>(&handle).any;
 
