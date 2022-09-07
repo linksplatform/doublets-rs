@@ -114,10 +114,7 @@ impl<T: LinkType> Display for DoubletsResult<T> {
                 write!(f, "link {exists} does not exist.")
             }
             DoubletsResult::LimitReached(limit) => {
-                write!(
-                    f,
-                    "limit for the number of links in the storage has been reached: {limit}"
-                )
+                write!(f, "links limit in storage has been reached: {limit}")
             }
             DoubletsResult::HasUsages(usages) => {
                 write!(f, "link {usages:?} has dependencies")
@@ -126,7 +123,7 @@ impl<T: LinkType> Display for DoubletsResult<T> {
                 write!(f, "link {exists} already exists")
             }
             DoubletsResult::AllocFailed(alloc) => {
-                write!(f, "unable to allocate memory for links storage: `{alloc}`")
+                write!(f, "alloc memory error: `{alloc}`")
             }
             DoubletsResult::Other(other) => {
                 write!(f, "other internal error: `{other}`")
