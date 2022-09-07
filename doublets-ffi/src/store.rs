@@ -104,6 +104,14 @@ impl<T: LinkType> DoubletsResult<T> {
             Error::Other(other) => Self::Other(Box::new(other)),
         }
     }
+
+    pub fn is_ok(&self) -> bool {
+        matches!(self, Self::Break | Self::Continue | Self::Handle(_))
+    }
+
+    pub fn is_err(&self) -> bool {
+        !self.is_ok()
+    }
 }
 
 impl<T: LinkType> From<Flow> for DoubletsResult<T> {
