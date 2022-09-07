@@ -35,7 +35,7 @@ impl<T> OwnedSlice<T> {
         let leak = NonNull::from(Box::leak(place));
         OwnedSlice {
             // ptr: leak.as_non_null_ptr(),
-            ptr: unsafe { NonNull::new_unchecked(leak.as_ptr() as *mut _) },
+            ptr: leak.cast(),
             len: leak.len(),
             _marker: PhantomData,
         }
