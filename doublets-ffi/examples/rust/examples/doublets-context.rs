@@ -23,11 +23,9 @@ extern "C" fn create_cb<F>(ctx: FFIContext, before: Link<u64>, after: Link<u64>)
 where
     F: FnMut(Link<u64>, Link<u64>),
 {
-    unsafe {
-        let handler = &mut *(ctx as *mut F);
-        (*handler)(before, after);
-        Flow::Continue
-    }
+    let handler = unsafe { &mut *(ctx as *mut F) };
+    (*handler)(before, after);
+    Flow::Continue
 }
 
 unsafe fn magic_create<F>(handle: &mut StoreHandle<u64>, mut handler: F)
@@ -41,7 +39,7 @@ where
 fn main() {
     unsafe {
         let handle =
-            doublets_create_log_handle(null_mut(), callback, Level::Trace, Format::Virgin, false);
+            doublets_create_log_handle(null_mut(), callback, Level::Trace, Format::Virgin, true);
 
         let path = CString::new("doublets.links").unwrap();
         let mut store = doublets_create_united_store_u64(

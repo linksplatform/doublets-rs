@@ -6,7 +6,7 @@ use doublets_ffi::{
     FFIContext,
 };
 use std::{
-    ffi::{c_char, CStr, CString},
+    ffi::{c_char, CStr},
     io::{self, Write},
 };
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
