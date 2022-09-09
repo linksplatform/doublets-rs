@@ -21,7 +21,8 @@ jobs:
     needs:
       - test
       - miri
-      - clippy
+    # temporary ignore bug in clippy
+    #  - clippy
     steps:
       - run: exit 0
 
