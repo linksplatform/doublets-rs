@@ -47,7 +47,8 @@ fn main() {
         let mut store = doublets_create_united_store_u64(
             path.as_ptr(),
             Constants::from(LinksConstants::external()),
-        );
+        )
+        .unwrap();
 
         magic_create(&mut store, |before, after| {
             print!("{before:?}\n{after:?}\n");
