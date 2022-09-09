@@ -44,16 +44,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         let result = delete::<u64>(&mut handle, query.as_ptr(), 3, null_mut(), create_cb);
 
         if let Fallible::Err(error) = result {
-            let memchr = |buf: &[u8]| {
-                buf.iter()
-                    .position(|x| *x == 0)
-                    .expect("it is unreachable: C strings every has \\'0' at the end")
-            };
-
             let mut msg_buf = vec![0u8; 256];
             read_error::<u64>(msg_buf.as_mut_ptr().cast(), 256, &error);
 
-            let str = CStr::from_bytes_until_nul(&msg_buf[..=memchr(&msg_buf)])?.to_str()?;
+            let str = CStr::from_bytes_until_nul(&msg_buf)?.to_str()?;
             tracing::error!("{}", str);
 
             free_error::<u64>(error);
