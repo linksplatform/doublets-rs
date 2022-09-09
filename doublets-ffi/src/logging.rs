@@ -1,5 +1,5 @@
-use super::{c_char, FFICallbackContext};
-use crate::FFICallbackContextWrapper;
+use super::{c_char, FFIContext};
+use crate::FFIContextWrapper;
 use crossbeam_channel::{self as mpsc, Sender};
 use std::{ffi::CString, io, thread};
 use tap::Pipe;
@@ -43,7 +43,7 @@ impl MakeWriter<'_> for ChannelWriter {
 
 /// # Safety
 /// This callback is safe if all the rules of Rust are followed
-pub type LogFFICallback = unsafe extern "C" fn(FFICallbackContext, *const c_char);
+pub type LogFFICallback = unsafe extern "C" fn(FFIContext, *const c_char);
 
 #[repr(usize)]
 pub enum Level {
@@ -66,17 +66,17 @@ pub struct DoubletsFFILogHandle;
 
 impl DoubletsFFILogHandle {
     pub fn new(
-        ctx: FFICallbackContext,
+        ctx: FFIContext,
         callback: LogFFICallback,
         max_level: Level,
         format: Format,
         ansi: bool,
     ) -> Self {
         log_panics::init();
-        let wrapper = FFICallbackContextWrapper(ctx);
+        let wrapper = FFIContextWrapper(ctx);
         let (sender, receiver) = mpsc::bounded(256);
 
-        let callback = move |ctx: FFICallbackContextWrapper, ptr| {
+        let callback = move |ctx: FFIContextWrapper, ptr| {
             // SAFETY: caller must guarantee - we only delegate callback
             unsafe {
                 callback(ctx.0, ptr);

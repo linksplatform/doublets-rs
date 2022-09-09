@@ -1,6 +1,6 @@
 use crate::{
     logging::{DoubletsFFILogHandle, Format, Level, LogFFICallback},
-    FFICallbackContext,
+    FFIContext,
 };
 
 use tracing::error;
@@ -15,7 +15,7 @@ pub extern "C" fn doublets_activate_env_logger() {
 
 #[no_mangle]
 pub unsafe extern "C" fn doublets_create_log_handle(
-    ctx: FFICallbackContext,
+    ctx: FFIContext,
     callback: LogFFICallback,
     max_level: Level,
     format: Format,

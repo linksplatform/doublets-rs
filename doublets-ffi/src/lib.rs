@@ -17,7 +17,7 @@ type c_void = std::ffi::c_void;
 #[allow(non_camel_case_types)]
 type c_char = std::ffi::c_char;
 
-pub type FFICallbackContext = *mut c_void;
+pub type FFIContext = *mut c_void;
 
 /// [`Send`] and [`Sync`] wrapper on [`FFICallbackContext`]
 ///
@@ -26,8 +26,8 @@ pub type FFICallbackContext = *mut c_void;
 ///
 /// Otherwise value not use in multithreading context
 #[derive(Clone, Copy)]
-pub struct FFICallbackContextWrapper(FFICallbackContext);
+pub struct FFIContextWrapper(FFIContext);
 
 /// Guarantee by caller side
-unsafe impl Send for FFICallbackContextWrapper {}
-unsafe impl Sync for FFICallbackContextWrapper {}
+unsafe impl Send for FFIContextWrapper {}
+unsafe impl Sync for FFIContextWrapper {}

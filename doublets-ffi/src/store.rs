@@ -6,7 +6,7 @@ use crate::{
     errors::DoubletsError,
     stable_try as tri,
     utils::{Fallible, Maybe, OwnedSlice},
-    FFICallbackContext,
+    FFIContext,
 };
 use doublets::{
     data::{Flow, LinkType},
@@ -24,9 +24,9 @@ use tracing::{debug, warn};
 
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
-type EachCallback<T> = extern "C" fn(FFICallbackContext, Link<T>) -> Flow;
+type EachCallback<T> = extern "C" fn(FFIContext, Link<T>) -> Flow;
 
-type CUDCallback<T> = extern "C" fn(FFICallbackContext, Link<T>, Link<T>) -> Flow;
+type CUDCallback<T> = extern "C" fn(FFIContext, Link<T>, Link<T>) -> Flow;
 
 pub struct StoreHandle<T: LinkType> {
     pointer: Box<dyn Doublets<T>>,
@@ -204,7 +204,7 @@ pub unsafe extern "C" fn create<T: LinkType>(
     handle: &mut StoreHandle<T>,
     query: *const T,
     len: u32,
-    ctx: FFICallbackContext,
+    ctx: FFIContext,
     callback: CUDCallback<T>,
 ) -> Fallible<Flow, DoubletsError<T>> {
     let query = query_from_raw(query, len);
@@ -239,7 +239,7 @@ pub unsafe extern "C" fn each<T: LinkType>(
     handle: &StoreHandle<T>,
     query: *const T,
     len: u32,
-    ctx: FFICallbackContext,
+    ctx: FFIContext,
     callback: EachCallback<T>,
 ) -> Flow {
     let query = query_from_raw(query, len);
@@ -306,7 +306,7 @@ pub unsafe extern "C" fn update<T: LinkType>(
     len_q: u32,
     change: *const T,
     len_c: u32,
-    ctx: FFICallbackContext,
+    ctx: FFIContext,
     callback: CUDCallback<T>,
 ) -> Fallible<Flow, DoubletsError<T>> {
     let handler = move |before, after| callback(ctx, before, after);
@@ -342,7 +342,7 @@ pub unsafe extern "C" fn delete<T: LinkType>(
     handle: &mut StoreHandle<T>,
     query: *const T,
     len: u32,
-    ctx: FFICallbackContext,
+    ctx: FFIContext,
     callback: CUDCallback<T>,
 ) -> Fallible<Flow, DoubletsError<T>> {
     let handler = move |before, after| callback(ctx, before, after);

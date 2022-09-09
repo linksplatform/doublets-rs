@@ -7,7 +7,7 @@ use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
     store::{create, doublets_create_united_store_u64, StoreHandle},
-    FFICallbackContext,
+    FFIContext,
 };
 use std::{
     ffi::{c_char, CStr, CString},
@@ -15,11 +15,11 @@ use std::{
     ptr::{null, null_mut},
 };
 
-unsafe extern "C" fn callback(_: FFICallbackContext, ptr: *const c_char) {
+unsafe extern "C" fn callback(_: FFIContext, ptr: *const c_char) {
     print!("{}", CStr::from_ptr(ptr).to_str().unwrap());
 }
 
-extern "C" fn create_cb<F>(ctx: FFICallbackContext, before: Link<u64>, after: Link<u64>) -> Flow
+extern "C" fn create_cb<F>(ctx: FFIContext, before: Link<u64>, after: Link<u64>) -> Flow
 where
     F: FnMut(Link<u64>, Link<u64>),
 {

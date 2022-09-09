@@ -3,7 +3,7 @@
 use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
-    FFICallbackContext,
+    FFIContext,
 };
 use std::{
     ffi::{c_char, CStr, CString},
@@ -11,7 +11,7 @@ use std::{
 };
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
-unsafe extern "C" fn callback(ctx: FFICallbackContext, ptr: *const c_char) {
+unsafe extern "C" fn callback(ctx: FFIContext, ptr: *const c_char) {
     let str = CStr::from_ptr(ptr).to_str().unwrap();
     let ctx = &mut *(ctx as *mut usize);
 

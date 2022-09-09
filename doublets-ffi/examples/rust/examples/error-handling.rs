@@ -9,7 +9,7 @@ use doublets_ffi::{
     logging::{Format, Level},
     store::{constants_from_store, create_unit_store, delete, free_store},
     utils::Fallible,
-    FFICallbackContext,
+    FFIContext,
 };
 use std::{
     ffi::{c_char, CStr, CString},
@@ -17,11 +17,11 @@ use std::{
     ptr::null_mut,
 };
 
-unsafe extern "C" fn callback(_: FFICallbackContext, ptr: *const c_char) {
+unsafe extern "C" fn callback(_: FFIContext, ptr: *const c_char) {
     print!("{}", CStr::from_ptr(ptr).to_str().unwrap());
 }
 
-extern "C" fn create_cb(_: FFICallbackContext, _: Link<u64>, _: Link<u64>) -> Flow {
+extern "C" fn create_cb(_: FFIContext, _: Link<u64>, _: Link<u64>) -> Flow {
     Flow::Continue
 }
 

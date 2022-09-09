@@ -3,14 +3,14 @@
 use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
-    FFICallbackContext,
+    FFIContext,
 };
 use std::{
     ffi::{c_char, CStr},
     ptr,
 };
 
-unsafe extern "C" fn callback(_: FFICallbackContext, ptr: *const c_char) {
+unsafe extern "C" fn callback(_: FFIContext, ptr: *const c_char) {
     let cstr = CStr::from_ptr(ptr);
     print!("{}", cstr.to_str().unwrap());
 }
