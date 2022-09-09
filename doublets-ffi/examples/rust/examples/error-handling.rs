@@ -4,7 +4,7 @@ use doublets::{
 };
 use doublets_ffi::{
     constants::Constants,
-    errors::{free_error, read_error, DoubletsResult},
+    errors::{free_error, read_error, DoubletsError},
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
     store::{constants_from_store, create_unit_store, delete, free_store},
@@ -33,8 +33,8 @@ fn main() {
         let result =
             create_unit_store::<u64>(path.as_ptr(), Constants::from(LinksConstants::external()));
         let mut handle = match result {
-            DoubletsResult::Handle(handle) => handle,
-            DoubletsResult::Continue | DoubletsResult::Break => unreachable!(),
+            DoubletsError::Handle(handle) => handle,
+            DoubletsError::Continue | DoubletsError::Break => unreachable!(),
             error => {
                 panic!("unexpected error: {}", error)
             }
@@ -45,7 +45,7 @@ fn main() {
         let query = [1 /* not exists index */, any, any];
         let result = delete::<u64>(&mut handle, query.as_ptr(), 3, null_mut(), create_cb);
 
-        if let DoubletsResult::Continue | DoubletsResult::Break = result {
+        if let DoubletsError::Continue | DoubletsError::Break = result {
             unreachable!()
         } else {
             let memchr = |buf: &[u8]| buf.iter().position(|x| *x == 0).unwrap();

@@ -3,9 +3,9 @@
 use crate::{
     c_char,
     constants::Constants,
-    errors::{DoubletsResult, OwnedSlice},
+    errors::DoubletsError,
     stable_try as tri,
-    utils::Maybe,
+    utils::{Fallible, Maybe, OwnedSlice},
     FFICallbackContext,
 };
 use doublets::{
@@ -83,16 +83,8 @@ unsafe fn query_from_raw<'a, T>(query: *const T, len: u32) -> &'a [T] {
     thin_query_from_raw(query, len)
 }
 
-impl<T: LinkType> DoubletsResult<T> {
-    pub fn from_branch(flow: Flow) -> Self {
-        if let Flow::Continue = flow {
-            DoubletsResult::Continue
-        } else {
-            DoubletsResult::Break
-        }
-    }
-
-    pub fn from_err(err: Error<T>) -> Self {
+impl<T: LinkType> From<Error<T>> for DoubletsError<T> {
+    fn from(err: Error<T>) -> Self {
         match err {
             Error::NotExists(link) => Self::NotExists(link),
             Error::HasUsages(usages) => Self::HasUsages(OwnedSlice::leak(usages)),
@@ -104,43 +96,16 @@ impl<T: LinkType> DoubletsResult<T> {
             Error::Other(other) => Self::Other(Box::new(other)),
         }
     }
-
-    pub fn is_ok(&self) -> bool {
-        matches!(self, Self::Break | Self::Continue | Self::Handle(_))
-    }
-
-    pub fn is_err(&self) -> bool {
-        !self.is_ok()
-    }
 }
 
-impl<T: LinkType> From<Flow> for DoubletsResult<T> {
-    fn from(flow: Flow) -> Self {
-        Self::from_branch(flow)
-    }
-}
-
-impl<T: LinkType> From<Box<StoreHandle<T>>> for DoubletsResult<T> {
-    fn from(handle: Box<StoreHandle<T>>) -> Self {
-        Self::Handle(handle)
-    }
-}
-
-fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsResult<T> {
+fn acquire_error<T: LinkType>(err: Error<T>) -> DoubletsError<T> {
     // It can be very expensive to handle each error
     debug!(op_error = % err);
-    DoubletsResult::from_err(err)
+    err.into()
 }
 
-fn acquire_result<Ok, T>(result: Result<Ok, Error<T>>) -> DoubletsResult<T>
-where
-    T: LinkType,
-    Ok: Into<DoubletsResult<T>>,
-{
-    match result {
-        Ok(ok) => ok.into(),
-        Err(err) => acquire_error(err),
-    }
+fn acquire_result<Ok, T: LinkType>(result: Result<Ok, Error<T>>) -> Fallible<Ok, DoubletsError<T>> {
+    result.map_err(acquire_error).into()
 }
 
 #[tracing::instrument(
@@ -165,7 +130,7 @@ where
 pub unsafe extern "C" fn create_unit_store<T: LinkType>(
     path: *const c_char,
     constants: Constants<T>,
-) -> DoubletsResult<T> {
+) -> Fallible<Box<StoreHandle<T>>, DoubletsError<T>> {
     let result: Result<_, Error<T>> = tri! {
         let path = CStr::from_ptr(path).to_str().unwrap();
         let mem = FileMapped::from_path(path)?;
@@ -241,7 +206,7 @@ pub unsafe extern "C" fn create<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResult<T> {
+) -> Fallible<Flow, DoubletsError<T>> {
     let query = query_from_raw(query, len);
     let handler = move |before, after| callback(ctx, before, after);
     handle
@@ -276,13 +241,10 @@ pub unsafe extern "C" fn each<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: EachCallback<T>,
-) -> DoubletsResult<T> {
+) -> Flow {
     let query = query_from_raw(query, len);
     let handler = move |link| callback(ctx, link);
-    handle
-        .assume_ref()
-        .each_by(query, handler)
-        .pipe(DoubletsResult::from_branch)
+    handle.assume_ref().each_by(query, handler)
 }
 
 #[tracing::instrument(
@@ -346,7 +308,7 @@ pub unsafe extern "C" fn update<T: LinkType>(
     len_c: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResult<T> {
+) -> Fallible<Flow, DoubletsError<T>> {
     let handler = move |before, after| callback(ctx, before, after);
     let query = query_from_raw(query, len_q);
     let change = query_from_raw(change, len_c);
@@ -382,7 +344,7 @@ pub unsafe extern "C" fn delete<T: LinkType>(
     len: u32,
     ctx: FFICallbackContext,
     callback: CUDCallback<T>,
-) -> DoubletsResult<T> {
+) -> Fallible<Flow, DoubletsError<T>> {
     let handler = move |before, after| callback(ctx, before, after);
     let query = query_from_raw(query, len);
     handle
