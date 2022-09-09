@@ -5,7 +5,7 @@ pub mod errors;
 pub mod export;
 pub mod logging;
 pub mod store;
-mod utils;
+pub mod utils;
 
 pub(crate) use utils::stable_try;
 
