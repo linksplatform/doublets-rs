@@ -52,22 +52,22 @@ jobs:
       - name: Run tests
         run: cargo test ${{ matrix.features }} --release -- --nocapture
 
-  clippy:
-    name: clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Install Rust clippy
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-          components: clippy
-      - uses: Swatinem/rust-cache@v1
-      - name: "clippy --all"
-        run: cargo clippy --all --tests --all-features
+  # clippy:
+  #   name: clippy
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: true
+  #     - name: Install Rust clippy
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: nightly
+  #         override: true
+  #         components: clippy
+  #     - uses: Swatinem/rust-cache@v1
+  #     - name: "clippy --all"
+  #       run: cargo clippy --all --tests --all-features
 
   miri:
     runs-on: ubuntu-latest
