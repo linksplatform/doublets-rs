@@ -24,7 +24,7 @@ use std::{
 #[repr(transparent)]
 #[derive(Default)]
 pub struct Void {
-    _nonzero: u8,
+    _nonzero: [u8; 0],
 }
 
 #[repr(C, usize)]
