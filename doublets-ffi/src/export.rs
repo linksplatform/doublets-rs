@@ -3,16 +3,6 @@ use crate::{
     FFIContext,
 };
 
-use tracing::error;
-
-/// Basic logger. For advanced use [`doublets_create_log_handle`]
-#[no_mangle]
-pub extern "C" fn doublets_activate_env_logger() {
-    if tracing_subscriber::fmt::try_init().is_err() {
-        error!("Cannot re-init env logger, this should only be called once");
-    }
-}
-
 #[no_mangle]
 pub unsafe extern "C" fn doublets_create_log_handle(
     ctx: FFIContext,

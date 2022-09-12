@@ -15,13 +15,9 @@ use std::{
     ptr::{self, NonNull},
 };
 
-/// С/C++ not allow zero-sized types. `u8` it's a repr of (in C/C++)
-/// with `sizeof == 1` and `alignof == 1`:
-///
-/// <code>
-/// struct Void {};
-/// </code>
-#[repr(transparent)]
+/// repr C type unit type
+/// with `sizeof == 0` and `alignof == 1`:
+#[repr(C)]
 #[derive(Default)]
 pub struct Void {
     _nonzero: [u8; 0],

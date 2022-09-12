@@ -92,7 +92,7 @@ impl<T: LinkType> From<Error<T>> for DoubletsError<T> {
             Error::LimitReached(limit) => Self::LimitReached(limit),
             // these errors are difficult to handle as data
             // I hope no one will be offended if we alloc them at the heap
-            Error::AllocFailed(alloc) => Self::AllocFailed(Box::new(alloc)),
+            Error::AllocFailed(alloc) => Self::AllocFailed(Box::new(Box::new(alloc))),
             Error::Other(other) => Self::Other(Box::new(other)),
         }
     }

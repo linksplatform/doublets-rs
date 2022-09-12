@@ -62,7 +62,9 @@ pub enum Format {
     Json,
 }
 
-pub struct DoubletsFFILogHandle;
+pub struct DoubletsFFILogHandle {
+    _non_exhaustive: (),
+}
 
 impl DoubletsFFILogHandle {
     pub fn new(
@@ -134,6 +136,8 @@ impl DoubletsFFILogHandle {
             );
         };
 
-        Self
+        Self {
+            _non_exhaustive: (),
+        }
     }
 }

@@ -19,19 +19,15 @@ pub enum DoubletsError<T: LinkType> {
     LimitReached(T),
     HasUsages(OwnedSlice<Link<T>>),
     AlreadyExists(Doublet<T>),
-    AllocFailed(Box<mem::Error>),
+    AllocFailed(Box<OpaqueError>),
     Other(Box<OpaqueError>),
 }
 
 impl<T: LinkType> DoubletsError<T> {
     #[cfg(unstable_backtrace)]
     fn backtrace(&self) -> Option<&Backtrace> {
-        fn erasure(err: &mem::Error) -> &dyn error::Error {
-            err as _
-        }
-
         match self {
-            DoubletsError::AllocFailed(err) => erasure(err).request_ref(),
+            DoubletsError::AllocFailed(err) => err.request_ref(),
             DoubletsError::Other(err) => err.request_ref(),
             _ => None,
         }
