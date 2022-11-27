@@ -1,8 +1,9 @@
 [workspace]
 
 members = [
-    "doublets-ffi",
     "doublets",
+    "doublets-ffi",
+    "doublets-ffi/examples/rust",
 
     # dev
     "dev-deps/mem-rs",
