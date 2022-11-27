@@ -18,9 +18,20 @@ use std::{
 /// repr C type unit type
 /// with `sizeof == 0` and `alignof == 1`:
 #[repr(C)]
-#[derive(Default)]
-pub struct Void {
+pub struct None {
     _nonzero: [u8; 0],
+}
+
+impl None {
+    pub fn new() -> Self {
+        Self { _nonzero: [] }
+    }
+}
+
+impl Debug for None {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "None value")
+    }
 }
 
 #[repr(C, usize)]
@@ -29,21 +40,22 @@ pub enum Fallible<T, E> {
     Err(E),
 }
 
-impl<T, E> Fallible<T, E> {
+impl<T, E: Debug> Fallible<T, E> {
     pub fn unwrap(self) -> T {
-        if let Self::Ok(val) = self {
-            val
-        } else {
-            panic!("called `Fallible::unwrap()` on a `Err` value")
+        match self {
+            Self::Ok(val) => val,
+            Self::Err(err) => {
+                panic!("called `Fallible::unwrap()` on a `Err` value: {err:?}")
+            }
         }
     }
 }
 
-pub type Maybe<T> = Fallible<T, Void>;
+pub type Maybe<T> = Fallible<T, None>;
 
 impl<T> Maybe<T> {
     pub fn none() -> Self {
-        Self::Err(Void::default())
+        Self::Err(None::new())
     }
 }
 
