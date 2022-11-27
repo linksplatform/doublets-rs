@@ -8,7 +8,6 @@ mod prepare;
 use proc_macro::{Level, Span};
 use std::collections::HashMap;
 
-
 use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,

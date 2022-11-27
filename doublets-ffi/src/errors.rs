@@ -1,5 +1,5 @@
 use crate::c_char;
-use doublets::{data::LinkType, mem, Doublet, Link};
+use doublets::{data::LinkType, Doublet, Link};
 #[cfg(unstable_backtrace)]
 use std::backtrace::Backtrace;
 use std::{
@@ -8,7 +8,6 @@ use std::{
     fmt::{self, Debug, Display, Formatter},
     ptr,
 };
-use tracing::warn;
 
 type OpaqueError = Box<dyn error::Error>;
 

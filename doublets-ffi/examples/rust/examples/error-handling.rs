@@ -6,7 +6,7 @@ use doublets::{
 };
 use doublets_ffi::{
     constants::Constants,
-    errors::{free_error, read_error, DoubletsError},
+    errors::{free_error, read_error},
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
     store::{constants_from_store, create_unit_store, delete, free_store},
@@ -15,7 +15,7 @@ use doublets_ffi::{
 };
 use std::{
     error::Error,
-    ffi::{c_char, CStr, CString},
+    ffi::{c_char, CStr},
     fs,
     ptr::null_mut,
 };
