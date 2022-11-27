@@ -10,7 +10,7 @@ use doublets_ffi::{
     export::{doublets_create_log_handle, doublets_free_log_handle},
     logging::{Format, Level},
     store::{constants_from_store, create_unit_store, delete, free_store},
-    utils::{Fallible, Maybe},
+    utils::Fallible,
     FFIContext,
 };
 use std::{
