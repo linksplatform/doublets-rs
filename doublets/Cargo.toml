@@ -24,7 +24,7 @@ tap = { version = "1.0.1" }
 cfg-if = { version = "1.0.0" }
 thiserror = { version = "1.0.30" }
 leak_slice = { version = "0.2.0" }
-bumpalo = { version = "3.10.0", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
 
 # platform
 data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
@@ -51,7 +51,7 @@ full = ["platform", "rayon", "small-search"]
 tap = { version = "1.0.1" }
 rand = { version = "0.8.5" }
 criterion = { version = "0.3.6" }
-bumpalo = { version = "3.10.0", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
 mimalloc = { version = "0.1.29", default-features = false }
 rpmalloc = "0.2.0"
 tinyvec = { version = "1.6.0", features = ["alloc"] }
