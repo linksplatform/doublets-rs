@@ -29,6 +29,7 @@ jobs:
           profile: minimal
           toolchain: nightly-2022-08-22
           components: rustfmt, clippy
+          default: true
       - name: Cache cargo
         uses: actions/cache@v2
         with:
