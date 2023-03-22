@@ -7,6 +7,10 @@ fn iter(c: &mut Criterion) {
     let mut store = Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
     let _any = store.constants().any;
 
+    for _ in 0..1000000 {
+        store.create_point().unwrap();
+    }
+
     c.bench_function("create_poing", |b| {
         b.iter(|| {
             for _ in 0..100 {
