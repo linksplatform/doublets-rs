@@ -106,11 +106,9 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install criterion
-        run: cargo install --version 0.3.5 criterion
-
       - name: Build benchmark
         run: cargo build --release --bench benchmark
 
       - name: Run benchmark
         run: cargo bench --bench benchmark
+
