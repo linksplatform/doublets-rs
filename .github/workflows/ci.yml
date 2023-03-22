@@ -87,9 +87,10 @@ jobs:
     name: Benchmark
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
+      - - name: Checkout code
+          uses: actions/checkout@v2
+          with:
+            submodules: trueg
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
