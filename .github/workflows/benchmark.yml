@@ -30,12 +30,15 @@ jobs:
           toolchain: nightly-2022-08-22
           components: rustfmt, clippy
           default: true
-      - uses: actions-rs/cargo@v1
+      - name: Build benchmark
+        uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --all-features
+          args: --release --all-features --bench iter
           toolchain: nightly-2022-08-22
       - name: Build benchmark
-        run: cargo +nightly build --release --bench iter
-      - name: Run benchmark
-        run: cargo +nightly bench --bench iter
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: --release --all-features --bench iter
+          toolchain: nightly-2022-08-22
