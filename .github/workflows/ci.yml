@@ -46,7 +46,7 @@ jobs:
           submodules: true
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: nightly-2022-08-22
           override: true
       - name: Run tests
         run: cargo test ${{ matrix.features }} --release -- --nocapture
@@ -76,7 +76,7 @@ jobs:
           submodules: true
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2022-08-22
       - name: Run miri
         run: |
           cd ci
