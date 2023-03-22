@@ -1,12 +1,4 @@
 [workspace]
-
-
-[dependencies]
-doublets-ffi = { path = "/doublets-ffi/ffi-attributes" }
-doublets = { path = "/doublets" }
-platform-data = { path = "/dev-deps/data-rs" }
-
-
 members = [
     "doublets-ffi",
     "doublets",
@@ -19,6 +11,7 @@ members = [
     # internal
     "integration"
 ]
+
 # in global rework
 exclude = [
     "doublets-decorators",
