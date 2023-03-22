@@ -1,5 +1,4 @@
 [workspace]
-
 members = [
     "doublets-ffi",
     "doublets",
@@ -12,6 +11,7 @@ members = [
     # internal
     "integration"
 ]
+
 # in global rework
 exclude = [
     "doublets-decorators",
