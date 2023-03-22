@@ -109,8 +109,8 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build benchmark
-        run: cargo build --release --bench benchmark +nightly
+        run: cargo +nightly build --release --bench benchmark
 
       - name: Run benchmark
-        run: cargo bench --bench benchmark +nightly
+        run: cargo +nightly bench --bench benchmark
 
