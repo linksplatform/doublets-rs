@@ -61,7 +61,7 @@ jobs:
       - name: Install Rust clippy
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: nightly-2022-08-22
           override: true
           components: clippy
       - uses: Swatinem/rust-cache@v1
