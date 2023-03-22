@@ -30,14 +30,11 @@ jobs:
           toolchain: nightly-2022-08-22
           components: rustfmt, clippy
           default: true
-      - name: Cache cargo
-        uses: actions/cache@v2
+      - uses: actions-rs/cargo@v1
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          command: build
+          args: --release --all-features
+          toolchain: nightly
       - name: Build benchmark
         run: cargo +nightly build --release --bench iter
       - name: Run benchmark
