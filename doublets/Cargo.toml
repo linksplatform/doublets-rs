@@ -51,7 +51,7 @@ full = ["platform", "rayon", "small-search"]
 [dev-dependencies]
 tap = { version = "1.0.1" }
 rand = { version = "0.8.5" }
-criterion = { version = "0.3.6" }
+criterion = { version = "0.4.0" }
 bumpalo = { version = "3.10.0", features = ["allocator_api", "collections"] }
 mimalloc = { version = "0.1.29", default-features = false }
 rpmalloc = "0.2.0"
