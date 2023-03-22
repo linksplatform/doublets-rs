@@ -27,9 +27,8 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: 1.63.0
+          toolchain: nightly-2022-08-22
           components: rustfmt, clippy
-          target: x86_64-unknown-linux-gnu
       - name: Cache cargo
         uses: actions/cache@v2
         with:
