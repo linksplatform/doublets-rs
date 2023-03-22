@@ -1,4 +1,4 @@
-name: CI
+name: Benchmark
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{rust_nightly}}
+          toolchain: ${{env.rust_nightly}}
           components: rustfmt, clippy
       - name: Cache cargo
         uses: actions/cache@v2
