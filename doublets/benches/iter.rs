@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion, Throughput};
 use data::Flow::Continue;
 use doublets::{split::Store, Doublets, DoubletsExt, Links};
 use mem::Global;
@@ -10,6 +10,15 @@ fn iter(c: &mut Criterion) {
     for _ in 0..1_000_000 {
         store.create_point().unwrap();
     }
+
+    c.bench_function("create_poing", |b| {
+        b.iter(|| {
+            for _ in 0..1000000 {
+                store.create_point().unwrap();
+            }
+        });
+    }).throughput(Throughput::Elements(100));
+
 
     (1..=1_000_000).filter(|x| x % 172 == 0).for_each(|x| {
         store.delete(x).unwrap();

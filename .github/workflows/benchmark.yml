@@ -1,0 +1,44 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  RUST_BACKTRACE: 1
+  #  later
+  #  RUSTFLAGS: -Dwarnings
+  CARGO_TERM_COLOR: always
+
+  rust_nightly: nightly-2022-07-23
+
+jobs:
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly-2022-08-22
+          components: rustfmt, clippy
+          default: true
+      - name: Build benchmark
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --bench iter
+          toolchain: nightly-2022-08-22
+      - name: Run benchmark
+        uses: actions-rs/cargo@v1
+        with:
+          command: bench
+          args: --all-features --bench iter
+          toolchain: nightly-2022-08-22
