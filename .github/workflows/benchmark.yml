@@ -7,19 +7,14 @@ on:
     branches: [ "main" ]
 
 env:
-  RUST_BACKTRACE: 1
-  #  later
-  #  RUSTFLAGS: -Dwarnings
-  CARGO_TERM_COLOR: always
-
-  rust_nightly: nightly-2022-07-23
+  toolchain: nightly-2022-08-22
 
 jobs:
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
         with:
           submodules: true
@@ -27,18 +22,16 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2022-08-22
+          toolchain: ${{env.toolchain}}
           components: rustfmt, clippy
           default: true
       - name: Build benchmark
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --all-features --bench iter
-          toolchain: nightly-2022-08-22
+          args: --release --all-features
       - name: Run benchmark
         uses: actions-rs/cargo@v1
         with:
           command: bench
-          args: --all-features --bench iter
-          toolchain: nightly-2022-08-22
+          args: --all-features
