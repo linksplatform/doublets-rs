@@ -7,7 +7,7 @@ fn iter(c: &mut Criterion) {
     let mut store = Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
     let _any = store.constants().any;
 
-    for _ in 0..1000000 {
+    for _ in 0..1_000_000 {
         store.create_point().unwrap();
     }
 
@@ -15,14 +15,14 @@ fn iter(c: &mut Criterion) {
         store.delete(x).unwrap();
     });
 
-    group.bench_function("iter", |b| {
+    c.bench_function("iter", |b| {
         b.iter(|| {
             store.iter().for_each(|item| {
                 black_box(item);
             })
         });
     });
-    group.bench_function("each", |b| {
+    c.bench_function("each", |b| {
         b.iter(|| {
             store.each(|link| {
                 black_box(link);
@@ -30,7 +30,7 @@ fn iter(c: &mut Criterion) {
             });
         });
     });
-    group.bench_function("each_with_vec", |b| {
+    c.bench_function("each_with_vec", |b| {
         b.iter(|| {
             let mut vec = Vec::with_capacity(store.count());
             store.each(|link| {
