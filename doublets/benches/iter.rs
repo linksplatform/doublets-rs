@@ -60,4 +60,5 @@ fn create_point(c: &mut Criterion) {
 }
 
 criterion_group!(benches, iter);
+criterion_group!(benches, create_point);
 criterion_main!(benches);
