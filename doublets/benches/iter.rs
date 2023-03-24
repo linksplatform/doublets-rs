@@ -45,7 +45,7 @@ fn iter(c: &mut Criterion) {
 fn create_point(c: &mut Criterion) {
     let mut store = Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
 
-    let n = 100;
+    let n = 1_000_000;
 
     let mut group = c.benchmark_group("create_point");
     group.throughput(Throughput::Elements(n));
