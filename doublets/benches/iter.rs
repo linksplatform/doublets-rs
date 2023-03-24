@@ -11,27 +11,18 @@ fn iter(c: &mut Criterion) {
         store.create_point().unwrap();
     }
 
-    c.bench_function("create_poing", |b| {
-        b.iter(|| {
-            for _ in 0..100 {
-                store.create_point().unwrap();
-            }
-        });
-    }).throughput(Throughput::Elements(100));
-
-
     (1..=1_000_000).filter(|x| x % 172 == 0).for_each(|x| {
         store.delete(x).unwrap();
     });
 
-    c.bench_function("iter", |b| {
+    group.bench_function("iter", |b| {
         b.iter(|| {
             store.iter().for_each(|item| {
                 black_box(item);
             })
         });
     });
-    c.bench_function("each", |b| {
+    group.bench_function("each", |b| {
         b.iter(|| {
             store.each(|link| {
                 black_box(link);
@@ -39,7 +30,7 @@ fn iter(c: &mut Criterion) {
             });
         });
     });
-    c.bench_function("each_with_vec", |b| {
+    group.bench_function("each_with_vec", |b| {
         b.iter(|| {
             let mut vec = Vec::with_capacity(store.count());
             store.each(|link| {
@@ -47,6 +38,23 @@ fn iter(c: &mut Criterion) {
                 Continue
             });
             black_box(vec);
+        });
+    });
+}
+
+fn create_point(c: &mut Criterion) {
+    let mut store = Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
+
+    let n = 100;
+
+    let mut group = c.benchmark_group("create_point");
+    group.throughput(Throughput::Elements(n));
+
+    group.bench_function("create_point", |b| {
+        b.iter(|| {
+            for _ in 0..n {
+                store.create_point().unwrap();
+            }
         });
     });
 }
