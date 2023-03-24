@@ -13,7 +13,7 @@ fn iter(c: &mut Criterion) {
 
     c.bench_function("create_poing", |b| {
         b.iter(|| {
-            for _ in 0..100 {
+            for _ in 0..1000000 {
                 store.create_point().unwrap();
             }
         });
