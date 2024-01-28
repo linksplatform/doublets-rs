@@ -1,5 +1,7 @@
 # Doublets
 
+[![Build Status][actions-badge]][actions-url]
+
 [actions-badge]: https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg
 [actions-url]: https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain
 
