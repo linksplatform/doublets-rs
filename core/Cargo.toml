@@ -1,0 +1,21 @@
+[package]
+name = "platform-data"
+version = "0.1.0-beta.3"
+edition = "2018"
+authors = ["uselesssgoddess", "Linksplatform Team <linksplatformtechnologies@gmail.com>"]
+license = "LGPL-3.0"
+repository = "https://github.com/linksplatform/platform-rs"
+homepage = "https://github.com/linksplatform/platform-rs"
+description = """
+Data for linksplatform
+"""
+
+[dependencies]
+beef = "~0.5"
+funty = "2.0.0"
+thiserror = "1.0.31"
+trees = { path = "../trees", package = "platform-trees" }
+
+[dev-dependencies]
+quickcheck = "1.0.3"
+quickcheck_macros = "1.0.0"
