@@ -1,18 +1,24 @@
 [workspace]
 
 members = [
-    "doublets-ffi",
+    #"doublets-ffi",
     "doublets",
 
     # dev
-    "dev-deps/mem-rs",
-    "dev-deps/data-rs",
-    "dev-deps/trees-rs",
+    #"dev-deps/mem-rs",
+    #"dev-deps/data-rs",
+    #"dev-deps/trees-rs",
 
     # internal
-    "integration"
+    # "integration"
 ]
 # in global rework
 exclude = [
     "doublets-decorators",
 ]
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+overflow-checks = false
+panic = 'abort'

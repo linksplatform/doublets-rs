@@ -1,6 +1,7 @@
-use std::fmt::{self, Debug, Formatter};
-
-use data::{LinkType, Query, ToQuery};
+use {
+    core::LinkType,
+    std::fmt::{self, Debug, Display, Formatter},
+};
 
 #[derive(Default, Eq, PartialEq, Clone, Hash)]
 #[repr(C)]
@@ -12,23 +13,11 @@ pub struct Link<T: LinkType> {
 
 impl<T: LinkType> Link<T> {
     #[inline]
-    #[must_use]
-    pub fn nothing() -> Self {
-        Self::default()
-    }
-
-    #[inline]
-    #[must_use]
     pub const fn new(index: T, source: T, target: T) -> Self {
-        Self {
-            index,
-            source,
-            target,
-        }
+        Self { index, source, target }
     }
 
     #[inline]
-    #[must_use]
     pub const fn point(val: T) -> Self {
         Self::new(val, val, val)
     }
@@ -42,7 +31,6 @@ impl<T: LinkType> Link<T> {
     }
 
     #[inline]
-    #[must_use]
     pub(crate) const unsafe fn from_slice_unchecked(slice: &[T]) -> Self {
         match slice {
             [index, source, target] => Self::new(*index, *source, *target),
@@ -51,39 +39,26 @@ impl<T: LinkType> Link<T> {
     }
 
     #[inline]
-    #[must_use]
-    pub fn is_null(&self) -> bool {
-        *self == Self::point(T::funty(0))
-    }
-
-    #[inline]
-    #[must_use]
-    pub fn is_full(&self) -> bool {
-        self.index == self.source && self.index == self.target
-    }
-
-    #[inline]
-    #[must_use]
-    pub fn is_partial(&self) -> bool {
-        self.index == self.source || self.index == self.target
-    }
-
-    #[inline]
-    #[must_use]
     pub const fn as_slice(&self) -> &[T] {
         // SAFETY: Link is repr(C) and therefore is safe to transmute to a slice
         unsafe { &*(self as *const Self).cast::<[T; 3]>() }
     }
 }
 
-impl<T: LinkType> Debug for Link<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {} {}", self.index, self.source, self.target)
+impl<T: LinkType + PartialEq> Link<T> {
+    #[inline]
+    pub fn is_full(&self) -> bool {
+        self.index == self.source && self.index == self.target
+    }
+
+    #[inline]
+    pub fn is_part(&self) -> bool {
+        self.index == self.source || self.index == self.target
     }
 }
 
-impl<T: LinkType> ToQuery<T> for Link<T> {
-    fn to_query(&self) -> Query<'_, T> {
-        self.as_slice().to_query()
+impl<T: LinkType + Display> Debug for Link<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {} {}", self.index, self.source, self.target)
     }
 }

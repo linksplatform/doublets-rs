@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 
-use data::LinkType;
+use core::LinkType;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct Doublet<T: LinkType> {
@@ -16,6 +16,6 @@ impl<T: LinkType> Doublet<T> {
 
 impl<T: LinkType> Display for Doublet<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}->{}", self.source, self.target)
+        write!(f, "{:?}->{:?}", self.source, self.target)
     }
 }

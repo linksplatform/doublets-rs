@@ -1,13 +1,10 @@
 use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
-use std::{
-    default::default,
-    ops::{ControlFlow, Try},
-};
+use std::ops::{ControlFlow, Try};
 
 use crate::{Error, Fuse, Link};
-use data::{Flow, LinkType, LinksConstants, ToQuery};
+use core::{Flow, LinkType, LinksConstants, ToQuery};
 
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
 

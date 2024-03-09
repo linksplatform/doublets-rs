@@ -1,580 +1,323 @@
-use crate::{
-    mem::{
-        header::LinksHeader,
-        traits::UnitList,
-        unit::{
-            LinkPart, LinksSourcesRecursionlessSizeBalancedTree,
-            LinksTargetsRecursionlessSizeBalancedTree, UnusedLinks,
-        },
-        UnitTree,
+use {
+    crate::{
+        mem::{unit::LinkRepr, Header},
+        Link,
     },
-    Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
+    core::{LinkType, Repr},
+    either::Either,
+    mem::RawMem,
+    smallvec::SmallVec,
+    std::{cmp, marker::PhantomData, mem::size_of},
 };
-use data::{Flow, LinkType, LinksConstants, ToQuery};
-use leak_slice::LeakSliceExt;
-use mem::{RawMem, DEFAULT_PAGE_SIZE};
 
-use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
-
-pub struct Store<
-    T: LinkType,
-    M: RawMem<LinkPart<T>>,
-    TS: UnitTree<T> = LinksSourcesRecursionlessSizeBalancedTree<T>,
-    TT: UnitTree<T> = LinksTargetsRecursionlessSizeBalancedTree<T>,
-    TU: UnitList<T> = UnusedLinks<T>,
-> {
-    mem: M,
-    mem_ptr: NonNull<[LinkPart<T>]>,
-    reserve_step: usize,
-    constants: LinksConstants<T>,
-
-    sources: TS,
-    targets: TT,
-    unused: TU,
+pub enum Param<T> {
+    Any,
+    Some(T),
 }
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Store<T, M, TS, TT, TU>
-{
-    #[cfg(not(miri))]
-    const SIZE_STEP: usize = 2_usize.pow(20);
-    #[cfg(miri)]
-    const SIZE_STEP: usize = 2_usize.pow(10);
+impl<T> Param<T> {
+    pub fn option(self) -> Option<T> {
+        match self {
+            Param::Any => None,
+            Param::Some(x) => Some(x),
+        }
+    }
+}
 
-    pub fn new(mem: M) -> Result<Store<T, M>, LinksError<T>> {
-        Self::with_constants(mem, LinksConstants::new())
+impl<T> From<T> for Param<T> {
+    fn from(value: T) -> Self {
+        Param::Some(value)
+    }
+}
+
+pub struct IterNever<T> {
+    _marker: PhantomData<T>,
+}
+
+impl<T> Iterator for IterNever<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        unreachable!()
+    }
+}
+
+macro_rules! choice {
+    [$ty:ty] => (Either<$ty, IterNever<Link<T>>>);
+    [$ty:ty, $($tail:ty),+] => (Either<$ty, choice![$($tail),+]>);
+
+    (0 <- $x:expr) => (Either::Left($x));
+    (1 <- $x:expr) => (Either::Right(choice!(0 <- $x)));
+    (2 <- $x:expr) => (Either::Right(choice!(1 <- $x)));
+    (3 <- $x:expr) => (Either::Right(choice!(2 <- $x)));
+    (4 <- $x:expr) => (Either::Right(choice!(3 <- $x)));
+    (5 <- $x:expr) => (Either::Right(choice!(4 <- $x)));
+    (6 <- $x:expr) => (Either::Right(choice!(5 <- $x)));
+    (7 <- $x:expr) => (Either::Right(choice!(6 <- $x)));
+    (8 <- $x:expr) => (Either::Right(choice!(7 <- $x)));
+    (9 <- $x:expr) => (Either::Right(choice!(8 <- $x)));
+}
+
+// temp constant
+pub const STEP: usize = 1024 * 1024;
+
+pub struct Store<T, M, Sources: ?Sized = super::Sources<T>, Targets: ?Sized = super::Targets<T>> {
+    mem: M,
+    _marker: PhantomData<(T, fn(Sources), fn(Targets))>,
+}
+
+impl<
+    T: LinkType,
+    M: RawMem<Item = LinkRepr<T>>,
+    Sources: super::Tree<Item = T> + ?Sized,
+    Targets: super::Tree<Item = T> + ?Sized,
+> Store<T, M, Sources, Targets>
+{
+    pub fn new(mem: M) -> Self {
+        Self { mem, _marker: Default::default() }.init()
     }
 
-    pub fn with_constants(
-        mem: M,
-        constants: LinksConstants<T>,
-    ) -> Result<Store<T, M>, LinksError<T>> {
-        let dangling_mem = NonNull::slice_from_raw_parts(NonNull::dangling(), 0);
-        let sources =
-            LinksSourcesRecursionlessSizeBalancedTree::new(constants.clone(), dangling_mem);
-        let targets =
-            LinksTargetsRecursionlessSizeBalancedTree::new(constants.clone(), dangling_mem);
-        let unused = UnusedLinks::new(dangling_mem);
-        let mut new = Store::<
-            T,
-            M,
-            LinksSourcesRecursionlessSizeBalancedTree<T>,
-            LinksTargetsRecursionlessSizeBalancedTree<T>,
-            UnusedLinks<T>,
-        > {
-            mem,
-            mem_ptr: dangling_mem,
-            reserve_step: Self::SIZE_STEP,
-            constants,
-            sources,
-            targets,
-            unused,
+    // header getters is safe because there is no way to call it avoiding `.init()`
+    fn header(&self) -> Header<T> {
+        // Safety: first has similar layout with header
+        unsafe { *(self.mem.allocated().get_unchecked(0) as *const _ as *const Header<T>) }
+    }
+
+    fn header_mut(&mut self) -> &mut Header<T> {
+        // Safety: first has similar layout with header
+        unsafe { std::mem::transmute(&mut self.mem.allocated_mut()[0]) }
+    }
+
+    fn grow_exact(&mut self, cap: usize) {
+        unsafe {
+            self.grow_exact_dumb(cap);
+            self.header_mut().reserved.add_addr(cap);
+        }
+    }
+
+    unsafe fn grow_exact_dumb(&mut self, cap: usize) {
+        self.mem.grow_zeroed_exact(cap).unwrap();
+    }
+
+    fn init(mut self) -> Self {
+        // grow to read header
+        unsafe {
+            self.grow_exact_dumb(1);
+        }
+
+        // header was initialized before
+        unsafe {
+            self.grow_exact_dumb(cmp::max(STEP, self.header().allocated.addr()));
+        }
+
+        // `reserved` is a size of allocated link reprs, excluding header
+        self.header_mut().reserved = T::from_addr(self.mem.allocated().len() - 1);
+        self
+    }
+
+    unsafe fn get_repr_unchecked(&self, idx: T) -> &LinkRepr<T> {
+        self.mem.allocated().get_unchecked(idx.addr())
+    }
+
+    unsafe fn get_repr_unchecked_mut(&mut self, idx: T) -> &mut LinkRepr<T> {
+        self.mem.allocated_mut().get_unchecked_mut(idx.addr())
+    }
+
+    fn get_link(&self, idx: T) -> Option<Link<T>> {
+        if self.is_exist(idx) {
+            let &LinkRepr { source, target, .. } = unsafe { self.get_repr_unchecked(idx) };
+            Some(Link::new(idx, source, target))
+        } else {
+            None
+        }
+    }
+
+    fn try_get_link(&self, idx: T) -> Result<Link<T>, !> {
+        self.get_link(idx).ok_or_else(|| todo!())
+    }
+
+    fn is_uninit(&self, _idx: T) -> bool {
+        false
+    }
+
+    fn is_valid(&self, idx: usize) -> bool {
+        idx < (u64::MAX >> (64 - size_of::<T>() * 8)) as usize
+    }
+
+    fn is_exist(&self, idx: T) -> bool {
+        idx.addr() > 0 && idx.addr() <= self.header().allocated.addr() && !self.is_uninit(idx)
+    }
+
+    fn sources(&self) -> &Sources {
+        Sources::with(self.mem.allocated())
+    }
+
+    fn sources_mut(&mut self) -> &mut Sources {
+        Sources::with_mut(self.mem.allocated_mut())
+    }
+
+    fn targets(&self) -> &Targets {
+        Targets::with(self.mem.allocated())
+    }
+
+    fn targets_mut(&mut self) -> &mut Targets {
+        Targets::with_mut(self.mem.allocated_mut())
+    }
+
+    pub fn create_new(&mut self) -> Link<T> {
+        let header = self.header();
+        let idx = if header.first_free.addr() == 0 {
+            if !self.is_valid(header.allocated.addr() + 1) {
+                todo!("overflows")
+            }
+
+            if header.allocated.addr() + 1 >= header.reserved.addr() {
+                self.grow_exact(STEP);
+            }
+
+            self.header_mut().allocated.add_addr(1);
+            self.header().allocated
+        } else {
+            todo!()
         };
 
-        // SAFETY: Without this, the code will become unsafe
-        unsafe {
-            new.init()?;
-        }
-        Ok(new)
+        Link::new(idx, T::from_addr(0), T::from_addr(0))
     }
 
-    unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
-        let mem = NonNull::from(self.mem.alloc(DEFAULT_PAGE_SIZE)?);
-        self.update_mem(mem);
+    fn update_one(&mut self, idx: T, (source, target): (T, T)) -> Result<(), !> {
+        let link = self.try_get_link(idx)?;
 
-        let header = self.get_header().clone();
-        let capacity = cmp::max(self.reserve_step, header.allocated.as_usize());
-        let mem = self.mem.alloc(capacity)?.leak();
-        self.update_mem(mem);
+        if let Some(source) = Repr::from_addr(link.source) {
+            let root = self.header().sources_root;
+            self.header_mut().sources_root =
+                Some(self.sources_mut().detach(root, source).ok_or_else(|| todo!())?);
+        }
 
-        let reserved = self.mem.allocated();
+        if let Some(target) = Repr::from_addr(link.target) {
+            let root = self.header().targets_root;
+            self.header_mut().targets_root =
+                Some(self.targets_mut().detach(root, target).ok_or_else(|| todo!())?);
+        }
 
-        let header = self.mut_header();
-        header.reserved = T::try_from(reserved - 1).expect("always ok");
+        let place = unsafe { self.get_repr_unchecked_mut(idx) };
+        *place = LinkRepr { source, target, ..*place };
+
+        if let Some(source) = Repr::from_addr(source) {
+            let root = self.header().sources_root;
+            self.header_mut().sources_root =
+                Some(self.sources_mut().attach(root, source).ok_or_else(|| todo!())?);
+        }
+
+        if let Some(target) = Repr::from_addr(target) {
+            let root = self.header().targets_root;
+            self.header_mut().targets_root =
+                Some(self.targets_mut().attach(root, target).ok_or_else(|| todo!())?)
+        }
+
         Ok(())
     }
 
-    fn mut_from_mem<'a, U>(mut ptr: NonNull<[U]>, index: usize) -> Option<&'a mut U> {
-        if index < ptr.len() {
-            // SAFETY: `ptr` is non-dangling slice
-            Some(unsafe {
-                let slice = ptr.as_mut();
-                &mut slice[index]
-            })
-        } else {
-            None
-        }
+    fn count_total(&self) -> usize {
+        let Header { allocated, free, .. } = self.header();
+        allocated.addr() - free.addr()
     }
 
-    fn get_from_mem<'a, U>(mem: NonNull<[U]>, index: usize) -> Option<&'a U> {
-        Self::mut_from_mem(mem, index).map(|v| &*v)
-    }
+    fn count_of(
+        &self,
+        (index, source, target): (impl Into<Param<T>>, impl Into<Param<T>>, impl Into<Param<T>>),
+    ) -> usize {
+        use Param::{Any, Some};
 
-    fn get_header(&self) -> &LinksHeader<T> {
-        // SAFETY: `LinksHeader` and `IndexPart` layout are equivalent
-        unsafe {
-            Self::get_from_mem(self.mem_ptr, 0)
-                .map(|x| transmute(x))
-                .expect("Header should be in index memory")
-        }
-    }
-
-    fn mut_header(&mut self) -> &mut LinksHeader<T> {
-        // SAFETY: `LinksHeader` and `IndexPart` layout are equivalent
-        unsafe {
-            Self::mut_from_mem(self.mem_ptr, 0)
-                .map(|x| transmute(x))
-                .expect("Header should be in index memory")
-        }
-    }
-
-    fn get_link_part(&self, index: T) -> &LinkPart<T> {
-        Self::get_from_mem(self.mem_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
-    }
-
-    unsafe fn get_link_part_unchecked(&self, index: T) -> &LinkPart<T> {
-        Self::get_from_mem(self.mem_ptr, index.as_usize()).unwrap_unchecked()
-    }
-
-    fn mut_link_part(&mut self, index: T) -> &mut LinkPart<T> {
-        Self::mut_from_mem(self.mem_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
-    }
-
-    unsafe fn mut_source_root(&mut self) -> *mut T {
-        &mut self.mut_header().root_as_source
-    }
-
-    unsafe fn mut_target_root(&mut self) -> *mut T {
-        &mut self.mut_header().root_as_target
-    }
-
-    unsafe fn detach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.detach(&mut *root, index);
-    }
-
-    unsafe fn detach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.detach(&mut *root, index);
-    }
-
-    unsafe fn attach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.attach(&mut *root, index);
-    }
-
-    unsafe fn attach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.attach(&mut *root, index);
-    }
-
-    unsafe fn detach_source(&mut self, index: T) {
-        let root = self.mut_source_root();
-        self.detach_source_unchecked(root, index);
-    }
-
-    unsafe fn detach_target(&mut self, index: T) {
-        let root = self.mut_target_root();
-        self.detach_target_unchecked(root, index);
-    }
-
-    unsafe fn attach_source(&mut self, index: T) {
-        let root = self.mut_source_root();
-        self.attach_source_unchecked(root, index);
-    }
-
-    unsafe fn attach_target(&mut self, index: T) {
-        let root = self.mut_target_root();
-        self.attach_target_unchecked(root, index);
-    }
-
-    fn get_total(&self) -> T {
-        let header = self.get_header();
-        header.allocated - header.free
-    }
-
-    fn is_unused(&self, link: T) -> bool {
-        let header = self.get_header();
-        if link <= header.allocated && header.first_free != link {
-            // SAFETY: link part memory is allocated
-            let link = unsafe { self.get_link_part_unchecked(link) };
-            // If the link is unused (that is, it was created but deleted),
-            // its search tree size is 0,
-            // its source and target will be used to build a LinkedList from similar links
-            link.size_as_source == T::funty(0) && link.source != T::funty(0)
-        } else {
-            true
-        }
-    }
-
-    fn exists(&self, link: T) -> bool {
-        let constants = self.constants();
-        let header = self.get_header();
-
-        link >= *constants.internal_range.start()
-            && link <= header.allocated
-            && !self.is_unused(link)
-    }
-
-    fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
-        self.mem_ptr = mem;
-        self.targets.update_mem(mem);
-        self.sources.update_mem(mem);
-        self.unused.update_mem(mem);
-    }
-
-    unsafe fn get_link_unchecked(&self, index: T) -> Link<T> {
-        debug_assert!(self.exists(index));
-
-        let raw = self.get_link_part_unchecked(index);
-        Link::new(index, raw.source, raw.target)
-    }
-
-    fn each_core(&self, handler: ReadHandler<'_, T>, query: &[T]) -> Flow {
-        let constants = self.constants();
-
-        if query.is_empty() {
-            for index in T::funty(1)..=self.get_header().allocated {
-                if let Some(link) = self.get_link(index) {
-                    handler(link)?;
+        match (index.into(), source.into(), target.into()) {
+            (Any, Any, Any) => self.count_total(),
+            (Any, Some(source), Any) => {
+                if let Option::Some(root) = self.header().sources_root {
+                    self.sources().count_usage(root, source)
+                } else {
+                    0
                 }
             }
-            return Flow::Continue;
-        }
-
-        let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
-
-        if query.len() == 1 {
-            return if index == any {
-                self.each_core(handler, &[])
-            } else if let Some(link) = self.get_link(index) {
-                handler(link)
-            } else {
-                Flow::Continue
-            };
-        }
-
-        if query.len() == 2 {
-            let value = query[1];
-            return if index == any {
-                if value == any {
-                    self.each_core(handler, &[])
+            (Any, Any, Some(target)) => {
+                if let Option::Some(root) = self.header().targets_root {
+                    self.targets().count_usage(root, target)
                 } else {
-                    self.each_core(handler, &[index, value, any])?;
-                    self.each_core(handler, &[index, any, value])
+                    0
                 }
-            } else if let Some(link) = self.get_link(index) {
-                if value == any || link.source == value || link.target == value {
-                    handler(link)
-                } else {
-                    Flow::Continue
-                }
-            } else {
-                Flow::Continue
-            };
+            }
+            other => self.each_iter(other).count(),
         }
-
-        if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
-
-            return if index == any {
-                if (source, target) == (any, any) {
-                    self.each_core(handler, &[])
-                } else if source == any {
-                    self.targets.each_usages(target, handler)
-                } else if target == any {
-                    self.sources.each_usages(source, handler)
-                } else {
-                    let link = self.sources.search(source, target);
-                    self.get_link(link).map_or(Flow::Continue, handler)
-                }
-            } else if let Some(link) = self.get_link(index) {
-                if (target, source) == (any, any) {
-                    handler(link) // TODO: add (x * *) search test
-                } else if target != any && source != any {
-                    if (source, target) == (link.source, link.target) {
-                        handler(link)
-                    } else {
-                        Flow::Continue
-                    }
-                } else if source == any {
-                    if link.target == target {
-                        handler(link)
-                    } else {
-                        Flow::Continue
-                    }
-                } else if target == any {
-                    if link.source == source {
-                        handler(link)
-                    } else {
-                        Flow::Continue
-                    }
-                } else {
-                    Flow::Continue
-                }
-            } else {
-                Flow::Continue
-            };
-        }
-        todo!()
-    }
-}
-
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Links<T> for Store<T, M, TS, TT, TU>
-{
-    fn constants(&self) -> &LinksConstants<T> {
-        &self.constants
     }
 
-    fn count_links(&self, query: &[T]) -> T {
-        if query.is_empty() {
-            return self.get_total();
-        };
+    fn each_iter(
+        &self,
+        (index, source, target): (impl Into<Param<T>>, impl Into<Param<T>>, impl Into<Param<T>>),
+    ) -> impl Iterator<Item = Link<T>> + '_ {
+        use Param::{Any, Some};
 
-        let constants = self.constants();
-        let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
-
-        if query.len() == 1 {
-            return if index == any {
-                self.get_total()
-            } else if self.exists(index) {
-                T::funty(1)
-            } else {
-                T::funty(0)
-            };
-        }
-
-        if query.len() == 2 {
-            let value = query[1];
-            return if index == any {
-                if value == any {
-                    self.get_total()
-                } else {
-                    self.targets.count_usages(value) + self.sources.count_usages(value)
-                }
-            } else {
-                if !self.exists(index) {
-                    return T::funty(0);
-                }
-                if value == any {
-                    return T::funty(1);
-                }
-
-                return self.get_link(index).map_or_else(
-                    || T::funty(0),
-                    |stored| {
-                        if stored.source == value || stored.target == value {
-                            T::funty(1)
-                        } else {
-                            T::funty(0)
-                        }
-                    },
+        let infer: choice![_, _, _] = match (index.into(), source.into(), target.into()) {
+            (Any, Any, Any) => choice!(0 <- {
+                (1..self.header().allocated.addr() )
+                    .map(T::from_addr)
+                    .filter_map(|idx| self.get_link(idx))
+            }),
+            (Some(index), Any, Any) => choice!(1 <- {
+                self.get_link(index).into_iter()
+            }),
+            (Any, Some(source), Some(target)) => choice!(1 <- {
+                let index = self.sources().find(
+                    self.header().sources_root,
+                    source,
+                    target,
                 );
-            };
-        }
-
-        if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
-
-            return if index == any {
-                if (target, source) == (any, any) {
-                    self.get_total()
-                } else if source == any {
-                    self.targets.count_usages(target)
-                } else if target == any {
-                    self.sources.count_usages(source)
+                self.get_link(T::from_repr(index)).into_iter()
+            }),
+            (Some(index), source, target) => choice!(1 <- {
+                // compare with `source` and `target` or skip
+                if let Option::Some(link) = self.get_link(index)
+                    && source.option().map(|s| s.addr() == link.source.addr()).unwrap_or(true)
+                    && target.option().map(|t| t.addr() == link.target.addr()).unwrap_or(true)
+                {
+                    Option::Some(link)
                 } else {
-                    let link = self.sources.search(source, target);
-                    if link == constants.null {
-                        T::funty(0)
-                    } else {
-                        T::funty(1)
-                    }
+                    None
                 }
-            } else if !self.exists(index) {
-                T::funty(0)
-            } else if (source, target) == (any, any) {
-                T::funty(1)
-            } else {
-                let link = unsafe { self.get_link_unchecked(index) };
-                if source != any && target != any {
-                    if (link.source, link.target) == (source, target) {
-                        T::funty(1)
-                    } else {
-                        T::funty(0)
-                    }
-                } else if source == any {
-                    if link.target == target {
-                        T::funty(1)
-                    } else {
-                        T::funty(0)
-                    }
-                } else if target == any {
-                    if link.source == source {
-                        T::funty(1)
-                    } else {
-                        T::funty(0)
-                    }
-                } else {
-                    T::funty(0)
-                }
-            };
-        }
-        todo!()
-    }
-
-    fn create_links(
-        &mut self,
-        _query: &[T],
-        handler: WriteHandler<'_, T>,
-    ) -> Result<Flow, LinksError<T>> {
-        let constants = self.constants();
-        let header = self.get_header();
-        let mut free = header.first_free;
-        if free == constants.null {
-            let max_inner = *constants.internal_range.end();
-            if header.allocated >= max_inner {
-                return Err(LinksError::LimitReached(max_inner));
-            }
-
-            if header.allocated >= header.reserved - T::funty(1) {
-                let mem = self
-                    .mem
-                    .alloc(self.mem.allocated() + self.reserve_step)?
-                    .leak();
-                self.update_mem(mem);
-                let reserved = self.mem.allocated();
-                let header = self.mut_header();
-                header.reserved = T::try_from(reserved).expect("always ok");
-            }
-            let header = self.mut_header();
-            header.allocated += T::funty(1);
-            free = header.allocated;
-        } else {
-            self.unused.detach(free);
-        }
-        Ok(handler(
-            Link::nothing(),
-            Link::new(free, T::funty(0), T::funty(0)),
-        ))
-    }
-
-    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
-        self.each_core(handler, &query.to_query()[..])
-    }
-
-    fn update_links(
-        &mut self,
-        query: &[T],
-        change: &[T],
-        handler: WriteHandler<'_, T>,
-    ) -> Result<Flow, LinksError<T>> {
-        let index = query[0];
-        let source = change[1];
-        let target = change[2];
-        let old_source = source;
-        let old_target = target;
-
-        let link = self.try_get_link(index)?;
-
-        if link.source != T::funty(0) {
-            // SAFETY: Here index detach from sources
-            // by default source is zero
-            unsafe {
-                self.detach_source(index);
-            }
-        }
-        if link.target != T::funty(0) {
-            // SAFETY: Here index detach from targets
-            // by default target is zero
-            unsafe {
-                self.detach_target(index);
-            }
-        }
-
-        let place = self.mut_link_part(index);
-        place.source = source;
-        place.target = target;
-        let place = place.clone();
-
-        if place.source != T::funty(0) {
-            // SAFETY: Here index attach to sources
-            unsafe {
-                self.attach_source(index);
-            }
-        }
-        if place.target != T::funty(0) {
-            // SAFETY: Here index attach to targets
-            unsafe {
-                self.attach_target(index);
-            }
-        }
-
-        Ok(handler(
-            Link::new(index, old_source, old_target),
-            Link::new(index, source, target),
-        ))
-    }
-
-    fn delete_links(
-        &mut self,
-        query: &[T],
-        handler: WriteHandler<'_, T>,
-    ) -> Result<Flow, LinksError<T>> {
-        let index = query[0];
-
-        let link = self.try_get_link(index)?;
-        self.update(index, T::funty(0), T::funty(0))?;
-
-        let header = self.get_header();
-        match index.cmp(&header.allocated) {
-            Ordering::Less => self.unused.attach_as_first(index),
-            Ordering::Equal => {
-                let allocated = self.get_header().allocated;
-                let header = self.mut_header();
-                header.allocated = allocated - T::funty(1);
-
-                loop {
-                    let allocated = self.get_header().allocated;
-                    if !(allocated > T::funty(0) && self.is_unused(allocated)) {
-                        break;
-                    }
-                    self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::funty(1);
-                }
-            }
-            // fixme: possible unreachable_unchecked
-            Ordering::Greater => unreachable!(),
-        }
-
-        Ok(handler(link, Link::nothing()))
+                .into_iter()
+            }),
+            (Any, Some(source), Any) => choice!(2 <- {
+                Stacked::new(|stack| {
+                    self.sources().each_usages(self.header().sources_root, source, |link| {
+                        stack.push(link)
+                    });
+                })
+            }),
+            (Any, Any, Some(target)) => choice!(2 <- {
+                Stacked::new(|stack| {
+                    self.targets().each_usages(self.header().targets_root, target, |link| {
+                        stack.push(link)
+                    });
+                })
+            }),
+        };
+        infer
     }
 }
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Doublets<T> for Store<T, M, TS, TT, TU>
-{
-    fn get_link(&self, index: T) -> Option<Link<T>> {
-        if self.exists(index) {
-            // SAFETY: links is exists
-            Some(unsafe { self.get_link_unchecked(index) })
-        } else {
-            None
-        }
+struct Stacked<T> {
+    stack: SmallVec<T, 8>,
+}
+
+impl<T> Stacked<T> {
+    pub fn new(mut iter: impl FnMut(&mut SmallVec<T, 8>)) -> Self {
+        let mut stack = SmallVec::new();
+        iter(&mut stack);
+        Self { stack }
     }
 }
 
-// SAFETY: No read operations result in a write
-unsafe impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Sync for Store<T, M, TS, TT, TU>
-{
-}
+impl<T> Iterator for Stacked<T> {
+    type Item = T;
 
-// SAFETY: All data is moved together with the `Store`
-unsafe impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Send for Store<T, M, TS, TT, TU>
-{
+    fn next(&mut self) -> Option<Self::Item> {
+        self.stack.pop()
+    }
 }

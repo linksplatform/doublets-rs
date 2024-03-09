@@ -1,15 +1,14 @@
-use data::LinkType;
+use {core::LinkType, std::mem::MaybeUninit};
 
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
-pub struct LinksHeader<T: LinkType> {
+pub struct Header<T: LinkType> {
     pub allocated: T,
     pub reserved: T,
     pub free: T,
     pub first_free: T,
-    pub root_as_source: T,
-    pub root_as_target: T,
     pub last_free: T,
-
-    __reserved_8: T,
+    pub sources_root: Option<T::Repr>,
+    pub targets_root: Option<T::Repr>,
+    __pad_to_8: MaybeUninit<T>,
 }

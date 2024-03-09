@@ -1,15 +1,16 @@
-#![feature(fn_traits)]
-#![feature(generators)]
-#![feature(try_trait_v2)]
-#![feature(default_free_fn)]
-#![feature(unboxed_closures)]
-#![feature(nonnull_slice_from_raw_parts)]
-#![feature(associated_type_defaults)]
-#![feature(type_alias_impl_trait)]
-#![feature(maybe_uninit_uninit_array)]
-#![feature(allocator_api)]
-#![feature(bench_black_box)]
-#![feature(maybe_uninit_array_assume_init)]
+#![feature(
+    fn_traits,
+    try_trait_v2,
+    unboxed_closures,
+    associated_type_defaults,
+    type_alias_impl_trait,
+    maybe_uninit_uninit_array,
+    allocator_api,
+    maybe_uninit_array_assume_init,
+    impl_trait_in_assoc_type,
+    never_type
+)]
+#![feature(let_chains)]
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,
@@ -23,11 +24,7 @@
     clippy::nursery
 )]
 // for `clippy::pedantic`
-#![allow(
-    clippy::missing_errors_doc,
-    clippy::missing_panics_doc,
-    clippy::missing_safety_doc
-)]
+#![allow(clippy::missing_errors_doc, clippy::missing_panics_doc, clippy::missing_safety_doc)]
 #![deny(
     clippy::all,
     clippy::cast_lossless,
@@ -41,7 +38,7 @@
     unused_qualifications,
     unused_import_braces,
     unused_lifetimes,
-    unreachable_pub,
+    // unreachable_pub,
     trivial_numeric_casts,
     // rustdoc,
     // missing_debug_implementations,
@@ -55,12 +52,14 @@
     nonstandard_style,
 )]
 // must be fixed later
-#![allow(clippy::needless_pass_by_value, clippy::comparison_chain)]
+#![allow(clippy::needless_pass_by_value, clippy::comparison_chain, irrefutable_let_patterns)]
 
 pub mod data;
 pub mod mem;
 
-pub use self::mem::{parts, split, unit};
+pub use data::Link;
 
-pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
-pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
+//pub use self::mem::{parts, split, unit};
+
+//pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
+//pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
