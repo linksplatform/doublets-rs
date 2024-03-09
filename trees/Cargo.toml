@@ -1,0 +1,27 @@
+[package]
+name = "platform-trees"
+version = "0.1.0-beta.1"
+edition = "2018"
+authors = [
+    "uselesssgoddess",
+    "Linksplatform Team <linksplatformtechnologies@gmail.com>"
+]
+license = "Unlicense"
+repository = "https://github.com/linksplatform/Collections.Methods"
+homepage = "https://github.com/linksplatform/Collections.Methods/rust"
+
+[dependencies]
+tap = "1.0.1"
+funty = "2.0"
+
+[dev-dependencies]
+criterion = "0.5.1"
+proptest = "1.0.0"
+
+[[bench]]
+name = "bench"
+harness = false
+
+[profile.bench]
+codegen-units = 1
+lto = "fat"
