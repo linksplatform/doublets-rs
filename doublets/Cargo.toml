@@ -39,7 +39,7 @@ rayon = { version = "1.5.3", optional = true }
 mem = []
 num = []
 data = []
-more-inline = []
+inline-more = []
 small-search = ["smallvec"]
 # todo: may be internal_platform
 platform = ["mem", "num", "data"]
