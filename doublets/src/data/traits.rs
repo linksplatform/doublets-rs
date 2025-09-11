@@ -3,6 +3,7 @@ use bumpalo::Bump;
 use rayon::prelude::*;
 use std::{
     default::default,
+    iter,
     ops::{ControlFlow, Try},
 };
 
@@ -653,18 +654,27 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         self.each_iter([self.constants().any; 3])
     }
 
-    type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEach = impl Iterator<Item = Link<T>>;
 
     #[cfg_attr(feature = "more-inline", inline)]
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
-        let cap = self.count_by(query.to_query()).as_usize();
-
+        let query = query.to_query();
+        
+        // We still need to collect into a Vec first because the current architecture
+        // uses callbacks, but this prepares for future generator-based implementation
+        let cap = self.count_by(&query).as_usize();
         let mut vec = Vec::with_capacity(cap);
         self.each_by(query, &mut |link| {
             vec.push(link);
             Flow::Continue
         });
-        vec.into_iter()
+        
+        // Use from_coroutine to create an iterator from the collected data
+        iter::from_coroutine(#[coroutine] move || {
+            for link in vec {
+                yield link;
+            }
+        })
     }
 
     #[cfg(feature = "small-search")]
@@ -677,22 +687,28 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     }
 
     #[cfg(feature = "small-search")]
-    type ImplIterEachSmall =
-        impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEachSmall = impl Iterator<Item = Link<T>>;
 
     #[cfg(feature = "small-search")]
     #[cfg_attr(feature = "more-inline", inline)]
     fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall {
         // fixme: later use const generics
         const SIZE_HINT: usize = 2;
-
+        
+        let query = query.to_query();
         let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(
-            self.count_by(query.to_query()).as_usize(),
+            self.count_by(&query).as_usize(),
         );
         self.each_by(query, |link| {
             vec.push(link);
             Flow::Continue
         });
-        vec.into_iter()
+        
+        // Use from_coroutine to create an iterator from the collected data
+        iter::from_coroutine(#[coroutine] move || {
+            for link in vec {
+                yield link;
+            }
+        })
     }
 }
