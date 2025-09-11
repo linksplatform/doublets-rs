@@ -16,6 +16,11 @@ pub trait LinksTree<T: LinkType> {
     fn detach(&mut self, root: &mut T, index: T);
 
     fn attach(&mut self, root: &mut T, index: T);
+    
+    // New methods that accept memory explicitly to avoid stacked borrows issues
+    fn detach_with_mem(&mut self, mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T);
+    
+    fn attach_with_mem(&mut self, mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T);
 }
 
 pub trait UnitUpdateMem<T: LinkType> {

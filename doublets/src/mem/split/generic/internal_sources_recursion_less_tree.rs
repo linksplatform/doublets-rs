@@ -129,6 +129,16 @@ impl<T: LinkType> LinksTree<T> for InternalSourcesRecursionlessTree<T> {
     fn attach(&mut self, root: &mut T, index: T) {
         unsafe { NoRecurSzbTree::attach(self, root as *mut _, index) }
     }
+    
+    fn detach_with_mem(&mut self, _mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T) {
+        // Split trees don't use unit memory, so just delegate to normal detach
+        self.detach(root, index)
+    }
+    
+    fn attach_with_mem(&mut self, _mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T) {
+        // Split trees don't use unit memory, so just delegate to normal attach
+        self.attach(root, index)
+    }
 }
 
 impl<T: LinkType> SplitUpdateMem<T> for InternalSourcesRecursionlessTree<T> {

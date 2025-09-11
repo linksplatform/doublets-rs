@@ -151,19 +151,27 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     unsafe fn detach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.detach(&mut *root, index);
+        // Get memory pointer first to avoid overlapping borrows
+        let mem_ptr = self.mem_ptr;
+        self.sources.detach_with_mem(mem_ptr, &mut *root, index);
     }
 
     unsafe fn detach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.detach(&mut *root, index);
+        // Get memory pointer first to avoid overlapping borrows
+        let mem_ptr = self.mem_ptr;
+        self.targets.detach_with_mem(mem_ptr, &mut *root, index);
     }
 
     unsafe fn attach_source_unchecked(&mut self, root: *mut T, index: T) {
-        self.sources.attach(&mut *root, index);
+        // Get memory pointer first to avoid overlapping borrows
+        let mem_ptr = self.mem_ptr;
+        self.sources.attach_with_mem(mem_ptr, &mut *root, index);
     }
 
     unsafe fn attach_target_unchecked(&mut self, root: *mut T, index: T) {
-        self.targets.attach(&mut *root, index);
+        // Get memory pointer first to avoid overlapping borrows
+        let mem_ptr = self.mem_ptr;
+        self.targets.attach_with_mem(mem_ptr, &mut *root, index);
     }
 
     unsafe fn detach_source(&mut self, index: T) {
