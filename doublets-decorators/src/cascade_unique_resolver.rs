@@ -11,41 +11,39 @@ use crate::UniqueResolver;
 
 type Base<T, Links> = UniqueResolver<T, Links>;
 
-pub struct CascadeUniqueResolver<T: LinkType, L: Doublets<T>> {
+pub struct CascadeUniqueResolver<L: Doublets> {
     links: L,
 
-    _phantom: PhantomData<T>,
-}
+    }
 
-impl<T: LinkType, L: Doublets<T>> CascadeUniqueResolver<T, L> {
+impl<L: Doublets> CascadeUniqueResolver<L> {
     pub fn new(links: L) -> Self {
         Self {
             links,
-            _phantom: PhantomData,
-        }
+            }
     }
 }
 
-impl<T: LinkType, L: Doublets<T>> Doublets<T> for CascadeUniqueResolver<T, L> {
-    fn constants(&self) -> LinksConstants<T> {
+impl<L: Doublets> Doublets for CascadeUniqueResolver<L> {
+    fn constants(&self) -> &LinksConstants<Self::Item> {
         self.links.constants()
     }
 
-    fn count_by(&self, query: impl ToQuery<T>) -> T {
+    fn count_by(&self, query: impl ToQuery<Self::Item>) -> Self::Item {
         self.links.count_by(query)
     }
 
-    fn create_by_with<F, R>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<R, Error<T>>
+    fn create_by_with<F, R>(&mut self, query: impl ToQuery<Self::Item>, handler: F) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.create_by_with(query, handler)
     }
 
-    fn each_by<F, R>(&self, restrictions: impl ToQuery<T>, handler: F) -> R
+    fn each_by<F, R>(&self, restrictions: impl ToQuery<Self::Item>, handler: F) -> R
     where
-        F: FnMut(Link<T>) -> R,
+        F: FnMut(Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.each_by(restrictions, handler)
@@ -53,12 +51,12 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for CascadeUniqueResolver<T, L> {
 
     fn update_by_with<F, R>(
         &mut self,
-        query: impl ToQuery<T>,
-        change: impl ToQuery<T>,
+        query: impl ToQuery<Self::Item>,
+        change: impl ToQuery<Self::Item>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         let links = self.links.borrow_mut();
@@ -78,9 +76,9 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for CascadeUniqueResolver<T, L> {
         links.update_with(index, source, target, handler)
     }
 
-    fn delete_by_with<F, R>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<R, Error<T>>
+    fn delete_by_with<F, R>(&mut self, query: impl ToQuery<Self::Item>, handler: F) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.delete_by_with(query, handler)
