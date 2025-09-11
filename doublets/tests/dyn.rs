@@ -7,7 +7,7 @@ pub mod extensions;
 
 #[test]
 fn basic() -> Result<(), Error<usize>> {
-    let mut store: Box<dyn Doublets<_>> = box unit::Store::<usize, _>::new(Global::new())?;
+    let mut store: Box<dyn Doublets<Item = usize>> = box unit::Store::<usize, _>::new(Global::new())?;
 
     let a = store.create_point()?;
     let b = store.create_point()?;

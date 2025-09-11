@@ -542,13 +542,15 @@ impl<
     IT: SplitTree<T>,
     ET: SplitTree<T>,
     UL: SplitList<T>,
-> Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+> Links for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
-    fn constants(&self) -> &LinksConstants<T> {
+    type Item = T;
+    
+    fn constants(&self) -> &LinksConstants<Self::Item> {
         &self.constants
     }
 
-    fn count_links(&self, query: &[T]) -> T {
+    fn count_links(&self, query: &[Self::Item]) -> Self::Item {
         if query.is_empty() {
             return self.total();
         }
@@ -733,7 +735,7 @@ impl<
         ))
     }
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
+    fn each_links(&self, query: &[Self::Item], handler: ReadHandler<'_, Self::Item>) -> Flow {
         self.try_each_by_core(handler, query)
     }
 
@@ -858,9 +860,9 @@ impl<
     IT: SplitTree<T>,
     ET: SplitTree<T>,
     UL: SplitList<T>,
-> Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+> Doublets for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
-    fn get_link(&self, index: T) -> Option<Link<T>> {
+    fn get_link(&self, index: Self::Item) -> Option<Link<Self::Item>> {
         if self.exists(index) {
             Some(unsafe { self.get_link_unchecked(index) })
         } else {

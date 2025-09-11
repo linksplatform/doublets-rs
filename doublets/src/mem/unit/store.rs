@@ -321,13 +321,15 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 }
 
 impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Links<T> for Store<T, M, TS, TT, TU>
+    Links for Store<T, M, TS, TT, TU>
 {
-    fn constants(&self) -> &LinksConstants<T> {
+    type Item = T;
+    
+    fn constants(&self) -> &LinksConstants<Self::Item> {
         &self.constants
     }
 
-    fn count_links(&self, query: &[T]) -> T {
+    fn count_links(&self, query: &[Self::Item]) -> Self::Item {
         if query.is_empty() {
             return self.get_total();
         };
@@ -462,7 +464,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         ))
     }
 
-    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
+    fn each_links(&self, query: &[Self::Item], handler: ReadHandler<'_, Self::Item>) -> Flow {
         self.each_core(handler, &query.to_query()[..])
     }
 
@@ -555,9 +557,9 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 }
 
 impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Doublets<T> for Store<T, M, TS, TT, TU>
+    Doublets for Store<T, M, TS, TT, TU>
 {
-    fn get_link(&self, index: T) -> Option<Link<T>> {
+    fn get_link(&self, index: Self::Item) -> Option<Link<Self::Item>> {
         if self.exists(index) {
             // SAFETY: links is exists
             Some(unsafe { self.get_link_unchecked(index) })
