@@ -1,4 +1,6 @@
 use bumpalo::Bump;
+#[cfg(feature = "buffered-iter")]
+use buter::Buter;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
@@ -280,15 +282,30 @@ pub trait Doublets<T: LinkType>: Links<T> {
     {
         let query = query.to_query();
         let len = self.count_by(query.to_query()).as_usize();
-        let mut vec = Vec::with_capacity(len);
-
-        self.each_by(query, |link| {
-            vec.push(link.index);
-            Flow::Continue
-        });
+        
+        #[cfg(feature = "buffered-iter")]
+        let indices = {
+            let buter = Buter::with_capacity(len);
+            let writer = buter.writer();
+            self.each_by(query, |link| {
+                writer.extend(Some(link.index));
+                Flow::Continue
+            });
+            writer.into_iter().collect::<Vec<_>>()
+        };
+        
+        #[cfg(not(feature = "buffered-iter"))]
+        let indices = {
+            let mut vec = Vec::with_capacity(len);
+            self.each_by(query, |link| {
+                vec.push(link.index);
+                Flow::Continue
+            });
+            vec
+        };
 
         let mut handler = Fuse::new(handler);
-        for index in vec.into_iter().rev() {
+        for index in indices.into_iter().rev() {
             self.delete_with(index, &mut handler)?;
         }
         Ok(())
@@ -301,23 +318,51 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let any = self.constants().any;
-        let mut to_delete = Vec::with_capacity(
-            self.count_by([any, index, any]).as_usize()
-                + self.count_by([any, any, index]).as_usize(),
-        );
-        self.each_by([any, index, any], |link| {
-            if link.index != index {
-                to_delete.push(link.index);
-            }
-            Flow::Continue
-        });
+        let capacity = self.count_by([any, index, any]).as_usize()
+            + self.count_by([any, any, index]).as_usize();
+        
+        #[cfg(feature = "buffered-iter")]
+        let to_delete = {
+            let buter = Buter::with_capacity(capacity);
+            let writer = buter.writer();
+            
+            self.each_by([any, index, any], |link| {
+                if link.index != index {
+                    writer.extend(Some(link.index));
+                }
+                Flow::Continue
+            });
 
-        self.each_by([any, any, index], |link| {
-            if link.index != index {
-                to_delete.push(link.index);
-            }
-            Flow::Continue
-        });
+            self.each_by([any, any, index], |link| {
+                if link.index != index {
+                    writer.extend(Some(link.index));
+                }
+                Flow::Continue
+            });
+            
+            writer.into_iter().collect::<Vec<_>>()
+        };
+        
+        #[cfg(not(feature = "buffered-iter"))]
+        let to_delete = {
+            let mut vec = Vec::with_capacity(capacity);
+            
+            self.each_by([any, index, any], |link| {
+                if link.index != index {
+                    vec.push(link.index);
+                }
+                Flow::Continue
+            });
+
+            self.each_by([any, any, index], |link| {
+                if link.index != index {
+                    vec.push(link.index);
+                }
+                Flow::Continue
+            });
+            
+            vec
+        };
 
         let mut handler = Fuse::new(handler);
         for index in to_delete.into_iter().rev() {
@@ -459,21 +504,51 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let any = self.constants().any;
-        let mut usages = Vec::with_capacity(self.count_usages(index)?.as_usize());
+        let capacity = self.count_usages(index)?.as_usize();
 
-        self.each_by([any, index, any], |link| {
-            if link.index != index {
-                usages.push(link.index);
-            }
-            Flow::Continue
-        });
+        #[cfg(feature = "buffered-iter")]
+        let usages = {
+            let buter = Buter::with_capacity(capacity);
+            let writer = buter.writer();
 
-        self.each_by([any, any, index], |link| {
-            if link.index != index {
-                usages.push(link.index);
-            }
-            Flow::Continue
-        });
+            self.each_by([any, index, any], |link| {
+                if link.index != index {
+                    writer.extend(Some(link.index));
+                }
+                Flow::Continue
+            });
+
+            self.each_by([any, any, index], |link| {
+                if link.index != index {
+                    writer.extend(Some(link.index));
+                }
+                Flow::Continue
+            });
+            
+            writer.into_iter().collect::<Vec<_>>()
+        };
+
+        #[cfg(not(feature = "buffered-iter"))]
+        let usages = {
+            let mut vec = Vec::with_capacity(capacity);
+
+            self.each_by([any, index, any], |link| {
+                if link.index != index {
+                    vec.push(link.index);
+                }
+                Flow::Continue
+            });
+
+            self.each_by([any, any, index], |link| {
+                if link.index != index {
+                    vec.push(link.index);
+                }
+                Flow::Continue
+            });
+            
+            vec
+        };
+        
         Ok(usages)
     }
 
@@ -638,12 +713,25 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter {
-        let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
-        self.each_by(query, |link| {
-            vec.push(link);
-            Flow::Continue
-        });
-        vec.into_par_iter()
+        #[cfg(feature = "buffered-iter")]
+        {
+            let buter = Buter::with_capacity(self.count_by(query.to_query()).as_usize());
+            let writer = buter.writer();
+            self.each_by(query, |link| {
+                writer.extend(Some(link));
+                Flow::Continue
+            });
+            writer.into_iter().collect::<Vec<_>>().into_par_iter()
+        }
+        #[cfg(not(feature = "buffered-iter"))]
+        {
+            let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
+            self.each_by(query, |link| {
+                vec.push(link);
+                Flow::Continue
+            });
+            vec.into_par_iter()
+        }
     }
 
     type ImplIter = Self::ImplIterEach;
@@ -659,12 +747,25 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
         let cap = self.count_by(query.to_query()).as_usize();
 
-        let mut vec = Vec::with_capacity(cap);
-        self.each_by(query, &mut |link| {
-            vec.push(link);
-            Flow::Continue
-        });
-        vec.into_iter()
+        #[cfg(feature = "buffered-iter")]
+        {
+            let buter = Buter::with_capacity(cap);
+            let writer = buter.writer();
+            self.each_by(query, &mut |link| {
+                writer.extend(Some(link));
+                Flow::Continue
+            });
+            writer.into_iter().collect::<Vec<_>>().into_iter()
+        }
+        #[cfg(not(feature = "buffered-iter"))]
+        {
+            let mut vec = Vec::with_capacity(cap);
+            self.each_by(query, &mut |link| {
+                vec.push(link);
+                Flow::Continue
+            });
+            vec.into_iter()
+        }
     }
 
     #[cfg(feature = "small-search")]
@@ -686,13 +787,26 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         // fixme: later use const generics
         const SIZE_HINT: usize = 2;
 
-        let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(
-            self.count_by(query.to_query()).as_usize(),
-        );
-        self.each_by(query, |link| {
-            vec.push(link);
-            Flow::Continue
-        });
-        vec.into_iter()
+        #[cfg(feature = "buffered-iter")]
+        {
+            let buter = Buter::with_capacity(self.count_by(query.to_query()).as_usize());
+            let writer = buter.writer();
+            self.each_by(query, |link| {
+                writer.extend(Some(link));
+                Flow::Continue
+            });
+            writer.into_iter().collect::<smallvec::SmallVec<[Link<_>; SIZE_HINT]>>().into_iter()
+        }
+        #[cfg(not(feature = "buffered-iter"))]
+        {
+            let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(
+                self.count_by(query.to_query()).as_usize(),
+            );
+            self.each_by(query, |link| {
+                vec.push(link);
+                Flow::Continue
+            });
+            vec.into_iter()
+        }
     }
 }
