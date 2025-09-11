@@ -13,6 +13,18 @@ pub trait LinksTree<T: LinkType> {
 
     fn each_usages<H: FnMut(Link<T>) -> Flow + ?Sized>(&self, root: T, handler: &mut H) -> Flow;
 
+    #[cfg(feature = "rayon")]
+    fn par_each_usages(&self, root: T, buf: &mut bumpalo::collections::Vec<'_, Link<T>>) -> Result<(), ()> {
+        // Default implementation falls back to sequential
+        match self.each_usages(root, &mut |link| {
+            buf.push(link);
+            Flow::Continue
+        }) {
+            Flow::Continue => Ok(()),
+            Flow::Break => Err(()),
+        }
+    }
+
     fn detach(&mut self, root: &mut T, index: T);
 
     fn attach(&mut self, root: &mut T, index: T);
