@@ -1,5 +1,7 @@
 #![feature(fn_traits)]
-#![feature(generators)]
+#![feature(coroutines)]
+#![feature(yield_expr)]
+#![feature(iter_from_coroutine)]
 #![feature(try_trait_v2)]
 #![feature(default_free_fn)]
 #![feature(unboxed_closures)]
