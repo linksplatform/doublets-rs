@@ -126,6 +126,65 @@ fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     Flow::Continue
 }
 
+#[cfg(feature = "rayon")]
+fn par_each_usages_core<T: LinkType>(
+    this: &LinksTargetsRecursionlessSizeBalancedTree<T>,
+    base: T,
+    link: T,
+    buf: &mut bumpalo::collections::Vec<'_, Link<T>>,
+) -> Result<(), ()> {
+    use bumpalo::Bump;
+    use rayon::prelude::*;
+    
+    if link == T::funty(0) {
+        return Ok(());
+    }
+    unsafe {
+        let link_base_part = this.get_base_part(link);
+        
+        if link_base_part > base {
+            par_each_usages_core(this, base, this.get_left_or_default(link), buf)?;
+        } else if link_base_part < base {
+            par_each_usages_core(this, base, this.get_right_or_default(link), buf)?;
+        } else {
+            // Process current node
+            buf.push(this.get_link_value(link));
+            
+            // Determine if we should parallelize based on subtree size
+            let left_link = this.get_left_or_default(link);
+            let right_link = this.get_right_or_default(link);
+            
+            // Simple heuristic: parallelize if both subtrees exist
+            if left_link != T::funty(0) && right_link != T::funty(0) {
+                // Create temporary bump for parallel work
+                let left_bump = Bump::new();
+                let right_bump = Bump::new();
+                let mut left_buf = bumpalo::collections::Vec::new_in(&left_bump);
+                let mut right_buf = bumpalo::collections::Vec::new_in(&right_bump);
+                
+                // Parallel execution using rayon::join
+                let (left_result, right_result) = rayon::join(
+                    || par_each_usages_core(this, base, left_link, &mut left_buf),
+                    || par_each_usages_core(this, base, right_link, &mut right_buf),
+                );
+                
+                // Handle results
+                left_result?;
+                right_result?;
+                
+                // Merge results into main buffer
+                buf.extend(left_buf.iter().copied());
+                buf.extend(right_buf.iter().copied());
+            } else {
+                // Sequential execution for small subtrees
+                par_each_usages_core(this, base, left_link, buf)?;
+                par_each_usages_core(this, base, right_link, buf)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     fn count_usages(&self, link: T) -> T {
         unsafe {
@@ -182,6 +241,11 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
 
     fn each_usages<H: FnMut(Link<T>) -> Flow + ?Sized>(&self, root: T, handler: &mut H) -> Flow {
         each_usages_core(self, root, self.get_tree_root(), handler)
+    }
+
+    #[cfg(feature = "rayon")]
+    fn par_each_usages(&self, root: T, buf: &mut bumpalo::collections::Vec<'_, Link<T>>) -> Result<(), ()> {
+        par_each_usages_core(self, root, self.get_tree_root(), buf)
     }
 
     fn detach(&mut self, root: &mut T, index: T) {
