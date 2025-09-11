@@ -2,8 +2,7 @@ use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
-    default::default,
-    ops::{ControlFlow, Try},
+    ops::ControlFlow,
 };
 
 use crate::{Error, Fuse, Link};
@@ -653,7 +652,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         self.each_iter([self.constants().any; 3])
     }
 
-    type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEach = std::vec::IntoIter<Link<T>>;
 
     #[cfg_attr(feature = "more-inline", inline)]
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
