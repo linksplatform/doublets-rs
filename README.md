@@ -5,25 +5,24 @@
 [actions-badge]: https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg
 [actions-url]: https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain
 
-**Note: This crate requires Rust nightly (`nightly-2022-08-22` or later) due to unstable features used by platform dependencies.**
+## ⚠️ Current Build Status
 
-## Installation
+**This crate is currently not buildable** due to incompatible platform dependencies that use unstable and obsolete Rust features. The registry versions of `platform-data`, `platform-mem`, and `platform-treesmethods` contain code that is incompatible with any current Rust toolchain.
 
-Add this to your `Cargo.toml`:
+### Issues:
+- Platform dependencies use removed unstable features (`~const`, `default_free_fn`, etc.)
+- Missing or incorrect platform dependency implementations 
+- Version conflicts between thiserror and platform packages
 
-```toml
-[dependencies]
-doublets = "0.1.0-pre"
-```
+### Resolution Status:
+This is a known issue being tracked in [#18](https://github.com/linksplatform/doublets-rs/issues/18). Until the platform dependencies are updated or replaced, this crate cannot be compiled.
 
-Make sure you have the required Rust nightly toolchain installed:
+## For Developers
 
-```bash
-rustup install nightly-2022-08-22
-rustup override set nightly-2022-08-22
-```
-
-Alternatively, the project includes a `rust-toolchain.toml` file that will automatically use the correct toolchain.
+If you need to use doublets functionality, consider:
+1. Using the C# version from [linksplatform/Data.Doublets](https://github.com/linksplatform/Data.Doublets)
+2. Waiting for platform dependency updates
+3. Contributing to fix the platform dependencies
 
 ## [Overview](https://github.com/linksplatform)
 
