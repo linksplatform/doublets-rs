@@ -10,7 +10,10 @@ members = [
     "dev-deps/trees-rs",
 
     # internal
-    "integration"
+    "integration",
+    
+    # examples
+    "examples/solver"
 ]
 # in global rework
 exclude = [
