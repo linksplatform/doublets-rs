@@ -191,6 +191,22 @@ impl<T: LinkType> LinksTree<T> for LinksSourcesRecursionlessSizeBalancedTree<T> 
     fn attach(&mut self, root: &mut T, index: T) {
         unsafe { NoRecurSzbTree::attach(self, root as *mut _, index) }
     }
+    
+    fn detach_with_mem(&mut self, mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T) {
+        // Temporarily update memory reference to avoid stacked borrows
+        let old_mem = self.base.mem;
+        self.base.mem = mem;
+        unsafe { NoRecurSzbTree::detach(self, root as *mut _, index) }
+        self.base.mem = old_mem;
+    }
+    
+    fn attach_with_mem(&mut self, mem: NonNull<[LinkPart<T>]>, root: &mut T, index: T) {
+        // Temporarily update memory reference to avoid stacked borrows
+        let old_mem = self.base.mem;
+        self.base.mem = mem;
+        unsafe { NoRecurSzbTree::attach(self, root as *mut _, index) }
+        self.base.mem = old_mem;
+    }
 }
 
 impl<T: LinkType> UnitUpdateMem<T> for LinksSourcesRecursionlessSizeBalancedTree<T> {
