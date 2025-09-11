@@ -4,6 +4,9 @@ members = [
     "doublets-ffi",
     "doublets",
 
+    # web demo
+    "web-demo",
+
     # dev
     "dev-deps/mem-rs",
     "dev-deps/data-rs",

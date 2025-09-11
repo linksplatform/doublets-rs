@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Doublets Playground</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .panel h3 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .secondary {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        }
+        
+        .danger {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        }
+        
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .links-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .links-table th,
+        .links-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .links-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        
+        .links-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+        }
+        
+        .status-value {
+            color: #667eea;
+            margin-left: 5px;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background-color: #fdf2f2;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #10b981;
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 Doublets Playground</h1>
+        <p>Interactive WebAssembly demo for exploring doublets operations</p>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            Total Links: <span id="linkCount" class="status-value">0</span>
+        </div>
+        <div class="status-item">
+            Status: <span id="status" class="status-value">Ready</span>
+        </div>
+        <button id="refreshBtn" class="secondary">🔄 Refresh</button>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h3>🎛️ Operations</h3>
+            
+            <div class="control-group">
+                <button id="createPointBtn">Create Point (Self-Link)</button>
+                <div id="pointResult" class="output" style="display: none;"></div>
+            </div>
+
+            <div class="control-group">
+                <label>Create Custom Link:</label>
+                <input type="number" id="sourceInput" placeholder="Source" min="1" value="2">
+                <input type="number" id="targetInput" placeholder="Target" min="1" value="3">
+                <button id="createLinkBtn">Create Link</button>
+                <div id="linkResult" class="output" style="display: none;"></div>
+            </div>
+
+            <div class="control-group">
+                <label>Delete Link:</label>
+                <input type="number" id="deleteInput" placeholder="Link ID" min="1">
+                <button id="deleteLinkBtn" class="danger">Delete Link</button>
+                <div id="deleteResult" class="output" style="display: none;"></div>
+            </div>
+
+            <div class="control-group">
+                <label>Search Links:</label>
+                <input type="number" id="searchSource" placeholder="Source (optional)" min="1">
+                <input type="number" id="searchTarget" placeholder="Target (optional)" min="1">
+                <button id="searchBtn" class="secondary">Search</button>
+                <button id="clearSearchBtn" class="secondary">Show All</button>
+            </div>
+
+            <div class="control-group">
+                <button id="clearLogBtn" class="secondary">Clear Operations Log</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>📊 Current Links</h3>
+            <div id="linksDisplay">
+                <table class="links-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Source</th>
+                            <th>Target</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linksTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>📝 Operations Log</h3>
+        <div id="operationsLog" class="output">
+            Doublets playground initialized. Ready for operations!
+        </div>
+    </div>
+
+    <script type="module">
+        import init, { DoubletsDemo, greet } from './pkg/doublets_web_demo.js';
+
+        let demo = null;
+
+        async function initDemo() {
+            try {
+                await init();
+                demo = new DoubletsDemo();
+                greet("WebAssembly User");
+                updateDisplay();
+                showMessage("Doublets demo initialized successfully!", "success");
+            } catch (error) {
+                console.error("Failed to initialize demo:", error);
+                showMessage(`Failed to initialize: ${error}`, "error");
+            }
+        }
+
+        function showMessage(message, type = "info") {
+            const existing = document.querySelector('.message');
+            if (existing) {
+                existing.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            document.body.insertBefore(messageDiv, document.body.firstChild);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        function updateDisplay() {
+            if (!demo) return;
+
+            try {
+                const state = demo.get_state();
+                
+                // Update link count
+                document.getElementById('linkCount').textContent = state.count;
+                
+                // Update links table
+                const tableBody = document.getElementById('linksTableBody');
+                tableBody.innerHTML = '';
+                
+                state.links.forEach(link => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = link.id;
+                    row.insertCell(1).textContent = link.source;
+                    row.insertCell(2).textContent = link.target;
+                });
+                
+                // Update operations log
+                const logDiv = document.getElementById('operationsLog');
+                logDiv.innerHTML = state.operations.join('<br>') || 'No operations yet.';
+                logDiv.scrollTop = logDiv.scrollHeight;
+                
+                document.getElementById('status').textContent = 'Ready';
+            } catch (error) {
+                console.error("Error updating display:", error);
+                showMessage(`Display update error: ${error}`, "error");
+            }
+        }
+
+        function setLoading(isLoading) {
+            document.body.classList.toggle('loading', isLoading);
+            document.getElementById('status').textContent = isLoading ? 'Processing...' : 'Ready';
+        }
+
+        // Event listeners
+        document.getElementById('createPointBtn').addEventListener('click', async () => {
+            if (!demo) return;
+            
+            setLoading(true);
+            try {
+                const pointId = demo.create_point();
+                document.getElementById('pointResult').style.display = 'block';
+                document.getElementById('pointResult').textContent = `Created point with ID: ${pointId}`;
+                updateDisplay();
+                showMessage(`Point created successfully! ID: ${pointId}`, "success");
+            } catch (error) {
+                showMessage(`Error creating point: ${error}`, "error");
+            }
+            setLoading(false);
+        });
+
+        document.getElementById('createLinkBtn').addEventListener('click', async () => {
+            if (!demo) return;
+            
+            const source = parseInt(document.getElementById('sourceInput').value);
+            const target = parseInt(document.getElementById('targetInput').value);
+            
+            if (isNaN(source) || isNaN(target) || source < 1 || target < 1) {
+                showMessage("Please enter valid source and target values (> 0)", "error");
+                return;
+            }
+            
+            setLoading(true);
+            try {
+                const linkId = demo.create_link(source, target);
+                document.getElementById('linkResult').style.display = 'block';
+                document.getElementById('linkResult').textContent = `Created link with ID: ${linkId}`;
+                updateDisplay();
+                showMessage(`Link created successfully! ID: ${linkId}`, "success");
+            } catch (error) {
+                showMessage(`Error creating link: ${error}`, "error");
+            }
+            setLoading(false);
+        });
+
+        document.getElementById('deleteLinkBtn').addEventListener('click', async () => {
+            if (!demo) return;
+            
+            const linkId = parseInt(document.getElementById('deleteInput').value);
+            
+            if (isNaN(linkId) || linkId < 1) {
+                showMessage("Please enter a valid link ID (> 0)", "error");
+                return;
+            }
+            
+            setLoading(true);
+            try {
+                const deleted = demo.delete_link(linkId);
+                document.getElementById('deleteResult').style.display = 'block';
+                document.getElementById('deleteResult').textContent = deleted 
+                    ? `Link ${linkId} deleted successfully`
+                    : `Link ${linkId} not found`;
+                updateDisplay();
+                showMessage(deleted ? `Link ${linkId} deleted successfully!` : `Link ${linkId} not found`, deleted ? "success" : "error");
+                document.getElementById('deleteInput').value = '';
+            } catch (error) {
+                showMessage(`Error deleting link: ${error}`, "error");
+            }
+            setLoading(false);
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', async () => {
+            if (!demo) return;
+            
+            const source = document.getElementById('searchSource').value;
+            const target = document.getElementById('searchTarget').value;
+            
+            try {
+                const sourceNum = source ? parseInt(source) : null;
+                const targetNum = target ? parseInt(target) : null;
+                
+                const results = demo.search_links(sourceNum, targetNum);
+                
+                const tableBody = document.getElementById('linksTableBody');
+                tableBody.innerHTML = '';
+                
+                results.forEach(link => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = link.id;
+                    row.insertCell(1).textContent = link.source;
+                    row.insertCell(2).textContent = link.target;
+                });
+                
+                showMessage(`Found ${results.length} matching links`, "success");
+            } catch (error) {
+                showMessage(`Search error: ${error}`, "error");
+            }
+        });
+
+        document.getElementById('clearSearchBtn').addEventListener('click', () => {
+            document.getElementById('searchSource').value = '';
+            document.getElementById('searchTarget').value = '';
+            updateDisplay();
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            updateDisplay();
+            showMessage("Display refreshed", "success");
+        });
+
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            if (!demo) return;
+            demo.clear_operations_log();
+            updateDisplay();
+            showMessage("Operations log cleared", "success");
+        });
+
+        // Initialize the demo
+        initDemo();
+    </script>
+</body>
+</html>

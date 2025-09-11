@@ -11,6 +11,16 @@ later
 
 later
 
+## Web Demo
+
+Try the interactive WebAssembly demo: [**🔗 Doublets Playground**](https://linksplatform.github.io/doublets-rs/)
+
+The web demo allows you to:
+- Create and manage doublets interactively
+- Explore link relationships visually  
+- Learn doublets concepts in your browser
+- See real-time operations and results
+
 ## Example
 
 A basic operations in doublets:
