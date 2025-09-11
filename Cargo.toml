@@ -4,11 +4,6 @@ members = [
     "doublets-ffi",
     "doublets",
 
-    # dev
-    "dev-deps/mem-rs",
-    "dev-deps/data-rs",
-    "dev-deps/trees-rs",
-
     # internal
     "integration"
 ]

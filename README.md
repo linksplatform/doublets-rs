@@ -5,7 +5,24 @@
 [actions-badge]: https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg
 [actions-url]: https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain
 
-later
+## ⚠️ Current Build Status
+
+**This crate is currently not buildable** due to incompatible platform dependencies that use unstable and obsolete Rust features. The registry versions of `platform-data`, `platform-mem`, and `platform-treesmethods` contain code that is incompatible with any current Rust toolchain.
+
+### Issues:
+- Platform dependencies use removed unstable features (`~const`, `default_free_fn`, etc.)
+- Missing or incorrect platform dependency implementations 
+- Version conflicts between thiserror and platform packages
+
+### Resolution Status:
+This is a known issue being tracked in [#18](https://github.com/linksplatform/doublets-rs/issues/18). Until the platform dependencies are updated or replaced, this crate cannot be compiled.
+
+## For Developers
+
+If you need to use doublets functionality, consider:
+1. Using the C# version from [linksplatform/Data.Doublets](https://github.com/linksplatform/Data.Doublets)
+2. Waiting for platform dependency updates
+3. Contributing to fix the platform dependencies
 
 ## [Overview](https://github.com/linksplatform)
 
