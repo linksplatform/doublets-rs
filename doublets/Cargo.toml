@@ -24,23 +24,25 @@ tap = { version = "1.0.1" }
 cfg-if = { version = "1.0.0" }
 thiserror = { version = "1.0.30" }
 leak_slice = { version = "0.2.0" }
-bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"], optional = true }
 
-# platform
-data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
-mem = { package = "platform-mem", version = "0.1.0-pre+beta.2", path = "../dev-deps/mem-rs" }
-trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-deps/trees-rs" }
+# platform dependencies - only available with nightly features
+data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1", optional = true }
+mem = { package = "platform-mem", version = "0.1.0-pre+beta.2", path = "../dev-deps/mem-rs", optional = true }
+trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-deps/trees-rs", optional = true }
 
 # optional
 smallvec = { version = "1.8.1", features = ["union"], optional = true }
 rayon = { version = "1.5.3", optional = true }
 
 [features]
-mem = []
+mem = ["dep:mem"]
 num = []
-data = []
+data = ["dep:data"]
 more-inline = []
 small-search = ["smallvec"]
+# Enables nightly-only features for advanced functionality
+nightly = ["dep:bumpalo"]
 # todo: may be internal_platform
 platform = ["mem", "num", "data"]
 
@@ -51,12 +53,16 @@ full = ["platform", "rayon", "small-search"]
 tap = { version = "1.0.1" }
 rand = { version = "0.8.5" }
 criterion = { version = "0.3.6" }
-bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
+bumpalo = { version = "3.11.1", features = ["collections"] }
 mimalloc = { version = "0.1.29", default-features = false }
 rpmalloc = "0.2.0"
 tinyvec = { version = "1.6.0", features = ["alloc"] }
 smallvec = { version = "1.9.0", features = [] }
 static_assertions = { version = "1.1.0" }
+
+[[example]]
+name = "stable_example"
+path = "../examples/stable_example.rs"
 
 [[bench]]
 name = "iter"
