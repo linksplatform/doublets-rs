@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp::Ordering, mem::transmute, ptr::NonNull};
 
 use crate::{
     mem::{
@@ -109,7 +109,7 @@ impl<
     }
 
     pub fn new(data_mem: MD, index_mem: MI) -> Result<Store<T, MD, MI>, LinksError<T>> {
-        Self::with_constants(data_mem, index_mem, default())
+        Self::with_constants(data_mem, index_mem, Default::default())
     }
 
     fn mut_from_mem<'a, U>(mut ptr: NonNull<[U]>, index: usize) -> Option<&'a mut U> {
