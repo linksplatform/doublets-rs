@@ -27,9 +27,9 @@ leak_slice = { version = "0.2.0" }
 bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
 
 # platform
-data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
-mem = { package = "platform-mem", version = "0.1.0-pre+beta.2", path = "../dev-deps/mem-rs" }
-trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-deps/trees-rs" }
+data = { package = "platform-data", version = "0.1.0-beta.3" }
+mem = { package = "platform-mem", version = "0.1.0-pre+beta.2" }
+trees = { package = "platform-treesmethods", version = "0.1.0-aplha.2" }
 
 # optional
 smallvec = { version = "1.8.1", features = ["union"], optional = true }

@@ -5,7 +5,25 @@
 [actions-badge]: https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg
 [actions-url]: https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain
 
-later
+**Note: This crate requires Rust nightly (`nightly-2022-08-22` or later) due to unstable features used by platform dependencies.**
+
+## Installation
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+doublets = "0.1.0-pre"
+```
+
+Make sure you have the required Rust nightly toolchain installed:
+
+```bash
+rustup install nightly-2022-08-22
+rustup override set nightly-2022-08-22
+```
+
+Alternatively, the project includes a `rust-toolchain.toml` file that will automatically use the correct toolchain.
 
 ## [Overview](https://github.com/linksplatform)
 
