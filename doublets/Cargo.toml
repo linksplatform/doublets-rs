@@ -1,6 +1,6 @@
 [package]
 name = "doublets"
-version = "0.1.0-pre+beta.15"
+version = "0.1.0-pre+beta.16"
 edition = "2021"
 authors = [
     "uselessgoddess",
@@ -34,6 +34,7 @@ trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-
 # optional
 smallvec = { version = "1.8.1", features = ["union"], optional = true }
 rayon = { version = "1.5.3", optional = true }
+buter = { version = "1.2.4", optional = true }
 
 [features]
 mem = []
@@ -41,11 +42,12 @@ num = []
 data = []
 more-inline = []
 small-search = ["smallvec"]
+buffered-iter = ["buter"]
 # todo: may be internal_platform
 platform = ["mem", "num", "data"]
 
 default = ["platform"]
-full = ["platform", "rayon", "small-search"]
+full = ["platform", "rayon", "small-search", "buffered-iter"]
 
 [dev-dependencies]
 tap = { version = "1.0.1" }
@@ -61,3 +63,7 @@ static_assertions = { version = "1.1.0" }
 [[bench]]
 name = "iter"
 harness = false
+
+[[example]]
+name = "buffered_iterator_test"
+path = "../examples/buffered_iterator_test.rs"
