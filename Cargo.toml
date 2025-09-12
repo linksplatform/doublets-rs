@@ -3,6 +3,7 @@
 members = [
     "ffi",
     "doublets",
+    "doublets-async",
 
     # internal
     "integration"

@@ -1,0 +1,36 @@
+[package]
+name = "doublets-async"
+version = "0.1.0-pre+beta.1"
+edition = "2021"
+authors = [
+    "Linksplatform Team <linksplatformtechnologies@gmail.com>"
+]
+categories = [
+    "database-implementations", "asynchronous"
+]
+keywords = [
+    "associative", "doublets", "db", "async", "gats"
+]
+readme = "README.md"
+license = "LGPL-3.0"
+repository = "https://github.com/linksplatform/Data.Doublets"
+homepage = "https://github.com/linksplatform/Data.Doublets/blob/main/rust/doublets-async"
+description = """
+Fast async Doublets API using GATs and TAIT - solves performance issues with traditional async-trait approach
+"""
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"], optional = true }
+futures = "0.3"
+
+[features]
+default = []
+tokio-runtime = ["tokio"]
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["full"] }
+criterion = "0.5"
+
+[[bench]]
+name = "async_performance"
+harness = false
