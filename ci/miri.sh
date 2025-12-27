@@ -1,12 +1,8 @@
 #!/bin/sh
 set -e
 
-# Pin to a specific nightly version that is compatible with the codebase.
-# The platform-data dependency uses unstable const features that are not
-# compatible with newer nightly compilers (const_deref, const_result_drop,
-# const_ops, etc. were removed or changed).
-MIRI_NIGHTLY=nightly-2022-08-22
-echo "Installing Miri with nightly: $MIRI_NIGHTLY"
+MIRI_NIGHTLY=nightly-$(curl -s https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/miri)
+echo "Installing latest nightly with Miri: $MIRI_NIGHTLY"
 rustup set profile minimal
 rustup default "$MIRI_NIGHTLY"
 
