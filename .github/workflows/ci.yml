@@ -70,7 +70,10 @@ jobs:
           cargo fmt -p doublets -p doublets-ffi -p integration -p ffi-attributes -p env-decorators -- --check
 
       - name: Run Clippy
-        run: cargo clippy --all --tests --all-features
+        run: |
+          # Run Clippy only for main workspace crates
+          # Skip submodules (dev-deps/) as they have their own linting rules
+          cargo clippy -p doublets -p doublets-ffi -p integration -p ffi-attributes -p env-decorators --tests --all-features
 
       - name: Check file size limit
         run: node scripts/check-file-size.mjs

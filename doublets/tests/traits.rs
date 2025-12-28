@@ -712,12 +712,11 @@ fn unit_exist_external() -> Result<(), Error<usize>> {
     // External links should always exist
     let constants = Links::constants(&store);
 
-    // Test with a value that might be external
-    // Note: The specific behavior depends on LinksConstants implementation
+    // Test with the 'any' constant which should be external
+    // External values (like 'any') exist by definition
     let any = constants.any;
-    let exists = store.exist(any);
-    // Just verify it doesn't panic
-    assert!(exists || !exists);
+    // Just call exist to exercise the external link code path
+    let _ = store.exist(any);
 
     Ok(())
 }
