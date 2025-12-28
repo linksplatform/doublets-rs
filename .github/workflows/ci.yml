@@ -1,87 +1,387 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      description:
+        description: 'Release description (optional)'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   RUST_BACKTRACE: 1
-#  later
-#  RUSTFLAGS: -Dwarnings
   CARGO_TERM_COLOR: always
 
-  rust_nightly: nightly-2022-07-23
-
 jobs:
-  tests-pass:
-    name: pass
-    runs-on: ubuntu-latest
-    needs:
-      - test
-      - miri
-      - clippy
-    steps:
-      - run: exit 0
+  # REQUIRED CI CHECKS - All must pass before release
+  # These jobs ensure code quality and tests pass before any release
 
+  # Linting and formatting
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2022-08-22
+          components: rustfmt, clippy
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all --tests --all-features
+
+      - name: Check file size limit
+        run: node scripts/check-file-size.mjs
+
+  # Test on multiple OS
   test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        rust:
-          - nightly
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+        os: [ubuntu-latest, macos-latest, windows-latest]
         rustflags:
           - '-C target-cpu=native'
           - '-C target-cpu=native -C target-feature=-avx2'
-        features:
-          - ''
-    runs-on: ${{ matrix.os }}
+    env:
+      RUSTFLAGS: ${{ matrix.rustflags }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2022-08-22
-          override: true
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - name: Run tests
-        run: cargo test ${{ matrix.features }} --release -- --nocapture
+        run: cargo test --release --all-features -- --nocapture
 
-  clippy:
-    name: clippy
+      - name: Run doc tests
+        run: cargo test --doc --all-features
+
+  # Build package - only runs if lint and test pass
+  build:
+    name: Build Package
     runs-on: ubuntu-latest
+    needs: [lint, test]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install Rust clippy
-        uses: actions-rs/toolchain@v1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2022-08-22
-          override: true
-          components: clippy
-      - uses: Swatinem/rust-cache@v1
-      - name: "clippy --all"
-        run: cargo clippy --all --tests --all-features
 
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+
+      - name: Build release
+        run: cargo build --release --all-features
+
+  # Miri for memory safety checks
   miri:
+    name: Miri
     runs-on: ubuntu-latest
     # Allow miri to fail without blocking CI since it has infrastructure compatibility issues
     # with newer Rust versions and xargo dependencies
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly-2022-08-22
+
       - name: Run miri
         run: |
           cd ci
           chmod +x miri.sh
           ./miri.sh
+
+  # Code coverage
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2022-08-22
+          components: llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-cov-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-cov-
+
+      - name: Generate code coverage
+        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: lcov.info
+          fail_ci_if_error: false
+          verbose: true
+
+  # Check for changelog fragments in PRs
+  changelog:
+    name: Changelog Fragment Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changelog fragments
+        run: |
+          # Get list of fragment files (excluding README and template)
+          FRAGMENTS=$(find changelog.d -name "*.md" ! -name "README.md" 2>/dev/null | wc -l)
+
+          # Get changed files in PR
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Check if any source files changed (excluding docs and config)
+          SOURCE_CHANGED=$(echo "$CHANGED_FILES" | grep -E "^(doublets/src/|doublets-ffi/src/|integration/src/)" | wc -l)
+
+          if [ "$SOURCE_CHANGED" -gt 0 ] && [ "$FRAGMENTS" -eq 0 ]; then
+            echo "::warning::No changelog fragment found. Please add a changelog entry in changelog.d/"
+            echo ""
+            echo "To create a changelog fragment:"
+            echo "  Create a new .md file in changelog.d/ with your changes"
+            echo ""
+            echo "See changelog.d/README.md for more information."
+            # Note: This is a warning, not a failure, to allow flexibility
+            # Change 'exit 0' to 'exit 1' to make it required
+            exit 0
+          fi
+
+          echo "Changelog check passed"
+
+  # All required checks must pass
+  tests-pass:
+    name: All Checks Pass
+    runs-on: ubuntu-latest
+    needs: [lint, test, build, coverage]
+    steps:
+      - run: echo "All CI checks passed!"
+
+  # Automatic release on push to main using changelog fragments
+  auto-release:
+    name: Auto Release
+    needs: [lint, test, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2022-08-22
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine bump type from changelog fragments
+        id: bump_type
+        run: node scripts/get-bump-type.mjs
+
+      - name: Check if version already released or no fragments
+        id: check
+        run: |
+          # Check if there are changelog fragments
+          if [ "${{ steps.bump_type.outputs.has_fragments }}" != "true" ]; then
+            # No fragments - check if current version tag exists
+            CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' doublets/Cargo.toml | head -1)
+            if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
+              echo "No changelog fragments and v$CURRENT_VERSION already released"
+              echo "should_release=false" >> $GITHUB_OUTPUT
+            else
+              echo "No changelog fragments but v$CURRENT_VERSION not yet released"
+              echo "should_release=true" >> $GITHUB_OUTPUT
+              echo "skip_bump=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Found changelog fragments, proceeding with release"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+            echo "skip_bump=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Collect changelog and bump version
+        id: version
+        if: steps.check.outputs.should_release == 'true' && steps.check.outputs.skip_bump != 'true'
+        run: |
+          node scripts/version-and-commit.mjs \
+            --bump-type "${{ steps.bump_type.outputs.bump_type }}"
+
+      - name: Get current version
+        id: current_version
+        if: steps.check.outputs.should_release == 'true'
+        run: |
+          CURRENT_VERSION=$(grep -Po '(?<=^version = ")[^"]*' doublets/Cargo.toml | head -1)
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build release
+        if: steps.check.outputs.should_release == 'true'
+        run: cargo build --release --all-features
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/create-github-release.mjs \
+            --release-version "${{ steps.current_version.outputs.version }}" \
+            --repository "${{ github.repository }}"
+
+  # Manual release via workflow_dispatch - only after CI passes
+  manual-release:
+    name: Manual Release
+    needs: [lint, test, build]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2022-08-22
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Collect changelog fragments
+        run: |
+          # Check if there are any fragments to collect
+          FRAGMENTS=$(find changelog.d -name "*.md" ! -name "README.md" 2>/dev/null | wc -l)
+          if [ "$FRAGMENTS" -gt 0 ]; then
+            echo "Found $FRAGMENTS changelog fragment(s), collecting..."
+            node scripts/collect-changelog.mjs
+          else
+            echo "No changelog fragments found, skipping collection"
+          fi
+
+      - name: Version and commit
+        id: version
+        run: |
+          node scripts/version-and-commit.mjs \
+            --bump-type "${{ github.event.inputs.bump_type }}" \
+            --description "${{ github.event.inputs.description }}"
+
+      - name: Build release
+        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+        run: cargo build --release --all-features
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node scripts/create-github-release.mjs \
+            --release-version "${{ steps.version.outputs.new_version }}" \
+            --repository "${{ github.repository }}"
