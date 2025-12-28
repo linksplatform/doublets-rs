@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  toolchain: nightly-2022-08-22
+  toolchain: stable
 
 jobs:
   benchmark:

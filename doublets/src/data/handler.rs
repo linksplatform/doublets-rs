@@ -1,6 +1,9 @@
 use crate::Link;
+#[cfg(feature = "data")]
 use data::{Flow, LinkType};
-use std::{marker::PhantomData, mem::MaybeUninit, ops::Try};
+use std::{marker::PhantomData, mem::MaybeUninit};
+#[cfg(feature = "nightly")]
+use std::ops::Try;
 
 pub trait Handler<T, R>: FnMut(Link<T>, Link<T>) -> R
 where

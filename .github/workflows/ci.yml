@@ -12,7 +12,7 @@ env:
 #  RUSTFLAGS: -Dwarnings
   CARGO_TERM_COLOR: always
 
-  rust_nightly: nightly-2022-07-23
+  rust_stable: stable
 
 jobs:
   tests-pass:
@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         rust:
-          - nightly
+          - stable
         os:
           - ubuntu-latest
           - windows-latest
@@ -46,7 +46,7 @@ jobs:
           submodules: true
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-08-22
+          toolchain: stable
           override: true
       - name: Run tests
         run: cargo test ${{ matrix.features }} --release -- --nocapture
@@ -61,7 +61,7 @@ jobs:
       - name: Install Rust clippy
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-08-22
+          toolchain: stable
           override: true
           components: clippy
       - uses: Swatinem/rust-cache@v1

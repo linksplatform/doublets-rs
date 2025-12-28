@@ -1,3 +1,4 @@
+#[cfg(feature = "bumpalo")]
 use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
