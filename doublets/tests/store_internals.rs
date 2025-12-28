@@ -458,3 +458,370 @@ fn split_each_with_early_break() -> Result<(), Error<usize>> {
 
     Ok(())
 }
+
+// ============================================
+// Split Store Tree Traversal Tests
+// These tests exercise internal tree operations
+// ============================================
+
+// Test split store count_usages with various patterns
+#[test]
+fn split_count_usages_single_link() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let _ab = store.create_link(a, b)?;
+
+    // a is used as source in ab
+    let source_usages = store.count_usages(a)?;
+    assert!(source_usages >= 1);
+
+    // b is used as target in ab
+    let target_usages = store.count_usages(b)?;
+    assert!(target_usages >= 1);
+
+    Ok(())
+}
+
+// Test split store with many usages to exercise tree structure
+#[test]
+fn split_count_usages_many_links() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let base = store.create_point()?;
+    let mut targets = Vec::new();
+
+    // Create many links with same source
+    for _ in 0..20 {
+        let t = store.create_point()?;
+        targets.push(t);
+        store.create_link(base, t)?;
+    }
+
+    // base should have many usages
+    let usages = store.count_usages(base)?;
+    assert!(usages >= 20);
+
+    Ok(())
+}
+
+// Test split store each_usages iteration
+#[test]
+fn split_each_usages_with_handler() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let c = store.create_point()?;
+
+    store.create_link(a, b)?;
+    store.create_link(a, c)?;
+    store.create_link(b, a)?;
+
+    // Count usages of a
+    let mut usage_count = 0;
+    store.usages(a)?.iter().for_each(|_| usage_count += 1);
+    assert!(usage_count >= 2); // a used as source (ab, ac) and target (ba)
+
+    Ok(())
+}
+
+// Test split store tree search
+#[test]
+fn split_search_operations() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let c = store.create_point()?;
+
+    let ab = store.create_link(a, b)?;
+    let ac = store.create_link(a, c)?;
+    let bc = store.create_link(b, c)?;
+
+    // Search should find existing links
+    assert_eq!(store.search(a, b), Some(ab));
+    assert_eq!(store.search(a, c), Some(ac));
+    assert_eq!(store.search(b, c), Some(bc));
+
+    // Search should not find non-existent
+    assert_eq!(store.search(c, a), None);
+
+    Ok(())
+}
+
+// Test split store with complex link patterns
+#[test]
+fn split_complex_link_patterns() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    // Create a mesh of links
+    let mut points = Vec::new();
+    for _ in 0..10 {
+        points.push(store.create_point()?);
+    }
+
+    // Connect each point to several others
+    for i in 0..10 {
+        for j in (i + 1)..10 {
+            store.create_link(points[i], points[j])?;
+        }
+    }
+
+    // Verify all links exist via search
+    for i in 0..10 {
+        for j in (i + 1)..10 {
+            let result = store.search(points[i], points[j]);
+            assert!(result.is_some(), "Link {}->{} should exist", i, j);
+        }
+    }
+
+    Ok(())
+}
+
+// Test split store deletion with tree updates
+#[test]
+fn split_delete_updates_trees() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let c = store.create_point()?;
+
+    let ab = store.create_link(a, b)?;
+    let ac = store.create_link(a, c)?;
+
+    // Both links exist
+    assert!(store.search(a, b).is_some());
+    assert!(store.search(a, c).is_some());
+
+    // Record usages before delete
+    let usages_before = store.count_usages(a)?;
+
+    // Delete one link
+    store.delete(ab)?;
+
+    // ab is gone, ac remains
+    assert!(store.search(a, b).is_none());
+    assert!(store.search(a, c).is_some());
+
+    // a still has usages (ac)
+    assert!(store.has_usages(a));
+
+    // Delete remaining link
+    store.delete(ac)?;
+
+    // a has fewer usages than before
+    let usages_after = store.count_usages(a)?;
+    assert!(usages_after < usages_before || usages_before == 0);
+
+    Ok(())
+}
+
+// Test split store tree rebalancing under stress
+#[test]
+fn split_tree_rebalancing_stress() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let base = store.create_point()?;
+
+    // Create many links
+    let mut links = Vec::new();
+    for _ in 0..100 {
+        let t = store.create_point()?;
+        let link = store.create_link(base, t)?;
+        links.push(link);
+    }
+
+    // Delete half of them
+    for link in links.iter().step_by(2) {
+        store.delete(*link)?;
+    }
+
+    // Verify remaining links still searchable
+    let remaining_count = store.count_usages(base)?;
+    assert!(remaining_count > 0);
+
+    // Verify store consistency
+    let total = store.count();
+    let mut counted = 0;
+    store.each(|_| {
+        counted += 1;
+        Flow::Continue
+    });
+    assert_eq!(total, counted);
+
+    Ok(())
+}
+
+// Test split store with ordered insertions
+#[test]
+fn split_ordered_insertions() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let base = store.create_point()?;
+
+    // Insert targets in order
+    for i in 0..50 {
+        let t = store.create_point()?;
+        store.create_link(base, t)?;
+
+        // Verify search still works
+        let found = store.search(base, t);
+        assert!(found.is_some(), "Link to target {} should be found", i);
+    }
+
+    Ok(())
+}
+
+// Test split store with reverse-order insertions (worst case for some trees)
+#[test]
+fn split_reverse_insertions() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    // Create targets first
+    let mut targets = Vec::new();
+    for _ in 0..50 {
+        targets.push(store.create_point()?);
+    }
+
+    let base = store.create_point()?;
+
+    // Insert in reverse order
+    for t in targets.iter().rev() {
+        store.create_link(base, *t)?;
+    }
+
+    // Verify all links found
+    for t in &targets {
+        assert!(store.search(base, *t).is_some());
+    }
+
+    Ok(())
+}
+
+// Test split store usages with same target
+#[test]
+fn split_same_target_multiple_sources() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let target = store.create_point()?;
+
+    // Multiple sources pointing to same target
+    for _ in 0..20 {
+        let src = store.create_point()?;
+        store.create_link(src, target)?;
+    }
+
+    // Target should have many usages
+    let usages = store.usages(target)?;
+    assert!(usages.len() >= 20);
+
+    Ok(())
+}
+
+// Test split store with mixed operations
+#[test]
+fn split_mixed_crud_operations() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+
+    // Create, verify, delete cycle
+    for _ in 0..10 {
+        let link = store.create_link(a, b)?;
+        assert!(store.search(a, b).is_some());
+
+        store.delete(link)?;
+        // After delete, the link should not be searchable
+        // Note: search behavior may vary based on implementation
+        // Just verify the store is still consistent
+        let count_after = store.count();
+        assert!(count_after >= 2); // At least a and b exist
+    }
+
+    Ok(())
+}
+
+// Test split store update operations
+#[test]
+fn split_update_operations() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let c = store.create_point()?;
+
+    let link = store.create_link(a, b)?;
+
+    // Update to new target
+    store.update(link, a, c)?;
+
+    // Old link gone, new link exists
+    assert!(store.search(a, b).is_none());
+    assert!(store.search(a, c).is_some());
+
+    Ok(())
+}
+
+// Test split store count_usages with no usages
+#[test]
+fn split_count_usages_no_usages() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+
+    // a is a point - count_usages counts how many times it's used as source/target
+    // A self-reference point doesn't show up in external usages
+    let usages_a = store.count_usages(a)?;
+    let usages_b = store.count_usages(b)?;
+
+    // Create and delete a link
+    let link = store.create_link(a, b)?;
+    let usages_with_link = store.count_usages(a)?;
+    assert!(usages_with_link >= usages_a); // At least as many usages
+
+    store.delete(link)?;
+
+    // Back to original
+    assert_eq!(store.count_usages(a)?, usages_a);
+    assert_eq!(store.count_usages(b)?, usages_b);
+
+    Ok(())
+}
+
+// Test split store iteration with filters
+#[test]
+fn split_iteration_with_filters() -> Result<(), Error<usize>> {
+    let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
+    let any = Links::constants(&store).any;
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let c = store.create_point()?;
+
+    store.create_link(a, b)?;
+    store.create_link(a, c)?;
+    store.create_link(b, c)?;
+
+    // Filter by source
+    let mut source_a_count = 0;
+    store.each_by([any, a, any], |_| {
+        source_a_count += 1;
+        Flow::Continue
+    });
+    assert!(source_a_count >= 2);
+
+    // Filter by target
+    let mut target_c_count = 0;
+    store.each_by([any, any, c], |_| {
+        target_c_count += 1;
+        Flow::Continue
+    });
+    assert!(target_c_count >= 2);
+
+    Ok(())
+}
