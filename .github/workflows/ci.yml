@@ -156,9 +156,13 @@ jobs:
         with:
           submodules: true
 
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly-2022-08-22
+      # Note: Don't install nightly-2022-08-22 here - miri.sh will install the
+      # appropriate nightly version that has Miri available. The old toolchain
+      # is too old for Miri's dependencies (xargo requires rustc 1.68+).
+      - name: Install rustup
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Run miri
         run: |
