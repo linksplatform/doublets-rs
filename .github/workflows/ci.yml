@@ -64,7 +64,10 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: |
+          # Check formatting only for main workspace crates
+          # Skip submodules (dev-deps/) as they have their own formatting rules
+          cargo fmt -p doublets -p doublets-ffi -p integration -p ffi-attributes -p env-decorators -- --check
 
       - name: Run Clippy
         run: cargo clippy --all --tests --all-features
