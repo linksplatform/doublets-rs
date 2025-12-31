@@ -44,6 +44,16 @@ doublets = "0.1.0-pre"
 rustup default nightly
 ```
 
+## Web Demo
+
+Try the interactive WebAssembly demo: [**🔗 Doublets Playground**](https://linksplatform.github.io/doublets-rs/)
+
+The web demo allows you to:
+- Create and manage doublets interactively
+- Explore link relationships visually  
+- Learn doublets concepts in your browser
+- See real-time operations and results
+
 ## Example
 
 Basic CRUD operations with doublets:

@@ -1,0 +1,16 @@
+{
+  "name": "doublets-web-demo",
+  "version": "0.1.0",
+  "description": "WebAssembly demo playground for doublets-rs",
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir pkg",
+    "serve": "python3 -m http.server 8000",
+    "dev": "npm run build && npm run serve"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.12.1"
+  },
+  "keywords": ["doublets", "webassembly", "rust", "wasm", "demo"],
+  "author": "Doublets Team",
+  "license": "Unlicense"
+}
