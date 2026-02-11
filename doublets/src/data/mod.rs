@@ -6,7 +6,7 @@ mod traits;
 
 pub use doublet::Doublet;
 pub use error::Error;
-pub use handler::{Fuse, Handler};
+pub use handler::{Fuse, Handler, HandlerResult};
 pub use link::Link;
 pub use traits::{Doublets, DoubletsExt, Links, ReadHandler, WriteHandler};
 

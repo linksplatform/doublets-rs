@@ -6,7 +6,7 @@ use std::{
     ops::{ControlFlow, Try},
 };
 
-use crate::{Error, Fuse, Link};
+use crate::{Error, Fuse, HandlerResult, Link};
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
@@ -53,21 +53,21 @@ pub trait Doublets<T: LinkType>: Links<T> {
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R::Try, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
-        let mut output = R::from_output(());
+        let mut output = R::Try::from_output(());
         let query = query.to_query();
 
         self.create_links(
             &query[..],
-            &mut |before, after| match handler(before, after).branch() {
+            &mut |before, after| match handler(before, after).try_it().branch() {
                 ControlFlow::Continue(_) => Flow::Continue,
                 ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
+                    output = R::Try::from_residual(residual);
                     Flow::Break
                 }
             },
@@ -87,10 +87,10 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| index)
     }
 
-    fn create_with<F, R>(&mut self, handler: F) -> Result<R, Error<T>>
+    fn create_with<F, R>(&mut self, handler: F) -> Result<R::Try, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
         self.create_by_with([], handler)
@@ -103,19 +103,19 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_by([])
     }
 
-    fn each_by<F, R>(&self, query: impl ToQuery<T>, mut handler: F) -> R
+    fn each_by<F, R>(&self, query: impl ToQuery<T>, mut handler: F) -> R::Try
     where
         F: FnMut(Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
-        let mut output = R::from_output(());
+        let mut output = R::Try::from_output(());
         let query = query.to_query();
 
-        self.each_links(&query[..], &mut |link| match handler(link).branch() {
+        self.each_links(&query[..], &mut |link| match handler(link).try_it().branch() {
             ControlFlow::Continue(_) => Flow::Continue,
             ControlFlow::Break(residual) => {
-                output = R::from_residual(residual);
+                output = R::Try::from_residual(residual);
                 Flow::Break
             }
         });
@@ -123,10 +123,10 @@ pub trait Doublets<T: LinkType>: Links<T> {
         output
     }
 
-    fn each<F, R>(&self, handler: F) -> R
+    fn each<F, R>(&self, handler: F) -> R::Try
     where
         F: FnMut(Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
         self.each_by([], handler)
@@ -137,23 +137,23 @@ pub trait Doublets<T: LinkType>: Links<T> {
         query: impl ToQuery<T>,
         change: impl ToQuery<T>,
         mut handler: H,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R::Try, Error<T>>
     where
         H: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
-        let mut output = R::from_output(());
+        let mut output = R::Try::from_output(());
         let query = query.to_query();
         let change = change.to_query();
 
         self.update_links(
             &query[..],
             &change[..],
-            &mut |before, after| match handler(before, after).branch() {
+            &mut |before, after| match handler(before, after).try_it().branch() {
                 ControlFlow::Continue(_) => Flow::Continue,
                 ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
+                    output = R::Try::from_residual(residual);
                     Flow::Break
                 }
             },
@@ -179,10 +179,10 @@ pub trait Doublets<T: LinkType>: Links<T> {
         source: T,
         target: T,
         handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R::Try, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
         self.update_by_with([index], [index, source, target], handler)
@@ -199,21 +199,21 @@ pub trait Doublets<T: LinkType>: Links<T> {
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R::Try, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
-        let mut output = R::from_output(());
+        let mut output = R::Try::from_output(());
         let query = query.to_query();
 
         self.delete_links(
             &query[..],
-            &mut |before, after| match handler(before, after).branch() {
+            &mut |before, after| match handler(before, after).try_it().branch() {
                 ControlFlow::Continue(_) => Flow::Continue,
                 ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
+                    output = R::Try::from_residual(residual);
                     Flow::Break
                 }
             },
@@ -233,10 +233,10 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
-    fn delete_with<F, R>(&mut self, index: T, handler: F) -> Result<R, Error<T>>
+    fn delete_with<F, R>(&mut self, index: T, handler: F) -> Result<R::Try, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        R: HandlerResult,
         Self: Sized,
     {
         self.delete_by_with([index], handler)
