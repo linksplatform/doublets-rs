@@ -10,6 +10,7 @@ use std::{
     mem,
     ops::{RangeInclusive, Try},
     ptr::{drop_in_place, null_mut},
+    sync::Mutex,
 };
 
 use doublets::{
@@ -23,12 +24,19 @@ use doublets::{
 };
 use libc::c_char;
 use log::{error, warn};
+use once_cell::sync::Lazy;
+use tracing_subscriber::{reload, EnvFilter, Registry, fmt};
+use tracing_subscriber::layer::SubscriberExt;
 
 #[allow(non_camel_case_types)]
 type c_void = core::ffi::c_void;
 
 use doublets::{parts, unit, Doublets};
 use ffi_attributes as ffi;
+
+// Global reload handle for log level management
+static RELOAD_HANDLE: Lazy<Mutex<Option<reload::Handle<EnvFilter, Registry>>>> =
+    Lazy::new(|| Mutex::new(None));
 
 fn result_into_log<R, E: Display>(result: Result<R, E>, default: R) -> R {
     result.unwrap_or_else(|e| {
@@ -433,9 +441,18 @@ pub fn build_shared_logger() -> SharedLogger {
 pub extern "C" fn setup_shared_logger(logger: SharedLogger) {
     log::set_max_level(log::STATIC_MAX_LEVEL);
 
-    let subscriber = tracing_subscriber::fmt::fmt()
-        .with_max_level(tracing::Level::TRACE)
-        .finish();
+    // Create a reloadable filter
+    let (filter, reload_handle) = reload::Layer::new(EnvFilter::new("trace"));
+    
+    // Store the reload handle globally
+    if let Ok(mut handle_guard) = RELOAD_HANDLE.lock() {
+        *handle_guard = Some(reload_handle);
+    }
+
+    let subscriber = Registry::default()
+        .with(fmt::layer().with_target(false))
+        .with(filter);
+        
     if let Err(err) = tracing::subscriber::set_global_default(subscriber) {
         warn!("subscriber error: {}", err)
     }
@@ -451,6 +468,48 @@ pub extern "C" fn init_fmt_logger() {
     setup_shared_logger(logger);
 }
 
+#[no_mangle]
+pub extern "C" fn set_log_level(level: *const c_char) -> bool {
+    if level.is_null() {
+        return false;
+    }
+    
+    let level_str = unsafe {
+        match CStr::from_ptr(level).to_str() {
+            Ok(s) => s,
+            Err(_) => return false,
+        }
+    };
+    
+    let filter = match EnvFilter::try_new(level_str) {
+        Ok(f) => f,
+        Err(_) => return false,
+    };
+    
+    if let Ok(handle_guard) = RELOAD_HANDLE.lock() {
+        if let Some(ref handle) = *handle_guard {
+            match handle.reload(filter) {
+                Ok(_) => true,
+                Err(err) => {
+                    warn!("Failed to reload log level: {}", err);
+                    false
+                }
+            }
+        } else {
+            warn!("Log level reload handle not initialized");
+            false
+        }
+    } else {
+        warn!("Failed to lock reload handle");
+        false
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn reset_log_level() -> bool {
+    set_log_level(b"trace\0".as_ptr() as *const c_char)
+}
+
 mod tests {
     #[test]
     fn error_log() {
@@ -464,5 +523,58 @@ mod tests {
         info!("info");
         warn!("warn");
         error!("error");
+    }
+
+    #[test]
+    fn test_log_level_reset() {
+        use crate::{build_shared_logger, reset_log_level, set_log_level, setup_shared_logger};
+        use std::ffi::CString;
+        use log::{debug, error, info, trace, warn};
+
+        let logger = build_shared_logger();
+        setup_shared_logger(logger);
+        
+        // Test setting log level to info
+        let info_level = CString::new("info").unwrap();
+        assert!(set_log_level(info_level.as_ptr()));
+        
+        trace!("This trace should not be visible");
+        debug!("This debug should not be visible");
+        info!("This info should be visible");
+        warn!("This warn should be visible");
+        error!("This error should be visible");
+        
+        // Test resetting log level to trace
+        assert!(reset_log_level());
+        
+        trace!("This trace should now be visible");
+        debug!("This debug should now be visible");
+        info!("This info should still be visible");
+        
+        // Test setting log level to error
+        let error_level = CString::new("error").unwrap();
+        assert!(set_log_level(error_level.as_ptr()));
+        
+        trace!("This trace should not be visible");
+        debug!("This debug should not be visible");  
+        info!("This info should not be visible");
+        warn!("This warn should not be visible");
+        error!("This error should be visible");
+    }
+
+    #[test]
+    fn test_invalid_log_level() {
+        use crate::{build_shared_logger, set_log_level, setup_shared_logger};
+        use std::ffi::CString;
+
+        let logger = build_shared_logger();
+        setup_shared_logger(logger);
+        
+        // Test with invalid log level
+        let invalid_level = CString::new("invalid_level").unwrap();
+        assert!(!set_log_level(invalid_level.as_ptr()));
+        
+        // Test with null pointer
+        assert!(!set_log_level(std::ptr::null()));
     }
 }
