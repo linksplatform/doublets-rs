@@ -307,11 +307,13 @@ impl<
         Ok(())
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     fn total(&self) -> T {
         let header = self.get_header();
         header.allocated - header.free
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn is_unused(&self, link: T) -> bool {
         let header = self.get_header();
         if link <= header.allocated && header.first_free != link {
@@ -330,6 +332,7 @@ impl<
         self.is_unused(link)
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     pub fn exists(&self, link: T) -> bool {
         let constants = self.constants();
         let header = self.get_header();
@@ -544,6 +547,7 @@ impl<
     UL: SplitList<T>,
 > Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
+    #[inline(always)]
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
     }

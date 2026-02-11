@@ -186,11 +186,13 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         self.attach_target_unchecked(root, index);
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     fn get_total(&self) -> T {
         let header = self.get_header();
         header.allocated - header.free
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     fn is_unused(&self, link: T) -> bool {
         let header = self.get_header();
         if link <= header.allocated && header.first_free != link {
@@ -205,6 +207,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         }
     }
 
+    #[cfg_attr(feature = "inline-more", inline)]
     fn exists(&self, link: T) -> bool {
         let constants = self.constants();
         let header = self.get_header();
@@ -323,6 +326,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
     Links<T> for Store<T, M, TS, TT, TU>
 {
+    #[inline(always)]
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
     }

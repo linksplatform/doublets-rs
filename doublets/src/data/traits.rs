@@ -42,6 +42,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.count_links(&query.to_query()[..])
     }
 
+    #[inline(always)]
     fn count(&self) -> T
     where
         Self: Sized,
@@ -249,6 +250,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_by([index])
     }
 
+    #[inline]
     fn try_get_link(&self, index: T) -> Result<Link<T>, Error<T>> {
         self.get_link(index).ok_or(Error::NotExists(index))
     }
@@ -552,14 +554,17 @@ pub trait Doublets<T: LinkType>: Links<T> {
 }
 
 impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
+    #[inline(always)]
     fn constants(&self) -> &LinksConstants<T> {
         (**self).constants()
     }
 
+    #[inline(always)]
     fn count_links(&self, query: &[T]) -> T {
         (**self).count_links(query)
     }
 
+    #[inline(always)]
     fn create_links(
         &mut self,
         query: &[T],
@@ -568,10 +573,12 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         (**self).create_links(query, handler)
     }
 
+    #[inline(always)]
     fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
         (**self).each_links(query, handler)
     }
 
+    #[inline(always)]
     fn update_links(
         &mut self,
         query: &[T],
@@ -581,6 +588,7 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
         (**self).update_links(query, change, handler)
     }
 
+    #[inline(always)]
     fn delete_links(
         &mut self,
         query: &[T],
@@ -591,6 +599,7 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
 }
 
 impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
+    #[inline(always)]
     fn get_link(&self, index: T) -> Option<Link<T>> {
         (**self).get_link(index)
     }
@@ -655,7 +664,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
-    #[cfg_attr(feature = "more-inline", inline)]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
         let cap = self.count_by(query.to_query()).as_usize();
 
@@ -681,7 +690,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
-    #[cfg_attr(feature = "more-inline", inline)]
+    #[cfg_attr(feature = "inline-more", inline)]
     fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall {
         // fixme: later use const generics
         const SIZE_HINT: usize = 2;
