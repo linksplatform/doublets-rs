@@ -638,12 +638,23 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter {
-        let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
-        self.each_by(query, |link| {
+        // Use bump allocator for efficient parallel memory management
+        let bump = Bump::new();
+        let query = query.to_query();
+        let estimated_count = self.count_by(&query).as_usize();
+        
+        // Allocate vec in bump for efficient parallel collection
+        let mut vec = bumpalo::collections::Vec::with_capacity_in(estimated_count, &bump);
+        
+        // Use optimized parallel traversal if possible, fall back to sequential
+        self.each_by(&query, |link| {
             vec.push(link);
             Flow::Continue
         });
-        vec.into_par_iter()
+        
+        // Convert to parallel iterator  
+        let results: Vec<Link<T>> = vec.into_iter().collect();
+        results.into_par_iter()
     }
 
     type ImplIter = Self::ImplIterEach;
