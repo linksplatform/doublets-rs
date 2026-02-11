@@ -64,7 +64,7 @@ unsafe fn unnull_or_error<'a, P, R>(ptr: *mut P) -> &'a mut R {
 // TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
-type WrappedLinks<T> = Box<dyn Doublets<T>>;
+type WrappedLinks<T> = Box<dyn Doublets<Item = T>>;
 
 type EachCallback<T> = extern "C" fn(Link<T>) -> T;
 
@@ -176,7 +176,7 @@ unsafe fn new_with_constants_united_links<T: LinkType>(
             .write(true)
             .open(path)?;
         let mem = FileMapped::new(file)?;
-        let mut links: Box<dyn Doublets<T>> =
+        let mut links: Box<dyn Doublets<Item = T>> =
             box UnitedLinks::<T>::with_constants(mem, constants.into())?;
         let ptr = links.as_mut() as *mut _ as *mut c_void;
         mem::forget(links);

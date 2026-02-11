@@ -7,41 +7,67 @@ use doublets::{
 
 use doublets::{Doublets, Error, Link};
 
-pub struct UniqueResolver<T: LinkType, L: Doublets<T>> {
+pub struct UniqueResolver<L: Doublets> {
     links: L,
 
-    _phantom: PhantomData<T>,
-}
+    }
 
-impl<T: LinkType, L: Doublets<T>> UniqueResolver<T, L> {
+impl<L: Doublets> UniqueResolver<L> {
     pub fn new(links: L) -> Self {
         UniqueResolver {
             links,
-            _phantom: PhantomData,
-        }
+            }
     }
 }
 
-impl<T: LinkType, L: Doublets<T>> Doublets<T> for UniqueResolver<T, L> {
-    fn constants(&self) -> LinksConstants<T> {
+impl<L: Doublets> Links for UniqueResolver<L> {
+    type Item = L::Item;
+    
+    fn constants(&self) -> &LinksConstants<Self::Item> {
         self.links.constants()
     }
 
-    fn count_by(&self, query: impl ToQuery<T>) -> T {
+    fn count_links(&self, query: &[Self::Item]) -> Self::Item {
+        self.links.count_links(query)
+    }
+
+    fn create_links(&mut self, query: &[Self::Item], handler: doublets::WriteHandler<'_, Self::Item>) 
+        -> Result<doublets::Flow, doublets::Error<Self::Item>> {
+        self.links.create_links(query, handler)
+    }
+
+    fn each_links(&self, query: &[Self::Item], handler: doublets::ReadHandler<'_, Self::Item>) -> doublets::Flow {
+        self.links.each_links(query, handler)
+    }
+
+    fn update_links(&mut self, query: &[Self::Item], change: &[Self::Item], handler: doublets::WriteHandler<'_, Self::Item>) 
+        -> Result<doublets::Flow, doublets::Error<Self::Item>> {
+        self.links.update_links(query, change, handler)
+    }
+
+    fn delete_links(&mut self, query: &[Self::Item], handler: doublets::WriteHandler<'_, Self::Item>) 
+        -> Result<doublets::Flow, doublets::Error<Self::Item>> {
+        self.links.delete_links(query, handler)
+    }
+}
+
+impl<L: Doublets> Doublets for UniqueResolver<L> {
+
+    fn count_by(&self, query: impl ToQuery<Self::Item>) -> Self::Item {
         self.links.count_by(query)
     }
 
-    fn create_by_with<F, R>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<R, Error<T>>
+    fn create_by_with<F, R>(&mut self, query: impl ToQuery<Self::Item>, handler: F) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.create_by_with(query, handler)
     }
 
-    fn each_by<F, R>(&self, restrictions: impl ToQuery<T>, handler: F) -> R
+    fn each_by<F, R>(&self, restrictions: impl ToQuery<Self::Item>, handler: F) -> R
     where
-        F: FnMut(Link<T>) -> R,
+        F: FnMut(Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.each_by(restrictions, handler)
@@ -49,12 +75,12 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for UniqueResolver<T, L> {
 
     fn update_by_with<F, R>(
         &mut self,
-        query: impl ToQuery<T>,
-        change: impl ToQuery<T>,
+        query: impl ToQuery<Self::Item>,
+        change: impl ToQuery<Self::Item>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         let links = self.links.borrow_mut();
@@ -73,11 +99,15 @@ impl<T: LinkType, L: Doublets<T>> Doublets<T> for UniqueResolver<T, L> {
         links.update_with(index, source, target, handler)
     }
 
-    fn delete_by_with<F, R>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<R, Error<T>>
+    fn delete_by_with<F, R>(&mut self, query: impl ToQuery<Self::Item>, handler: F) -> Result<R, Error<Self::Item>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
+        F: FnMut(Link<Self::Item>, Link<Self::Item>) -> R,
         R: Try<Output = ()>,
     {
         self.links.delete_by_with(query, handler)
+    }
+
+    fn get_link(&self, index: Self::Item) -> Option<Link<Self::Item>> {
+        self.links.get_link(index)
     }
 }

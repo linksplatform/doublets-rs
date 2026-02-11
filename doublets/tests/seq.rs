@@ -9,7 +9,7 @@ use doublets::{
 
 use std::{error::Error, time::Instant};
 
-fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, LinksError<T>> {
+fn write_seq<T: LinkType>(store: &mut impl Doublets<Item = T>, seq: &[T]) -> Result<T, LinksError<T>> {
     let mut aliases = vec![store.create()?];
 
     for id in seq {
@@ -25,7 +25,7 @@ fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, 
     Ok(*aliases.first().unwrap_or(&T::funty(0)))
 }
 
-fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) -> Option<Link<T>> {
+fn custom_single<T: LinkType>(store: &impl Doublets<Item = T>, query: impl ToQuery<T>) -> Option<Link<T>> {
     // todo:
     //  store.each_iter(query).filter(Link::is_partial);
 
@@ -44,7 +44,7 @@ fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) 
     single
 }
 
-fn read_seq<T: LinkType>(store: &impl Doublets<T>, root: T) -> Result<Vec<T>, LinksError<T>> {
+fn read_seq<T: LinkType>(store: &impl Doublets<Item = T>, root: T) -> Result<Vec<T>, LinksError<T>> {
     let any = store.constants().any;
     let mut seq = vec![];
     let mut cur = root;

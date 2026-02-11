@@ -4,7 +4,7 @@ use mem::Global;
 use std::error::Error;
 use tap::Pipe;
 
-fn rebase_impl<T: LinkType>(mut store: impl Doublets<T>) -> Result<(), Box<dyn Error>> {
+fn rebase_impl<T: LinkType>(mut store: impl Doublets<Item = T>) -> Result<(), Box<dyn Error>> {
     let a = store.create_point()?;
     let b = store.create_point()?;
 

@@ -3,7 +3,7 @@ use rand::Rng;
 use data::{Flow, Hybrid, LinkType};
 use doublets::{Doublets, Link};
 
-pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
+pub fn test_crud<T: LinkType>(store: &mut impl Doublets<Item = T>) {
     let constants = store.constants().clone();
 
     assert_eq!(store.count(), T::funty(0));
@@ -37,7 +37,7 @@ pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(store.count(), T::funty(0));
 }
 
-pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
+pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<Item = T>) {
     let links = store;
 
     let constants = links.constants().clone();
@@ -113,7 +113,7 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
 }
 
 pub fn test_random_creations_and_deletions<T: LinkType>(
-    store: &mut impl Doublets<T>,
+    store: &mut impl Doublets<Item = T>,
     per_cycle: usize,
 ) {
     for n in 1..per_cycle {
