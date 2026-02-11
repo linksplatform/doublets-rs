@@ -34,7 +34,27 @@ pub trait Links<T: LinkType>: Send + Sync {
     -> Result<Flow, Error<T>>;
 }
 
-pub trait Doublets<T: LinkType>: Links<T> {
+pub trait Doublets<T: LinkType>: Send + Sync {
+    fn constants(&self) -> &LinksConstants<T>;
+
+    fn count_links(&self, query: &[T]) -> T;
+
+    fn create_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
+    -> Result<Flow, Error<T>>;
+
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow;
+
+    fn update_links(
+        &mut self,
+        query: &[T],
+        change: &[T],
+        handler: WriteHandler<'_, T>,
+    ) -> Result<Flow, Error<T>>;
+
+    fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
+    -> Result<Flow, Error<T>>;
+
+    fn get_link(&self, index: T) -> Option<Link<T>>;
     fn count_by(&self, query: impl ToQuery<T>) -> T
     where
         Self: Sized,
@@ -252,8 +272,6 @@ pub trait Doublets<T: LinkType>: Links<T> {
     fn try_get_link(&self, index: T) -> Result<Link<T>, Error<T>> {
         self.get_link(index).ok_or(Error::NotExists(index))
     }
-
-    fn get_link(&self, index: T) -> Option<Link<T>>;
 
     fn delete_all(&mut self) -> Result<(), Error<T>>
     where
@@ -548,6 +566,37 @@ pub trait Doublets<T: LinkType>: Links<T> {
             self.rebase(old, new)?;
             self.delete(old)
         }
+    }
+}
+
+impl<T: LinkType, D: Doublets<T> + ?Sized> Links<T> for D {
+    fn constants(&self) -> &LinksConstants<T> {
+        self.constants()
+    }
+
+    fn count_links(&self, query: &[T]) -> T {
+        self.count_links(query)
+    }
+
+    fn create_links(&mut self, query: &[T], handler: WriteHandler<'_, T>) -> Result<Flow, Error<T>> {
+        self.create_links(query, handler)
+    }
+
+    fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow {
+        self.each_links(query, handler)
+    }
+
+    fn update_links(
+        &mut self,
+        query: &[T],
+        change: &[T],
+        handler: WriteHandler<'_, T>,
+    ) -> Result<Flow, Error<T>> {
+        self.update_links(query, change, handler)
+    }
+
+    fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>) -> Result<Flow, Error<T>> {
+        self.delete_links(query, handler)
     }
 }
 

@@ -321,7 +321,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 }
 
 impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Links<T> for Store<T, M, TS, TT, TU>
+    Doublets<T> for Store<T, M, TS, TT, TU>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -552,11 +552,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 
         Ok(handler(link, Link::nothing()))
     }
-}
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Doublets<T> for Store<T, M, TS, TT, TU>
-{
     fn get_link(&self, index: T) -> Option<Link<T>> {
         if self.exists(index) {
             // SAFETY: links is exists
