@@ -1,15 +1,12 @@
 #![feature(fn_traits)]
-#![feature(generators)]
+#![feature(coroutines)]
 #![feature(try_trait_v2)]
-#![feature(default_free_fn)]
 #![feature(unboxed_closures)]
-#![feature(nonnull_slice_from_raw_parts)]
 #![feature(associated_type_defaults)]
 #![feature(type_alias_impl_trait)]
-#![feature(maybe_uninit_uninit_array)]
 #![feature(allocator_api)]
-#![feature(bench_black_box)]
 #![feature(maybe_uninit_array_assume_init)]
+#![feature(impl_trait_in_assoc_type)]
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,

@@ -2,7 +2,6 @@ use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 use std::{
-    default::default,
     ops::{ControlFlow, Try},
 };
 
@@ -79,7 +78,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut index = default();
+        let mut index = Default::default();
         self.create_by_with(query, |_before, link| {
             index = link.index;
             Flow::Continue
@@ -165,7 +164,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = Default::default();
         self.update_by_with(query, change, |_, after| {
             result = after.index;
             Flow::Continue
@@ -225,7 +224,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = Default::default();
         self.delete_by_with(query, |_before, after| {
             result = after.index;
             Flow::Continue
@@ -347,7 +346,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         R: Try<Output = ()>,
         Self: Sized,
     {
-        let mut new = default();
+        let mut new = Default::default();
         let mut handler = Fuse::new(handler);
         self.create_with(|before, after| {
             new = after.index;
@@ -362,7 +361,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = Default::default();
         self.create_link_with(source, target, |_, link| {
             result = link.index;
             Flow::Continue
@@ -653,7 +652,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         self.each_iter([self.constants().any; 3])
     }
 
-    type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEach = std::vec::IntoIter<Link<T>>;
 
     #[cfg_attr(feature = "more-inline", inline)]
     fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
@@ -677,8 +676,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     }
 
     #[cfg(feature = "small-search")]
-    type ImplIterEachSmall =
-        impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    type ImplIterEachSmall = std::vec::IntoIter<Link<T>>;
 
     #[cfg(feature = "small-search")]
     #[cfg_attr(feature = "more-inline", inline)]
