@@ -1,4 +1,4 @@
-use std::{default::default, marker::PhantomData, ptr::NonNull};
+use std::{marker::PhantomData, ptr::NonNull};
 
 use crate::{
     mem::{header::LinksHeader, unit::raw_link::LinkPart, LinksTree},

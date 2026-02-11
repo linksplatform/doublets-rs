@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
 
 use crate::{
     mem::{
