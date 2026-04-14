@@ -67,6 +67,11 @@ Using publishable workspace member: doublets (doublets/Cargo.toml)
 Crate: doublets, Version: 0.1.0-pre+beta.15, Published on crates.io: true
 ```
 
+## Template Repository Impact
+
+- **Rust template** (`link-foundation/rust-ai-driven-development-pipeline-template`): Same bug confirmed. All 5 release scripts lack workspace awareness. Issue filed: https://github.com/link-foundation/rust-ai-driven-development-pipeline-template/issues/36
+- **JS template** (`link-foundation/js-ai-driven-development-pipeline-template`): Not affected. npm/pnpm workspace root `package.json` files still contain `name` and `version`, and the template uses `@changesets/cli` with native workspace support.
+
 ## CI Logs
 
 - Full run log: `ci-logs/run-24406907038-full.log`
