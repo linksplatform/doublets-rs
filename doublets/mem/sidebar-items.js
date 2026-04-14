@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Error"],"mod":["parts","raw_mem","split","unit"],"struct":["Alloc","FileMapped","Global","LinksHeader","System","TempFile"],"trait":["ErasedMem","LinksList","LinksTree","RawMem","SplitList","SplitTree","SplitUpdateMem","UnitTree","UnitUpdateMem"],"type":["Result"]};

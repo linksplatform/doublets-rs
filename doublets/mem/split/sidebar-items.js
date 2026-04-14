@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["DataPart","ExternalRecursionlessSizeBalancedTreeBase","ExternalSourcesRecursionlessTree","ExternalTargetsRecursionlessTree","IndexPart","InternalSourcesLinkedList","InternalSourcesRecursionlessTree","InternalTargetsRecursionlessTree","Store","UnusedLinks"],"trait":["ExternalRecursionlessSizeBalancedTreeBaseAbstract"]};

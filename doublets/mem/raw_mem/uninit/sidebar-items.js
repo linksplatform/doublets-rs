@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["assume_init_mut","fill","fill_with","write_clone_of_slice"]};

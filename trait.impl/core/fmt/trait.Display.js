@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["doublets",[["impl&lt;T&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"doublets/data/enum.Error.html\" title=\"enum doublets::data::Error\">Error</a>&lt;T&gt;<div class=\"where\">where\n    T: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> + <a class=\"trait\" href=\"doublets/data/trait.LinkReference.html\" title=\"trait doublets::data::LinkReference\">LinkReference</a>,\n    <a class=\"struct\" href=\"https://doc.rust-lang.org/1.94.1/alloc/vec/struct.Vec.html\" title=\"struct alloc::vec::Vec\">Vec</a>&lt;<a class=\"struct\" href=\"doublets/data/struct.Link.html\" title=\"struct doublets::data::Link\">Link</a>&lt;T&gt;&gt;: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/fmt/trait.Debug.html\" title=\"trait core::fmt::Debug\">Debug</a>,\n    <a class=\"struct\" href=\"doublets/data/struct.Doublet.html\" title=\"struct doublets::data::Doublet\">Doublet</a>&lt;T&gt;: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a>,</div>",0],["impl&lt;T: <a class=\"trait\" href=\"doublets/data/trait.LinkReference.html\" title=\"trait doublets::data::LinkReference\">LinkReference</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.94.1/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"struct\" href=\"doublets/data/struct.Doublet.html\" title=\"struct doublets::data::Doublet\">Doublet</a>&lt;T&gt;",0]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[1671]}

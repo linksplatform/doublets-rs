@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Error","Flow"],"macro":["query"],"struct":["AddrToRaw","Doublet","Fuse","Hybrid","Link","LinksConstants","Point","PointIter","Query","RawToAddr"],"trait":["Doublets","DoubletsExt","LinkReference","Links","ToQuery"],"type":["ReadHandler","WriteHandler"]};
