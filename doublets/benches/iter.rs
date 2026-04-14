@@ -19,7 +19,7 @@ fn iter(c: &mut Criterion) {
         b.iter(|| {
             store.iter().for_each(|item| {
                 black_box(item);
-            })
+            });
         });
     });
     c.bench_function("each", |b| {

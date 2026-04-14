@@ -490,12 +490,9 @@ fn split_count_usages_many_links() -> Result<(), Error<usize>> {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new())?;
 
     let base = store.create_point()?;
-    let mut targets = Vec::new();
-
     // Create many links with same source
     for _ in 0..20 {
         let t = store.create_point()?;
-        targets.push(t);
         store.create_link(base, t)?;
     }
 
@@ -573,7 +570,7 @@ fn split_complex_link_patterns() -> Result<(), Error<usize>> {
     for i in 0..10 {
         for j in (i + 1)..10 {
             let result = store.search(points[i], points[j]);
-            assert!(result.is_some(), "Link {}->{} should exist", i, j);
+            assert!(result.is_some(), "Link {i}->{j} should exist");
         }
     }
 
@@ -669,7 +666,7 @@ fn split_ordered_insertions() -> Result<(), Error<usize>> {
 
         // Verify search still works
         let found = store.search(base, t);
-        assert!(found.is_some(), "Link to target {} should be found", i);
+        assert!(found.is_some(), "Link to target {i} should be found");
     }
 
     Ok(())

@@ -14,21 +14,21 @@ fn doublet_new() {
 #[test]
 fn doublet_display() {
     let doublet = Doublet::<usize>::new(1, 2);
-    let display_str = format!("{}", doublet);
+    let display_str = format!("{doublet}");
     assert_eq!(display_str, "1->2");
 }
 
 #[test]
 fn doublet_display_large_values() {
     let doublet = Doublet::<usize>::new(12345, 67890);
-    let display_str = format!("{}", doublet);
+    let display_str = format!("{doublet}");
     assert_eq!(display_str, "12345->67890");
 }
 
 #[test]
 fn doublet_debug() {
     let doublet = Doublet::<usize>::new(1, 2);
-    let debug_str = format!("{:?}", doublet);
+    let debug_str = format!("{doublet:?}");
     assert!(debug_str.contains('1'));
     assert!(debug_str.contains('2'));
 }
@@ -94,7 +94,7 @@ fn doublet_self_reference() {
     let doublet = Doublet::<usize>::new(5, 5);
     assert_eq!(doublet.source, 5);
     assert_eq!(doublet.target, 5);
-    assert_eq!(format!("{}", doublet), "5->5");
+    assert_eq!(format!("{doublet}"), "5->5");
 }
 
 #[test]

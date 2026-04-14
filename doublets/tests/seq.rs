@@ -14,7 +14,7 @@ fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, 
 
     for id in seq {
         let link = store.create()?;
-        aliases.push(store.update(link, link, *id)?)
+        aliases.push(store.update(link, link, *id)?);
     }
 
     for (i, cur) in aliases.iter().enumerate() {
@@ -22,7 +22,8 @@ fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, 
             store.create_link(*cur, *next)?;
         }
     }
-    Ok(*aliases.first().unwrap_or(&T::funty(0)))
+    let zero = T::funty(0);
+    Ok(*aliases.first().unwrap_or(&zero))
 }
 
 fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) -> Option<Link<T>> {
@@ -125,7 +126,7 @@ fn bug() -> Result<(), Box<dyn Error>> {
     let any = store.constants().any;
 
     for link in store.each_iter([any, any, 1]) {
-        println!("{:?}", link);
+        println!("{link:?}");
     }
 
     Ok(())

@@ -3,6 +3,7 @@ use rand::Rng;
 use data::{Flow, Hybrid, LinkType};
 use doublets::{Doublets, Link};
 
+#[allow(dead_code)]
 pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     let constants = store.constants().clone();
 
@@ -37,6 +38,7 @@ pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(store.count(), T::funty(0));
 }
 
+#[allow(dead_code)]
 pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     let links = store;
 
@@ -44,6 +46,7 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
 
     let n106 = T::try_from(106_usize).unwrap();
     let n107 = T::try_from(char::from_u32(107).unwrap() as usize).unwrap();
+    #[allow(clippy::cast_sign_loss)]
     let n108 = T::try_from((-108_i32) as usize).unwrap();
 
     let h106 = Hybrid::external(n106);
@@ -118,7 +121,6 @@ pub fn test_random_creations_and_deletions<T: LinkType>(
 ) {
     for n in 1..per_cycle {
         let mut created = 0;
-        let mut _deleted = 0;
         for _ in 0..n {
             let count = store.count().as_usize();
             let create_point: bool = rand::random();
