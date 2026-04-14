@@ -95,6 +95,69 @@ fn get_cargo_toml_path(rust_root: &str) -> String {
     }
 }
 
+fn is_workspace_toml(cargo_toml_path: &str) -> bool {
+    std::fs::read_to_string(cargo_toml_path)
+        .map(|c| c.contains("[workspace]"))
+        .unwrap_or(false)
+}
+
+fn has_publish_false(cargo_toml_path: &str) -> bool {
+    std::fs::read_to_string(cargo_toml_path)
+        .map(|c| {
+            let re = Regex::new(r#"(?m)^publish\s*=\s*false"#).unwrap();
+            re.is_match(&c)
+        })
+        .unwrap_or(false)
+}
+
+fn parse_workspace_members(cargo_toml_path: &str) -> Vec<String> {
+    let content = match std::fs::read_to_string(cargo_toml_path) {
+        Ok(c) => c,
+        Err(_) => return vec![],
+    };
+    let re = Regex::new(r#"(?s)members\s*=\s*\[(.*?)\]"#).unwrap();
+    if let Some(caps) = re.captures(&content) {
+        let member_re = Regex::new(r#""([^"]+)""#).unwrap();
+        member_re.captures_iter(caps.get(1).unwrap().as_str())
+            .map(|c| c.get(1).unwrap().as_str().to_string())
+            .collect()
+    } else {
+        vec![]
+    }
+}
+
+fn resolve_package_cargo_toml(rust_root: &str) -> String {
+    let root_toml = get_cargo_toml_path(rust_root);
+    let full_path = if root_toml.starts_with("./") || root_toml.starts_with('/') {
+        root_toml.clone()
+    } else {
+        format!("./{}", root_toml)
+    };
+    if !is_workspace_toml(&full_path) {
+        return root_toml;
+    }
+
+    eprintln!("Detected workspace Cargo.toml, searching for publishable member...");
+    let members = parse_workspace_members(&full_path);
+    let base = if rust_root == "." { String::new() } else { format!("{}/", rust_root) };
+
+    for member in &members {
+        let member_toml = format!("{}{}/Cargo.toml", base, member);
+        let check_path = if member_toml.starts_with("./") || member_toml.starts_with('/') {
+            member_toml.clone()
+        } else {
+            format!("./{}", member_toml)
+        };
+        if Path::new(&check_path).exists() && !has_publish_false(&check_path) {
+            eprintln!("Using publishable workspace member: {} ({})", member, member_toml);
+            return member_toml;
+        }
+    }
+
+    eprintln!("Warning: No publishable workspace member found, falling back to root Cargo.toml");
+    root_toml
+}
+
 fn get_cargo_toml_diff(cargo_toml_path: &str) -> String {
     let base_ref = env::var("GITHUB_BASE_REF").unwrap_or_else(|_| "main".to_string());
 
@@ -136,7 +199,7 @@ fn main() {
 
     // Get and check the diff
     let rust_root = get_rust_root();
-    let cargo_toml_path = get_cargo_toml_path(&rust_root);
+    let cargo_toml_path = resolve_package_cargo_toml(&rust_root);
     let diff = get_cargo_toml_diff(&cargo_toml_path);
 
     if diff.is_empty() {
