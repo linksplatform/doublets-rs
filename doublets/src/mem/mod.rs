@@ -1,3 +1,9 @@
+//! Memory layout and store implementations for doublets.
+//!
+//! Two store backends are available:
+//! - [`mod@unit`] — a single contiguous memory region per store.
+//! - [`split`] — separate data and index memory regions.
+
 pub use header::LinksHeader;
 pub use traits::{
     LinksList, LinksTree, SplitList, SplitTree, SplitUpdateMem, UnitTree, UnitUpdateMem,

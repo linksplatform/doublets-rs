@@ -2,6 +2,10 @@ use crate::Link;
 use data::{Flow, LinkType};
 use std::marker::PhantomData;
 
+/// A write-handler wrapper that stops calling the inner handler once it returns [`Flow::Break`].
+///
+/// After the first `Break`, every subsequent call to [`Fuse::call`] also returns `Break`
+/// without invoking the wrapped closure.
 pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
     handler: H,
     done: bool,
@@ -9,6 +13,7 @@ pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
 }
 
 impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
+    /// Wraps `handler` in a [`Fuse`].
     pub fn new(handler: F) -> Self {
         Self {
             handler,
@@ -17,6 +22,7 @@ impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
         }
     }
 
+    /// Calls the inner handler unless it has already returned [`Flow::Break`].
     pub fn call(&mut self, before: Link<T>, after: Link<T>) -> Flow {
         if self.done {
             Flow::Break

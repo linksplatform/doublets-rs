@@ -1,3 +1,21 @@
+//! A doublets graph database library for working with associative link structures.
+//!
+//! Doublets stores data as a graph of typed links, each represented as a triple
+//! `(index, source, target)`. Two store implementations are provided:
+//!
+//! - [`unit::Store`] — a single-memory store for smaller graphs.
+//! - [`split::Store`] — a two-memory (data + index) store that separates link
+//!   data from tree-index metadata for larger graphs.
+//!
+//! # Quick start
+//!
+//! ```rust,ignore
+//! use doublets::{unit, Doublets, DoubletsExt};
+//! use mem::FileMapped;
+//!
+//! let store = unit::Store::<u64, _>::new(FileMapped::from_path("db.links")?)?;
+//! ```
+
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,

@@ -2,21 +2,29 @@ use std::fmt::{self, Debug, Formatter};
 
 use data::{LinkType, Query, ToQuery};
 
+/// A link triple `(index, source, target)` that represents one node in the doublets graph.
+///
+/// Every link is uniquely identified by its `index` and connects a `source` to a `target`.
 #[derive(Default, Eq, PartialEq, Clone, Hash)]
 #[repr(C)]
 pub struct Link<T: LinkType> {
+    /// Unique identifier of this link within the store.
     pub index: T,
+    /// The source (left) endpoint of this link.
     pub source: T,
+    /// The target (right) endpoint of this link.
     pub target: T,
 }
 
 impl<T: LinkType> Link<T> {
+    /// Returns a default/null link with all fields set to zero.
     #[inline]
     #[must_use]
     pub fn nothing() -> Self {
         Self::default()
     }
 
+    /// Creates a new link with the given `index`, `source`, and `target`.
     #[inline]
     #[must_use]
     pub const fn new(index: T, source: T, target: T) -> Self {
@@ -27,12 +35,18 @@ impl<T: LinkType> Link<T> {
         }
     }
 
+    /// Creates a self-referential (point) link where `index == source == target`.
     #[inline]
     #[must_use]
     pub const fn point(val: T) -> Self {
         Self::new(val, val, val)
     }
 
+    /// Constructs a [`Link`] from the first three elements of `slice`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice.len() < 3`.
     #[inline]
     pub const fn from_slice(slice: &[T]) -> Self {
         assert!(slice.len() >= 3);
@@ -50,24 +64,28 @@ impl<T: LinkType> Link<T> {
         }
     }
 
+    /// Returns `true` if this is the null (zero) link.
     #[inline]
     #[must_use]
     pub fn is_null(&self) -> bool {
         *self == Self::point(T::funty(0))
     }
 
+    /// Returns `true` if the link is a full point (`index == source == target`).
     #[inline]
     #[must_use]
     pub fn is_full(&self) -> bool {
         self.index == self.source && self.index == self.target
     }
 
+    /// Returns `true` if `index` equals either `source` or `target`.
     #[inline]
     #[must_use]
     pub fn is_partial(&self) -> bool {
         self.index == self.source || self.index == self.target
     }
 
+    /// Returns the link fields as a three-element slice `[index, source, target]`.
     #[inline]
     #[must_use]
     pub const fn as_slice(&self) -> &[T] {

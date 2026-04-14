@@ -16,6 +16,10 @@ use mem::RawMem;
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+/// A split-memory doublets store that keeps link data and index metadata in separate regions.
+///
+/// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
+/// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
 pub struct Store<
     T: LinkType + crate::TreesLinkType,
     MD: RawMem<Item = DataPart<T>>,
@@ -64,6 +68,7 @@ impl<
     const SIZE_STEP: usize = 2_usize.pow(10);
 
     // TODO: create Options
+    /// Creates a split store with the given data memory, index memory, and `constants`.
     pub fn with_constants(
         data_mem: MD,
         index_mem: MI,
@@ -109,6 +114,7 @@ impl<
         Ok(new)
     }
 
+    /// Creates a split store using the given memories and default [`LinksConstants`].
     pub fn new(data_mem: MD, index_mem: MI) -> Result<Store<T, MD, MI>, LinksError<T>> {
         Self::with_constants(data_mem, index_mem, LinksConstants::default())
     }
@@ -147,6 +153,7 @@ impl<
         }
     }
 
+    /// Returns the raw data part (source/target) for the link at `index`.
     pub fn get_data_part(&self, index: T) -> &DataPart<T> {
         Self::get_from_mem(self.data_ptr, index.as_usize())
             .expect("Data part should be in data memory")
@@ -161,6 +168,7 @@ impl<
             .expect("Data part should be in data memory")
     }
 
+    /// Returns the raw index part (tree metadata) for the link at `index`.
     pub fn get_index_part(&self, index: T) -> &IndexPart<T> {
         Self::get_from_mem(self.index_ptr, index.as_usize())
             .expect("Index part should be in index memory")
@@ -320,6 +328,7 @@ impl<
         header.allocated - header.free
     }
 
+    /// Returns `true` if the slot at `link` is in the free-list (deleted but not yet reused).
     pub fn is_unused(&self, link: T) -> bool {
         let header = self.get_header();
         if link <= header.allocated && header.first_free != link {
@@ -334,10 +343,12 @@ impl<
 
     //fn is_non_
 
+    /// Returns `true` if `link` is a virtual (external/unused) reference.
     pub fn is_virtual(&self, link: T) -> bool {
         self.is_unused(link)
     }
 
+    /// Returns `true` if `link` is an allocated, non-deleted internal link.
     pub fn exists(&self, link: T) -> bool {
         let constants = self.constants();
         let header = self.get_header();

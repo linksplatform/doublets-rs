@@ -18,6 +18,10 @@ use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+/// A single-memory doublets store backed by a size-balanced search tree.
+///
+/// All link data and tree-index metadata are stored in one contiguous `RawMem` region.
+/// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
 pub struct Store<
     T: LinkType + crate::TreesLinkType,
     M: RawMem<Item = LinkPart<T>>,
@@ -48,10 +52,12 @@ impl<
     #[cfg(miri)]
     const SIZE_STEP: usize = 2_usize.pow(10);
 
+    /// Creates a store using the given memory and default [`LinksConstants`].
     pub fn new(mem: M) -> Result<Store<T, M>, LinksError<T>> {
         Self::with_constants(mem, LinksConstants::new())
     }
 
+    /// Creates a store using the given memory and custom `constants`.
     pub fn with_constants(
         mem: M,
         constants: LinksConstants<T>,

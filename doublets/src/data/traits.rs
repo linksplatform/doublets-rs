@@ -4,20 +4,31 @@ use rayon::prelude::*;
 use crate::{Error, Fuse, Link};
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 
+/// Callback type for read-only link enumeration.
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
 
+/// Callback type for mutating operations that report `(before, after)` link states.
 pub type WriteHandler<'a, T> = &'a mut dyn FnMut(Link<T>, Link<T>) -> Flow;
 
+/// Low-level, raw slice-based interface for a doublets link store.
+///
+/// Implementors are required to be `Send + Sync`. Most users should prefer the
+/// higher-level [`Doublets`] trait which builds on this one.
 pub trait Links<T: LinkType>: Send + Sync {
+    /// Returns the store's [`LinksConstants`] (any/null/range values).
     fn constants(&self) -> &LinksConstants<T>;
 
+    /// Counts links that match `query`.
     fn count_links(&self, query: &[T]) -> T;
 
+    /// Creates one or more links matching `query` and reports each creation via `handler`.
     fn create_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
         -> Result<Flow, Error<T>>;
 
+    /// Iterates over links matching `query`, calling `handler` for each.
     fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow;
 
+    /// Updates links matching `query` to the new values in `change`, reporting via `handler`.
     fn update_links(
         &mut self,
         query: &[T],
@@ -25,11 +36,16 @@ pub trait Links<T: LinkType>: Send + Sync {
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, Error<T>>;
 
+    /// Deletes links matching `query` and reports each deletion via `handler`.
     fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
         -> Result<Flow, Error<T>>;
 }
 
+/// High-level API for a doublets link store, extending [`Links`] with ergonomic helpers.
+///
+/// All methods have default implementations built on top of [`Links`].
 pub trait Doublets<T: LinkType>: Links<T> {
+    /// Counts links matching `query`.
     fn count_by(&self, query: impl ToQuery<T>) -> T
     where
         Self: Sized,
@@ -37,6 +53,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.count_links(&query.to_query()[..])
     }
 
+    /// Returns the total number of links in the store.
     fn count(&self) -> T
     where
         Self: Sized,
@@ -44,6 +61,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.count_by([])
     }
 
+    /// Creates a link matching `query`, calling `handler` on each created link.
     fn create_by_with<F>(
         &mut self,
         query: impl ToQuery<T>,
@@ -57,6 +75,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_links(&query[..], &mut handler)
     }
 
+    /// Creates a link matching `query` and returns its index.
     fn create_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -69,6 +88,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| index)
     }
 
+    /// Creates a new link and calls `handler` with the before/after states.
     fn create_with<F>(&mut self, handler: F) -> Result<Flow, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -77,6 +97,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_by_with([], handler)
     }
 
+    /// Creates a new uninitialized link and returns its index.
     fn create(&mut self) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -84,6 +105,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_by([])
     }
 
+    /// Iterates over links matching `query`, calling `handler` for each.
     fn each_by<F>(&self, query: impl ToQuery<T>, mut handler: F) -> Flow
     where
         F: FnMut(Link<T>) -> Flow,
@@ -93,6 +115,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.each_links(&query[..], &mut handler)
     }
 
+    /// Iterates over all links in the store, calling `handler` for each.
     fn each<F>(&self, handler: F) -> Flow
     where
         F: FnMut(Link<T>) -> Flow,
@@ -101,6 +124,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.each_by([], handler)
     }
 
+    /// Updates links matching `query` to `change`, calling `handler` with before/after.
     fn update_by_with<H>(
         &mut self,
         query: impl ToQuery<T>,
@@ -116,6 +140,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_links(&query[..], &change[..], &mut handler)
     }
 
+    /// Updates links matching `query` to `change` and returns the updated link's index.
     fn update_by(&mut self, query: impl ToQuery<T>, change: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -128,6 +153,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
+    /// Updates the link at `index` to `(index, source, target)`, calling `handler`.
     fn update_with<F>(
         &mut self,
         index: T,
@@ -142,6 +168,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_by_with([index], [index, source, target], handler)
     }
 
+    /// Updates the link at `index` to `(index, source, target)` and returns the index.
     fn update(&mut self, index: T, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -149,6 +176,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_by([index], [index, source, target])
     }
 
+    /// Deletes links matching `query`, calling `handler` with before/after states.
     fn delete_by_with<F>(
         &mut self,
         query: impl ToQuery<T>,
@@ -162,6 +190,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_links(&query[..], &mut handler)
     }
 
+    /// Deletes links matching `query` and returns the deleted link's index.
     fn delete_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -174,6 +203,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
+    /// Deletes the link at `index`, calling `handler` with before/after states.
     fn delete_with<F>(&mut self, index: T, handler: F) -> Result<Flow, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -182,6 +212,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_by_with([index], handler)
     }
 
+    /// Deletes the link at `index` and returns its former index.
     fn delete(&mut self, index: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -189,12 +220,15 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_by([index])
     }
 
+    /// Returns the link at `index`, or `Err(Error::NotExists)` if it does not exist.
     fn try_get_link(&self, index: T) -> Result<Link<T>, Error<T>> {
         self.get_link(index).ok_or(Error::NotExists(index))
     }
 
+    /// Returns the link at `index`, or `None` if it does not exist.
     fn get_link(&self, index: T) -> Option<Link<T>>;
 
+    /// Deletes all links in the store.
     fn delete_all(&mut self) -> Result<(), Error<T>>
     where
         Self: Sized,
@@ -207,6 +241,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
+    /// Deletes all links matching `query`, calling `handler` for each deletion.
     fn delete_query_with<F>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -228,6 +263,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
+    /// Deletes all links that use `index` as a source or target, calling `handler` for each.
     fn delete_usages_with<F>(&mut self, index: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -259,6 +295,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
+    /// Deletes all links that use `index` as a source or target.
     fn delete_usages(&mut self, index: T) -> Result<(), Error<T>>
     where
         Self: Sized,
@@ -266,6 +303,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.delete_usages_with(index, |_, _| Flow::Continue)
     }
 
+    /// Creates a self-referential point link and returns its index.
     fn create_point(&mut self) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -274,6 +312,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update(new, new, new)
     }
 
+    /// Creates a link from `source` to `target`, calling `handler` with before/after states.
     fn create_link_with<F>(&mut self, source: T, target: T, handler: F) -> Result<Flow, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -292,6 +331,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         })
     }
 
+    /// Creates a link from `source` to `target` and returns its index.
     fn create_link(&mut self, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -304,6 +344,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
+    /// Returns `true` if at least one link matches `query`.
     fn found(&self, query: impl ToQuery<T>) -> bool
     where
         Self: Sized,
@@ -311,6 +352,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.count_by(query) != T::funty(0)
     }
 
+    /// Returns the first link matching `query`, or `None`.
     fn find(&self, query: impl ToQuery<T>) -> Option<Link<T>>
     where
         Self: Sized,
@@ -323,6 +365,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         result
     }
 
+    /// Returns the index of a link with the given `source` and `target`, or `None`.
     fn search(&self, source: T, target: T) -> Option<T>
     where
         Self: Sized,
@@ -339,6 +382,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.search(source, target).unwrap_or(default)
     }
 
+    /// Returns the link matching `query` only if exactly one link matches; `None` otherwise.
     fn single(&self, query: impl ToQuery<T>) -> Option<Link<T>>
     where
         Self: Sized,
@@ -356,6 +400,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         result
     }
 
+    /// Returns the index of the `(source, target)` link, creating it if it does not exist.
     fn get_or_create(&mut self, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -367,6 +412,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         }
     }
 
+    /// Returns the number of other links that reference `index` as a source or target.
     fn count_usages(&self, index: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -388,6 +434,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(usage_source + usage_target)
     }
 
+    /// Returns the indices of all links that reference `index` as a source or target.
     fn usages(&self, index: T) -> Result<Vec<T>, Error<T>>
     where
         Self: Sized,
@@ -411,6 +458,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(usages)
     }
 
+    /// Returns `true` if the link at `link` exists (internal or external).
     fn exist(&self, link: T) -> bool
     where
         Self: Sized,
@@ -423,6 +471,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         }
     }
 
+    /// Returns `true` if any other link references `link` as a source or target.
     fn has_usages(&self, link: T) -> bool
     where
         Self: Sized,
@@ -431,6 +480,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .is_ok_and(|link| link != T::funty(0))
     }
 
+    /// Re-points all usages of `old` to `new`, calling `handler` for each update.
     fn rebase_with<F>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -470,6 +520,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
+    /// Re-points all usages of `old` to `new` and returns `new`.
     fn rebase(&mut self, old: T, new: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -478,6 +529,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .map(|()| new)
     }
 
+    /// Re-points all usages of `old` to `new`, then deletes `old`. Returns `new`.
     fn rebase_and_delete(&mut self, old: T, new: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -536,27 +588,37 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
     }
 }
 
+/// Extension trait that adds iterator-based access to a [`Doublets`] store.
+///
+/// Automatically implemented for any type that implements [`Doublets`].
 pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
+    /// The parallel iterator type returned by [`par_iter`](DoubletsExt::par_iter).
     #[cfg(feature = "rayon")]
     type IdxParIter: IndexedParallelIterator<Item = Link<T>>;
 
+    /// Returns a parallel iterator over all links in the store.
     #[cfg(feature = "rayon")]
     fn par_iter(&self) -> Self::IdxParIter;
 
+    /// Returns a parallel iterator over links matching `query`.
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter;
 
+    /// Returns an iterator over all links in the store.
     fn iter(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
+    /// Returns an iterator over links matching `query`.
     fn each_iter(
         &self,
         query: impl ToQuery<T>,
     ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
+    /// Returns a small-vec-backed iterator over all links (optimised for small result sets).
     #[cfg(feature = "small-search")]
     fn iter_small(&self)
         -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
+    /// Returns a small-vec-backed iterator over links matching `query`.
     #[cfg(feature = "small-search")]
     fn each_iter_small(
         &self,
