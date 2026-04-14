@@ -220,7 +220,7 @@ dependencies = [
  "mimalloc",
  "num-traits",
  "platform-data",
- "platform-mem 0.3.0",
+ "platform-mem",
  "platform-trees",
  "rand",
  "rayon",
@@ -313,7 +313,7 @@ name = "integration"
 version = "0.1.0"
 dependencies = [
  "doublets",
- "platform-mem 0.1.0-pre+beta.2",
+ "platform-mem",
 ]
 
 [[package]]
@@ -389,15 +389,6 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "memmap2"
-version = "0.5.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a79b39c93a7a5a27eeaf9a23b5ff43f1b9e0ad6b1cdd441140ae53c35613fc7"
-dependencies = [
- "libc",
-]
-
-[[package]]
-name = "memmap2"
 version = "0.9.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "714098028fe011992e1c3962653c96b2d578c4b4bce9036e15ff220319b1e0e3"
@@ -467,34 +458,14 @@ dependencies = [
 
 [[package]]
 name = "platform-mem"
-version = "0.1.0-pre+beta.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e74b28413b5e7213bfde416a0a7dd11753cac3e86f20cb800ed04e59b3034f8f"
-dependencies = [
- "memmap2 0.5.5",
- "platform-num 0.1.0-aplha.1",
- "tempfile",
-]
-
-[[package]]
-name = "platform-mem"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27cff7c92440ac926c8c91ea3151db6e52a262f602d0c157f254e422fc15b12"
 dependencies = [
  "allocator-api2",
- "memmap2 0.9.10",
+ "memmap2",
  "tempfile",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "platform-num"
-version = "0.1.0-aplha.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64f3d8a90b4188611f2923aec60f0d6a6b49663e5e883fcd5d422f0f24ffb7bd"
-dependencies = [
- "num-traits",
 ]
 
 [[package]]
@@ -513,7 +484,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "164642d79d5add67b3a068d96102f2cb0c6444acc6edf57381f981b7278a44e4"
 dependencies = [
  "num-traits",
- "platform-num 0.6.0",
+ "platform-num",
 ]
 
 [[package]]
