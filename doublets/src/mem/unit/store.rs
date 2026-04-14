@@ -14,7 +14,7 @@ use data::{Flow, LinkType, LinksConstants, ToQuery};
 use leak_slice::LeakSliceExt;
 use mem::RawMem;
 
-use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 

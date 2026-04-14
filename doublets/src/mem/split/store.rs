@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp::Ordering, mem::transmute, ptr::NonNull};
 
 use crate::{
     mem::{
@@ -7,13 +7,13 @@ use crate::{
             IndexPart, InternalSourcesLinkedList, InternalSourcesRecursionlessTree,
             InternalTargetsRecursionlessTree, UnusedLinks,
         },
-        LinksHeader, LinksTree, SplitList, SplitTree, SplitUpdateMem,
+        LinksHeader, SplitList, SplitTree, SplitUpdateMem,
     },
     Doublets, DoubletsExt, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 use mem::RawMem;
-use trees::RelativeCircularLinkedList;
+
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
