@@ -22,19 +22,13 @@ pub trait UnitUpdateMem<T: LinkType + crate::TreesLinkType> {
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>);
 }
 
-pub trait UnitTree<T: LinkType + crate::TreesLinkType>:
-    LinksTree<T> + UnitUpdateMem<T>
-{
-}
+pub trait UnitTree<T: LinkType + crate::TreesLinkType>: LinksTree<T> + UnitUpdateMem<T> {}
 
 pub trait SplitUpdateMem<T: LinkType + crate::TreesLinkType> {
     fn update_mem(&mut self, data: NonNull<[DataPart<T>]>, index: NonNull<[IndexPart<T>]>);
 }
 
-pub trait SplitTree<T: LinkType + crate::TreesLinkType>:
-    LinksTree<T> + SplitUpdateMem<T>
-{
-}
+pub trait SplitTree<T: LinkType + crate::TreesLinkType>: LinksTree<T> + SplitUpdateMem<T> {}
 
 pub trait LinksList<T: LinkType + crate::TreesLinkType> {
     fn detach(&mut self, link: T);
@@ -42,12 +36,6 @@ pub trait LinksList<T: LinkType + crate::TreesLinkType> {
     fn attach_as_first(&mut self, link: T);
 }
 
-pub trait UnitList<T: LinkType + crate::TreesLinkType>:
-    LinksList<T> + UnitUpdateMem<T>
-{
-}
+pub trait UnitList<T: LinkType + crate::TreesLinkType>: LinksList<T> + UnitUpdateMem<T> {}
 
-pub trait SplitList<T: LinkType + crate::TreesLinkType>:
-    LinksList<T> + SplitUpdateMem<T>
-{
-}
+pub trait SplitList<T: LinkType + crate::TreesLinkType>: LinksList<T> + SplitUpdateMem<T> {}

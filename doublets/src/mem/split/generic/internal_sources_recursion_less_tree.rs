@@ -33,7 +33,9 @@ impl<T: LinkType + crate::TreesLinkType> InternalSourcesRecursionlessTree<T> {
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for InternalSourcesRecursionlessTree<T> {
+impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
+    for InternalSourcesRecursionlessTree<T>
+{
     unsafe fn get_left_reference(&self, node: T) -> *const T {
         std::ptr::addr_of!(self.get_index_part(node).left_as_source)
     }
@@ -90,7 +92,10 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for Intern
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T> for InternalSourcesRecursionlessTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T>
+    for InternalSourcesRecursionlessTree<T>
+{
+}
 
 fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     this: &InternalSourcesRecursionlessTree<T>,
@@ -102,9 +107,15 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
         return Flow::Continue;
     }
     unsafe {
-        if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() { return Flow::Break; }
-        if handler(this.get_link_value(link)).is_break() { return Flow::Break; }
-        if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() { return Flow::Break; }
+        if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() {
+            return Flow::Break;
+        }
+        if handler(this.get_link_value(link)).is_break() {
+            return Flow::Break;
+        }
+        if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() {
+            return Flow::Break;
+        }
         Flow::Continue
     }
 }

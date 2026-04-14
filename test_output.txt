@@ -1,0 +1,864 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /tmp/gh-issue-solver-1776153218771/doublets/Cargo.toml
+workspace: /tmp/gh-issue-solver-1776153218771/Cargo.toml
+ Downloading crates ...
+  Downloaded anes v0.1.6
+  Downloaded ciborium-ll v0.2.2
+  Downloaded criterion-plot v0.5.0
+  Downloaded cast v0.3.0
+  Downloaded ciborium-io v0.2.2
+  Downloaded num_cpus v1.13.1
+  Downloaded tinyvec_macros v0.1.0
+  Downloaded ciborium v0.2.2
+  Downloaded same-file v1.0.6
+  Downloaded scopeguard v1.1.0
+  Downloaded plotters-backend v0.3.4
+  Downloaded walkdir v2.3.2
+  Downloaded oorandom v11.1.3
+  Downloaded tinytemplate v1.2.1
+  Downloaded rand_core v0.6.3
+  Downloaded static_assertions v1.1.0
+  Downloaded ppv-lite86 v0.2.16
+  Downloaded tinyvec v1.6.0
+  Downloaded smallvec v1.9.0
+  Downloaded serde v1.0.140
+  Downloaded crossbeam-utils v0.8.11
+  Downloaded zerocopy-derive v0.8.48
+  Downloaded half v2.7.1
+  Downloaded criterion v0.5.1
+  Downloaded serde_json v1.0.82
+  Downloaded plotters v0.3.2
+  Downloaded rayon v1.5.3
+  Downloaded itertools v0.10.3
+  Downloaded ryu v1.0.10
+  Downloaded rayon-core v1.9.3
+  Downloaded crossbeam-epoch v0.9.10
+  Downloaded regex v1.6.0
+  Downloaded serde_derive v1.0.140
+  Downloaded regex-syntax v0.6.27
+  Downloaded crossbeam-deque v0.8.2
+  Downloaded crossbeam-channel v0.5.6
+  Downloaded cc v1.0.73
+  Downloaded getrandom v0.2.7
+  Downloaded either v1.7.0
+  Downloaded itoa v1.0.2
+  Downloaded is-terminal v0.4.17
+  Downloaded memoffset v0.6.5
+  Downloaded plotters-svg v0.3.2
+  Downloaded mimalloc v0.1.29
+  Downloaded libmimalloc-sys v0.1.25
+   Compiling cfg-if v1.0.0
+   Compiling crossbeam-utils v0.8.11
+   Compiling libc v0.2.185
+   Compiling memoffset v0.6.5
+   Compiling serde_derive v1.0.140
+   Compiling once_cell v1.21.4
+   Compiling crossbeam-epoch v0.9.10
+   Compiling zerocopy v0.8.48
+   Compiling serde v1.0.140
+   Compiling num-traits v0.2.19
+   Compiling zerocopy-derive v0.8.48
+   Compiling scopeguard v1.1.0
+   Compiling rayon-core v1.9.3
+   Compiling serde_json v1.0.82
+   Compiling cc v1.0.73
+   Compiling either v1.7.0
+   Compiling getrandom v0.2.7
+   Compiling num_cpus v1.13.1
+   Compiling crossbeam-deque v0.8.2
+   Compiling crossbeam-channel v0.5.6
+   Compiling rayon v1.5.3
+   Compiling remove_dir_all v0.5.3
+   Compiling anstyle v1.0.14
+   Compiling clap_lex v1.1.0
+   Compiling ryu v1.0.10
+   Compiling itoa v1.0.2
+   Compiling ciborium-io v0.2.2
+   Compiling plotters-backend v0.3.4
+   Compiling fastrand v1.8.0
+   Compiling libmimalloc-sys v0.1.25
+   Compiling plotters-svg v0.3.2
+   Compiling tempfile v3.3.0
+   Compiling clap_builder v4.6.0
+   Compiling thiserror v2.0.18
+   Compiling thiserror v1.0.31
+   Compiling rand_core v0.6.3
+   Compiling itertools v0.10.3
+   Compiling platform-num v0.6.0
+   Compiling memmap2 v0.9.10
+   Compiling allocator-api2 v0.4.0
+   Compiling beef v0.5.2
+   Compiling same-file v1.0.6
+   Compiling cast v0.3.0
+   Compiling ppv-lite86 v0.2.16
+   Compiling funty v2.0.0
+   Compiling regex-syntax v0.6.27
+   Compiling criterion-plot v0.5.0
+   Compiling platform-data v0.1.0-beta.3 (/tmp/gh-issue-solver-1776153218771/dev-deps/data-rs)
+   Compiling rand_chacha v0.3.1
+   Compiling clap v4.6.0
+   Compiling platform-mem v0.3.0
+   Compiling regex v1.6.0
+   Compiling walkdir v2.3.2
+   Compiling platform-trees v0.3.3
+   Compiling plotters v0.3.2
+   Compiling half v2.7.1
+   Compiling is-terminal v0.4.17
+   Compiling oorandom v11.1.3
+   Compiling ciborium-ll v0.2.2
+   Compiling anes v0.1.6
+   Compiling ciborium v0.2.2
+   Compiling tinytemplate v1.2.1
+   Compiling tinyvec_macros v0.1.0
+   Compiling tap v1.0.1
+   Compiling leak_slice v0.2.0
+   Compiling tinyvec v1.6.0
+   Compiling mimalloc v0.1.29
+   Compiling rand v0.8.5
+   Compiling smallvec v1.9.0
+   Compiling static_assertions v1.1.0
+   Compiling doublets v0.1.0-pre+beta.15 (/tmp/gh-issue-solver-1776153218771/doublets)
+   Compiling criterion v0.5.1
+warning: fields `break` and `continue` are never read
+  --> doublets/src/mem/split/generic/external_recursion_less_base.rs:17:16
+   |
+14 | pub struct ExternalRecursionlessSizeBalancedTreeBase<T: LinkType + crate::TreesLinkType> {
+   |            ----------------------------------------- fields in this struct
+...
+17 |     pub(crate) r#break: T,
+   |                ^^^^^^^
+18 |     pub(crate) r#continue: T,
+   |                ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `break` and `continue` are never read
+  --> doublets/src/mem/split/generic/internal_recursion_less_base.rs:16:16
+   |
+13 | pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType + crate::TreesLinkType> {
+   |                   ----------------------------------------- fields in this struct
+...
+16 |     pub(crate) r#break: T,
+   |                ^^^^^^^
+17 |     pub(crate) r#continue: T,
+   |                ^^^^^^^^^^
+
+warning: method `get_mut_data_part` is never used
+  --> doublets/src/mem/split/generic/internal_recursion_less_base.rs:44:8
+   |
+35 | pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType + crate::TreesLinkType>:
+   |                  ------------------------------------------------- method in this trait
+...
+44 |     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T>;
+   |        ^^^^^^^^^^^^^^^^^
+
+warning: fields `continue` and `break` are never read
+  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:19:5
+   |
+16 | pub struct InternalSourcesLinkedList<T: LinkType + crate::TreesLinkType> {
+   |            ------------------------- fields in this struct
+...
+19 |     r#continue: T,
+   |     ^^^^^^^^^^
+20 |     r#break: T,
+   |     ^^^^^^^
+
+warning: methods `get_header`, `get_mut_header`, and `get_mut_data_part` are never used
+  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:37:8
+   |
+23 | impl<T: LinkType + crate::TreesLinkType> InternalSourcesLinkedList<T> {
+   | --------------------------------------------------------------------- methods in this implementation
+...
+37 |     fn get_header(&self) -> &LinksHeader<T> {
+   |        ^^^^^^^^^^
+...
+41 |     fn get_mut_header(&mut self) -> &mut LinksHeader<T> {
+   |        ^^^^^^^^^^^^^^
+...
+49 |     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T> {
+   |        ^^^^^^^^^^^^^^^^^
+
+warning: method `get_link_part` is never used
+   --> doublets/src/mem/unit/store.rs:133:8
+    |
+ 38 | / impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
+ 39 | |     Store<T, M, TS, TT, TU>
+    | |___________________________- method in this implementation
+...
+133 |       fn get_link_part(&self, index: T) -> &LinkPart<T> {
+    |          ^^^^^^^^^^^^^
+
+warning: `doublets` (lib) generated 6 warnings
+error[E0432]: unresolved import `doublets::Handler`
+ --> doublets/tests/handler.rs:4:22
+  |
+4 | use doublets::{Fuse, Handler, Link};
+  |                      ^^^^^^^ no `Handler` in the root
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+ --> doublets/tests/handler.rs:1:1
+  |
+1 | #![feature(fn_traits)]
+  | ^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+ --> doublets/tests/handler.rs:9:16
+  |
+9 |     let _fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+  |                ^^^^         ------ help: remove the unnecessary generic argument
+  |                |
+  |                expected 2 generic arguments
+  |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+ --> doublets/src/data/handler.rs:5:12
+  |
+5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+  |            ^^^^ -            -
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:15:16
+   |
+15 |     let _fuse: Fuse<usize, _, Flow> = Fuse::from(handler);
+   |                ^^^^         ------ help: remove the unnecessary generic argument
+   |                |
+   |                expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0308]: mismatched types
+  --> doublets/tests/handler.rs:15:50
+   |
+14 |     let handler = |_before: Link<usize>, _after: Link<usize>| Flow::Continue;
+   |                   ------------------------------------------- the found closure
+15 |     let _fuse: Fuse<usize, _, Flow> = Fuse::from(handler);
+   |                                       ---------- ^^^^^^^ expected `Fuse<usize, _>`, found closure
+   |                                       |
+   |                                       arguments to this function are incorrect
+   |
+   = note: expected struct `doublets::Fuse<usize, _>`
+             found closure `{closure@doublets/tests/handler.rs:14:19: 14:62}`
+note: associated function defined here
+  --> /rustc/e408947bfd200af42db322daf0fadfe7e26d3bd1/library/core/src/convert/mod.rs:592:7
+
+error[E0599]: the method `fuse` exists for closure `{closure@doublets/tests/handler.rs:20:19: 20:62}`, but its trait bounds were not satisfied
+  --> doublets/tests/handler.rs:21:25
+   |
+20 |     let handler = |_before: Link<usize>, _after: Link<usize>| Flow::Continue;
+   |                   ------------------------------------------- doesn't satisfy `_: Iterator`
+21 |     let _fuse = handler.fuse();
+   |                         ^^^^ method cannot be called on `{closure@doublets/tests/handler.rs:20:19: 20:62}` due to unsatisfied trait bounds
+   |
+   = note: the following trait bounds were not satisfied:
+           `{closure@doublets/tests/handler.rs:20:19: 20:62}: Iterator`
+           which is required by `&mut {closure@doublets/tests/handler.rs:20:19: 20:62}: Iterator`
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:27:19
+   |
+27 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |                   ^^^^         ------ help: remove the unnecessary generic argument
+   |                   |
+   |                   expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:26:19: 26:62}>`
+  --> doublets/tests/handler.rs:32:18
+   |
+27 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:26:19: 26:62}>`
+...
+32 |     let result = fuse(link1.clone(), link2.clone());
+   |                  ^^^^------------------------------
+   |                  |
+   |                  call expression requires function
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:26:19: 26:62}>`
+  --> doublets/tests/handler.rs:35:18
+   |
+27 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:26:19: 26:62}>`
+...
+35 |     let result = fuse(link1, link2);
+   |                  ^^^^--------------
+   |                  |
+   |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:42:19
+   |
+42 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |                   ^^^^         ------ help: remove the unnecessary generic argument
+   |                   |
+   |                   expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:41:19: 41:62}>`
+  --> doublets/tests/handler.rs:47:18
+   |
+42 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:41:19: 41:62}>`
+...
+47 |     let result = fuse(link1.clone(), link2.clone());
+   |                  ^^^^------------------------------
+   |                  |
+   |                  call expression requires function
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:41:19: 41:62}>`
+  --> doublets/tests/handler.rs:51:18
+   |
+42 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:41:19: 41:62}>`
+...
+51 |     let result = fuse(link1, link2);
+   |                  ^^^^--------------
+   |                  |
+   |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:58:19
+   |
+58 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |                   ^^^^         ------ help: remove the unnecessary generic argument
+   |                   |
+   |                   expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:57:19: 57:62}>`
+  --> doublets/tests/handler.rs:63:18
+   |
+58 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:57:19: 57:62}>`
+...
+63 |     let result = fuse(link1, link2);
+   |                  ^^^^--------------
+   |                  |
+   |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:71:15
+   |
+71 |     let fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |               ^^^^         ------ help: remove the unnecessary generic argument
+   |               |
+   |               expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0277]: expected a `FnOnce<_>` closure, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:70:19: 70:62}>`
+  --> doublets/tests/handler.rs:77:46
+   |
+77 |     let result = std::ops::FnOnce::call_once(fuse, (link1, link2));
+   |                  --------------------------- ^^^^ expected an `FnOnce<_>` closure, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:70:19: 70:62}>`
+   |                  |
+   |                  required by a bound introduced by this call
+   |
+   = help: the trait `FnOnce<_>` is not implemented for `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:70:19: 70:62}>`
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+  --> doublets/tests/handler.rs:84:15
+   |
+84 |     let fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+   |               ^^^^         ------ help: remove the unnecessary generic argument
+   |               |
+   |               expected 2 generic arguments
+   |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+  --> doublets/src/data/handler.rs:5:12
+   |
+ 5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+   |            ^^^^ -            -
+
+error[E0277]: expected a `FnOnce<_>` closure, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:83:19: 83:62}>`
+  --> doublets/tests/handler.rs:89:46
+   |
+89 |     let result = std::ops::FnOnce::call_once(fuse, (link1, link2));
+   |                  --------------------------- ^^^^ expected an `FnOnce<_>` closure, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:83:19: 83:62}>`
+   |                  |
+   |                  required by a bound introduced by this call
+   |
+   = help: the trait `FnOnce<_>` is not implemented for `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:83:19: 83:62}>`
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+   --> doublets/tests/handler.rs:105:19
+    |
+105 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+    |                   ^^^^         ------ help: remove the unnecessary generic argument
+    |                   |
+    |                   expected 2 generic arguments
+    |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+   --> doublets/src/data/handler.rs:5:12
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |            ^^^^ -            -
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:97:19: 97:67}>`
+   --> doublets/tests/handler.rs:111:19
+    |
+105 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:97:19: 97:67}>`
+...
+111 |     let result1 = fuse(link1.clone(), link2.clone());
+    |                   ^^^^------------------------------
+    |                   |
+    |                   call expression requires function
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:97:19: 97:67}>`
+   --> doublets/tests/handler.rs:115:19
+    |
+105 |     let mut fuse: Fuse<usize, _, Flow> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:97:19: 97:67}>`
+...
+115 |     let result2 = fuse(link1, link2);
+    |                   ^^^^--------------
+    |                   |
+    |                   call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+   --> doublets/tests/handler.rs:124:19
+    |
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                   ^^^^         ---------------- help: remove the unnecessary generic argument
+    |                   |
+    |                   expected 2 generic arguments
+    |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+   --> doublets/src/data/handler.rs:5:12
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |            ^^^^ -            -
+
+error[E0271]: expected `{closure@handler.rs:123:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:123:66
+    |
+123 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Ok(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    ---- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:123:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:123:66
+    |
+123 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Ok(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    --------- ------- closure used here
+    |                                                    |
+    |                                                    required by a bound introduced by this call
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse::<T, F>::new`
+   --> doublets/src/data/handler.rs:11:49
+    |
+ 11 | impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
+    |                                                 ^^^^ required by this bound in `Fuse::<T, F>::new`
+ 12 |     pub fn new(handler: F) -> Self {
+    |            --- required by a bound in this associated function
+
+error[E0271]: expected `{closure@handler.rs:123:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:123:66
+    |
+123 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Ok(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    ------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:123:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:123:66
+    |
+123 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Ok(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                   ------------------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:123:19: 123:80}>`
+   --> doublets/tests/handler.rs:129:18
+    |
+124 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:123:19: 123:80}>`
+...
+129 |     let result = fuse(link1, link2);
+    |                  ^^^^--------------
+    |                  |
+    |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+   --> doublets/tests/handler.rs:136:19
+    |
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                   ^^^^         ---------------- help: remove the unnecessary generic argument
+    |                   |
+    |                   expected 2 generic arguments
+    |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+   --> doublets/src/data/handler.rs:5:12
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |            ^^^^ -            -
+
+error[E0271]: expected `{closure@handler.rs:135:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:135:66
+    |
+135 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Err(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    ---- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:135:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:135:66
+    |
+135 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Err(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    --------- ------- closure used here
+    |                                                    |
+    |                                                    required by a bound introduced by this call
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse::<T, F>::new`
+   --> doublets/src/data/handler.rs:11:49
+    |
+ 11 | impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
+    |                                                 ^^^^ required by this bound in `Fuse::<T, F>::new`
+ 12 |     pub fn new(handler: F) -> Self {
+    |            --- required by a bound in this associated function
+
+error[E0271]: expected `{closure@handler.rs:135:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:135:66
+    |
+135 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Err(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                                                    ------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:135:19}` to return `Flow`, but it returns `Result<(), ()>`
+   --> doublets/tests/handler.rs:135:66
+    |
+135 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Result<(), ()> { Err(()) };
+    |                   -----------------------------------------------^^^^^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Result<(), ()>`
+    |                   this closure
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |                   ------------------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Result<(), ()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:135:19: 135:80}>`
+   --> doublets/tests/handler.rs:141:18
+    |
+136 |     let mut fuse: Fuse<usize, _, Result<(), ()>> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:135:19: 135:80}>`
+...
+141 |     let result = fuse(link1, link2);
+    |                  ^^^^--------------
+    |                  |
+    |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+   --> doublets/tests/handler.rs:149:19
+    |
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                   ^^^^         ------------ help: remove the unnecessary generic argument
+    |                   |
+    |                   expected 2 generic arguments
+    |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+   --> doublets/src/data/handler.rs:5:12
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |            ^^^^ -            -
+
+error[E0271]: expected `{closure@handler.rs:148:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:148:66
+    |
+148 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { Some(()) };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                ---- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:148:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:148:66
+    |
+148 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { Some(()) };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                --------- ------- closure used here
+    |                                                |
+    |                                                required by a bound introduced by this call
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse::<T, F>::new`
+   --> doublets/src/data/handler.rs:11:49
+    |
+ 11 | impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
+    |                                                 ^^^^ required by this bound in `Fuse::<T, F>::new`
+ 12 |     pub fn new(handler: F) -> Self {
+    |            --- required by a bound in this associated function
+
+error[E0271]: expected `{closure@handler.rs:148:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:148:66
+    |
+148 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { Some(()) };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                ------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:148:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:148:66
+    |
+148 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { Some(()) };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                   -------------------------- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:148:19: 148:76}>`
+   --> doublets/tests/handler.rs:154:18
+    |
+149 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:148:19: 148:76}>`
+...
+154 |     let result = fuse(link1, link2);
+    |                  ^^^^--------------
+    |                  |
+    |                  call expression requires function
+
+error[E0107]: struct takes 2 generic arguments but 3 generic arguments were supplied
+   --> doublets/tests/handler.rs:161:19
+    |
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                   ^^^^         ------------ help: remove the unnecessary generic argument
+    |                   |
+    |                   expected 2 generic arguments
+    |
+note: struct defined here, with 2 generic parameters: `T`, `H`
+   --> doublets/src/data/handler.rs:5:12
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |            ^^^^ -            -
+
+error[E0271]: expected `{closure@handler.rs:160:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:160:66
+    |
+160 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { None };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                ---- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:160:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:160:66
+    |
+160 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { None };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                --------- ------- closure used here
+    |                                                |
+    |                                                required by a bound introduced by this call
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse::<T, F>::new`
+   --> doublets/src/data/handler.rs:11:49
+    |
+ 11 | impl<T: LinkType, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
+    |                                                 ^^^^ required by this bound in `Fuse::<T, F>::new`
+ 12 |     pub fn new(handler: F) -> Self {
+    |            --- required by a bound in this associated function
+
+error[E0271]: expected `{closure@handler.rs:160:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:160:66
+    |
+160 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { None };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                                                ------------------ closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0271]: expected `{closure@handler.rs:160:19}` to return `Flow`, but it returns `Option<()>`
+   --> doublets/tests/handler.rs:160:66
+    |
+160 |     let handler = |_before: Link<usize>, _after: Link<usize>| -> Option<()> { None };
+    |                   -----------------------------------------------^^^^^^^^^^
+    |                   |                                              |
+    |                   |                                              expected `Flow`, found `Option<()>`
+    |                   this closure
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |                   -------------------------- closure used here
+    |
+    = note: expected enum `Flow`
+               found enum `Option<()>`
+note: required by a bound in `doublets::Fuse`
+   --> doublets/src/data/handler.rs:5:60
+    |
+  5 | pub struct Fuse<T: LinkType, H: FnMut(Link<T>, Link<T>) -> Flow> {
+    |                                                            ^^^^ required by this bound in `Fuse`
+
+error[E0618]: expected function, found `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:160:19: 160:76}>`
+   --> doublets/tests/handler.rs:166:18
+    |
+161 |     let mut fuse: Fuse<usize, _, Option<()>> = Fuse::new(handler);
+    |         -------- `fuse` has type `doublets::Fuse<usize, {closure@doublets/tests/handler.rs:160:19: 160:76}>`
+...
+166 |     let result = fuse(link1, link2);
+    |                  ^^^^--------------
+    |                  |
+    |                  call expression requires function
+
+Some errors have detailed explanations: E0107, E0271, E0277, E0308, E0432, E0554, E0599, E0618.
+For more information about an error, try `rustc --explain E0107`.
+error: could not compile `doublets` (test "handler") due to 45 previous errors
+warning: build failed, waiting for other jobs to finish...
+warning: `doublets` (lib test) generated 6 warnings (6 duplicates)

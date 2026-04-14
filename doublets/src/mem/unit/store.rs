@@ -35,8 +35,13 @@ pub struct Store<
     unused: TU,
 }
 
-impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Store<T, M, TS, TT, TU>
+impl<
+        T: LinkType + crate::TreesLinkType,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Store<T, M, TS, TT, TU>
 {
     #[cfg(not(miri))]
     const SIZE_STEP: usize = 2_usize.pow(20);
@@ -201,7 +206,8 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
             // If the link is unused (that is, it was created but deleted),
             // its search tree size is 0,
             // its source and target will be used to build a LinkedList from similar links
-            link.size_as_source == <T as data::FuntyPart>::funty(0) && link.source != <T as data::FuntyPart>::funty(0)
+            link.size_as_source == <T as data::FuntyPart>::funty(0)
+                && link.source != <T as data::FuntyPart>::funty(0)
         } else {
             true
         }
@@ -329,8 +335,13 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Links<T> for Store<T, M, TS, TT, TU>
+impl<
+        T: LinkType + crate::TreesLinkType,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Links<T> for Store<T, M, TS, TT, TU>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -339,7 +350,7 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
     fn count_links(&self, query: &[T]) -> T {
         if query.is_empty() {
             return self.get_total();
-        };
+        }
 
         let constants = self.constants();
         let any = constants.any;
@@ -465,7 +476,11 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
         }
         Ok(handler(
             Link::nothing(),
-            Link::new(free, <T as data::FuntyPart>::funty(0), <T as data::FuntyPart>::funty(0)),
+            Link::new(
+                free,
+                <T as data::FuntyPart>::funty(0),
+                <T as data::FuntyPart>::funty(0),
+            ),
         ))
     }
 
@@ -534,7 +549,11 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
         let index = query[0];
 
         let link = self.try_get_link(index)?;
-        self.update(index, <T as data::FuntyPart>::funty(0), <T as data::FuntyPart>::funty(0))?;
+        self.update(
+            index,
+            <T as data::FuntyPart>::funty(0),
+            <T as data::FuntyPart>::funty(0),
+        )?;
 
         let header = self.get_header();
         match index.cmp(&header.allocated) {
@@ -546,7 +565,8 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated)) {
+                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated))
+                    {
                         break;
                     }
                     self.unused.detach(allocated);
@@ -561,8 +581,13 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Doublets<T> for Store<T, M, TS, TT, TU>
+impl<
+        T: LinkType + crate::TreesLinkType,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Doublets<T> for Store<T, M, TS, TT, TU>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         if self.exists(index) {
@@ -575,13 +600,23 @@ impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: Unit
 }
 
 // SAFETY: No read operations result in a write
-unsafe impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Sync for Store<T, M, TS, TT, TU>
+unsafe impl<
+        T: LinkType + crate::TreesLinkType,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Sync for Store<T, M, TS, TT, TU>
 {
 }
 
 // SAFETY: All data is moved together with the `Store`
-unsafe impl<T: LinkType + crate::TreesLinkType, M: RawMem<Item = LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Send for Store<T, M, TS, TT, TU>
+unsafe impl<
+        T: LinkType + crate::TreesLinkType,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Send for Store<T, M, TS, TT, TU>
 {
 }

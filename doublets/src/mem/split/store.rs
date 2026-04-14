@@ -14,7 +14,6 @@ use crate::{
 use data::{Flow, LinkType, LinksConstants, ToQuery};
 use mem::RawMem;
 
-
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
 pub struct Store<
@@ -48,15 +47,15 @@ pub struct Store<
 }
 
 impl<
-    T: LinkType + crate::TreesLinkType,
-    MD: RawMem<Item = DataPart<T>>,
-    MI: RawMem<Item = IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkType + crate::TreesLinkType,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     const USE_LIST: bool = false;
     #[cfg(not(miri))]
@@ -111,7 +110,7 @@ impl<
     }
 
     pub fn new(data_mem: MD, index_mem: MI) -> Result<Store<T, MD, MI>, LinksError<T>> {
-        Self::with_constants(data_mem, index_mem, Default::default())
+        Self::with_constants(data_mem, index_mem, LinksConstants::default())
     }
 
     fn mut_from_mem<'a, U>(mut ptr: NonNull<[U]>, index: usize) -> Option<&'a mut U> {
@@ -283,8 +282,14 @@ impl<
     }
 
     unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
-        let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, DEFAULT_PAGE_SIZE)?);
-        let index = NonNull::from(crate::mem::resize_mem(&mut self.index_mem, DEFAULT_PAGE_SIZE)?);
+        let data = NonNull::from(crate::mem::resize_mem(
+            &mut self.data_mem,
+            DEFAULT_PAGE_SIZE,
+        )?);
+        let index = NonNull::from(crate::mem::resize_mem(
+            &mut self.index_mem,
+            DEFAULT_PAGE_SIZE,
+        )?);
         self.update_mem(data, index);
 
         let header = self.get_header().clone();
@@ -321,7 +326,8 @@ impl<
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == <T as data::FuntyPart>::funty(0) && data.source != <T as data::FuntyPart>::funty(0)
+            index.size_as_target == <T as data::FuntyPart>::funty(0)
+                && data.source != <T as data::FuntyPart>::funty(0)
         } else {
             true
         }
@@ -360,7 +366,9 @@ impl<
             let allocated = self.get_header().allocated;
             while index <= allocated {
                 if let Some(link) = self.get_link(index) {
-                    if handler(link).is_break() { return Flow::Break; }
+                    if handler(link).is_break() {
+                        return Flow::Break;
+                    }
                 }
                 index = index + <T as data::FuntyPart>::funty(1);
             }
@@ -386,7 +394,12 @@ impl<
                 if value == any {
                     self.try_each_by_core(handler, &[])
                 } else {
-                    if self.try_each_by_core(handler, &[index, value, any]).is_break() { return Flow::Break; }
+                    if self
+                        .try_each_by_core(handler, &[index, value, any])
+                        .is_break()
+                    {
+                        return Flow::Break;
+                    }
                     self.try_each_by_core(handler, &[index, any, value])
                 }
             } else if let Some(link) = self.get_link(index) {
@@ -544,15 +557,15 @@ impl<
 }
 
 impl<
-    T: LinkType + crate::TreesLinkType,
-    MD: RawMem<Item = DataPart<T>>,
-    MI: RawMem<Item = IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkType + crate::TreesLinkType,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -715,8 +728,7 @@ impl<
             if header.allocated >= header.reserved - <T as data::FuntyPart>::funty(1) {
                 let new_data_cap = self.data_mem.allocated().len() + self.data_step;
                 let new_index_cap = self.index_mem.allocated().len() + self.index_step;
-                let data =
-                    NonNull::from(crate::mem::resize_mem(&mut self.data_mem, new_data_cap)?);
+                let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, new_data_cap)?);
                 let index =
                     NonNull::from(crate::mem::resize_mem(&mut self.index_mem, new_index_cap)?);
                 self.update_mem(data, index);
@@ -735,7 +747,11 @@ impl<
 
         Ok(handler(
             Link::nothing(),
-            Link::new(free, <T as data::FuntyPart>::funty(0), <T as data::FuntyPart>::funty(0)),
+            Link::new(
+                free,
+                <T as data::FuntyPart>::funty(0),
+                <T as data::FuntyPart>::funty(0),
+            ),
         ))
     }
 
@@ -825,7 +841,11 @@ impl<
 
         self.resolve_danglind_internal(index);
 
-        self.update(index, <T as data::FuntyPart>::funty(0), <T as data::FuntyPart>::funty(0))?;
+        self.update(
+            index,
+            <T as data::FuntyPart>::funty(0),
+            <T as data::FuntyPart>::funty(0),
+        )?;
 
         // TODO: move to `delete_core`
         let header = self.get_header();
@@ -840,7 +860,8 @@ impl<
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated)) {
+                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated))
+                    {
                         break;
                     }
                     self.unused.detach(allocated);
@@ -856,15 +877,15 @@ impl<
 }
 
 impl<
-    T: LinkType + crate::TreesLinkType,
-    MD: RawMem<Item = DataPart<T>>,
-    MI: RawMem<Item = IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkType + crate::TreesLinkType,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         if self.exists(index) {
@@ -876,27 +897,27 @@ impl<
 }
 
 unsafe impl<
-    T: LinkType + crate::TreesLinkType,
-    MD: RawMem<Item = DataPart<T>>,
-    MI: RawMem<Item = IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Sync for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkType + crate::TreesLinkType,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Sync for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
 }
 
 unsafe impl<
-    T: LinkType + crate::TreesLinkType,
-    MD: RawMem<Item = DataPart<T>>,
-    MI: RawMem<Item = IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkType + crate::TreesLinkType,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
 }

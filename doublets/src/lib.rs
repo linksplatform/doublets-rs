@@ -43,7 +43,23 @@
     nonstandard_style,
 )]
 // must be fixed later
-#![allow(clippy::needless_pass_by_value, clippy::comparison_chain)]
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::comparison_chain,
+    clippy::transmute_ptr_to_ptr,
+    clippy::ref_as_ptr,
+    clippy::borrow_as_ptr,
+    clippy::missing_const_for_fn,
+    clippy::needless_pass_by_ref_mut,
+    clippy::non_send_fields_in_send_ty,
+    clippy::too_many_lines,
+    clippy::redundant_pub_crate,
+    clippy::implied_bounds_in_impls,
+    clippy::only_used_in_recursion,
+    clippy::option_if_let_else,
+    clippy::assign_op_pattern,
+    dead_code
+)]
 
 pub mod data;
 pub mod mem;

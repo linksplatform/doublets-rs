@@ -14,7 +14,7 @@ pub trait Links<T: LinkType>: Send + Sync {
     fn count_links(&self, query: &[T]) -> T;
 
     fn create_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
-    -> Result<Flow, Error<T>>;
+        -> Result<Flow, Error<T>>;
 
     fn each_links(&self, query: &[T], handler: ReadHandler<'_, T>) -> Flow;
 
@@ -26,7 +26,7 @@ pub trait Links<T: LinkType>: Send + Sync {
     ) -> Result<Flow, Error<T>>;
 
     fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
-    -> Result<Flow, Error<T>>;
+        -> Result<Flow, Error<T>>;
 }
 
 pub trait Doublets<T: LinkType>: Links<T> {
@@ -207,11 +207,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
-    fn delete_query_with<F>(
-        &mut self,
-        query: impl ToQuery<T>,
-        handler: F,
-    ) -> Result<(), Error<T>>
+    fn delete_query_with<F>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
@@ -291,11 +287,9 @@ pub trait Doublets<T: LinkType>: Links<T> {
             Flow::Continue
         })?;
 
-        self.update_links(
-            &[new],
-            &[new, source, target],
-            &mut |before, after| handler.call(before, after),
-        )
+        self.update_links(&[new], &[new, source, target], &mut |before, after| {
+            handler.call(before, after)
+        })
     }
 
     fn create_link(&mut self, source: T, target: T) -> Result<T, Error<T>>
@@ -434,7 +428,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         self.count_usages(link)
-            .map_or(false, |link| link != T::funty(0))
+            .is_ok_and(|link| link != T::funty(0))
     }
 
     fn rebase_with<F>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
@@ -452,9 +446,8 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let mut handler = Fuse::new(handler);
 
-        let usages: Vec<_> = None
-            .into_iter()
-            .chain(self.each_iter([any, old, any]))
+        let usages: Vec<_> = self
+            .each_iter([any, old, any])
             .chain(self.each_iter([any, any, old]))
             .filter(|usage| usage.index != old)
             .collect();
@@ -482,7 +475,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         self.rebase_with(old, new, |_, _| Flow::Continue)
-            .map(|_| new)
+            .map(|()| new)
     }
 
     fn rebase_and_delete(&mut self, old: T, new: T) -> Result<T, Error<T>>
@@ -561,7 +554,8 @@ pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
     ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
-    fn iter_small(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
+    fn iter_small(&self)
+        -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
     fn each_iter_small(
@@ -611,7 +605,9 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     #[inline]
     #[cfg(feature = "small-search")]
-    fn iter_small(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
+    fn iter_small(
+        &self,
+    ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
         self.each_iter_small([self.constants().any; 3])
     }
 

@@ -76,7 +76,9 @@ impl<T: LinkType + crate::TreesLinkType> InternalSourcesLinkedList<T> {
         let first = current;
 
         while current != <T as data::FuntyPart>::funty(0) {
-            if handler(self.get_link_value(current)).is_break() { return Flow::Break; }
+            if handler(self.get_link_value(current)).is_break() {
+                return Flow::Break;
+            }
             current = self.get_next(current);
             if current == first {
                 return Flow::Continue;
@@ -119,7 +121,7 @@ impl<T: LinkType + crate::TreesLinkType> RelativeLinkedList<T> for InternalSourc
     }
 
     fn set_size(&mut self, head: T, size: T) {
-        self.get_mut_index_part(head).size_as_source = size
+        self.get_mut_index_part(head).size_as_source = size;
     }
 }
 
@@ -141,7 +143,10 @@ impl<T: LinkType + crate::TreesLinkType> LinkedList<T> for InternalSourcesLinked
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> RelativeCircularLinkedList<T> for InternalSourcesLinkedList<T> {}
+impl<T: LinkType + crate::TreesLinkType> RelativeCircularLinkedList<T>
+    for InternalSourcesLinkedList<T>
+{
+}
 
 impl<T: LinkType + crate::TreesLinkType> SplitUpdateMem<T> for InternalSourcesLinkedList<T> {
     fn update_mem(&mut self, data: NonNull<[DataPart<T>]>, indexes: NonNull<[IndexPart<T>]>) {

@@ -32,8 +32,9 @@ impl<T: LinkType + crate::TreesLinkType> InternalRecursionlessSizeBalancedTreeBa
     }
 }
 
-pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType + crate::TreesLinkType>:
-    IterativeSizeBalancedTree<T> + LinksTree<T>
+pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<
+    T: LinkType + crate::TreesLinkType,
+>: IterativeSizeBalancedTree<T> + LinksTree<T>
 {
     fn get_index_part(&self, link: T) -> &IndexPart<T>;
 

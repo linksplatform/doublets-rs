@@ -29,7 +29,9 @@ impl<T: LinkType + crate::TreesLinkType> LinksTargetsRecursionlessSizeBalancedTr
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
+    for LinksTargetsRecursionlessSizeBalancedTree<T>
+{
     unsafe fn get_left_reference(&self, node: T) -> *const T {
         std::ptr::addr_of!(self.get_link(node).left_as_target)
     }
@@ -100,7 +102,10 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for LinksT
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T>
+    for LinksTargetsRecursionlessSizeBalancedTree<T>
+{
+}
 
 fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     this: &LinksTargetsRecursionlessSizeBalancedTree<T>,
@@ -136,7 +141,9 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
     Flow::Continue
 }
 
-impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> LinksTree<T>
+    for LinksTargetsRecursionlessSizeBalancedTree<T>
+{
     fn count_usages(&self, link: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
@@ -147,7 +154,8 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for LinksTargetsRecursionl
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore += self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
+                    total_right_ignore +=
+                        self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_left_or_default(root);
                 }
             }
@@ -158,7 +166,8 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for LinksTargetsRecursionl
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore += self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
+                    total_left_ignore +=
+                        self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_right_or_default(root);
                 }
             }
@@ -203,7 +212,9 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for LinksTargetsRecursionl
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> UnitUpdateMem<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> UnitUpdateMem<T>
+    for LinksTargetsRecursionlessSizeBalancedTree<T>
+{
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
         self.base.mem = mem;
     }
@@ -259,4 +270,7 @@ impl<T: LinkType + crate::TreesLinkType> LinkRecursionlessSizeBalancedTreeBaseAb
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> UnitTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> UnitTree<T>
+    for LinksTargetsRecursionlessSizeBalancedTree<T>
+{
+}

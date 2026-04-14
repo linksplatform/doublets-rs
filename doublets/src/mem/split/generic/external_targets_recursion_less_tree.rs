@@ -33,7 +33,9 @@ impl<T: LinkType + crate::TreesLinkType> ExternalTargetsRecursionlessTree<T> {
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for ExternalTargetsRecursionlessTree<T> {
+impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
+    for ExternalTargetsRecursionlessTree<T>
+{
     unsafe fn get_left_reference(&self, node: T) -> *const T {
         std::ptr::addr_of!(self.get_index_part(node).left_as_target)
     }
@@ -104,7 +106,10 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for Extern
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T> for ExternalTargetsRecursionlessTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T>
+    for ExternalTargetsRecursionlessTree<T>
+{
+}
 
 fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     this: &ExternalTargetsRecursionlessTree<T>,
@@ -118,13 +123,23 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
     unsafe {
         let link_base_part = this.get_base_part(link);
         if link_base_part > base {
-            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() { return Flow::Break; }
+            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         } else if link_base_part < base {
-            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() { return Flow::Break; }
+            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         } else {
-            if handler(this.get_link_value(link)).is_break() { return Flow::Break; }
-            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() { return Flow::Break; }
-            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() { return Flow::Break; }
+            if handler(this.get_link_value(link)).is_break() {
+                return Flow::Break;
+            }
+            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
+            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         }
     }
     Flow::Continue
@@ -141,7 +156,8 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalTargetsRecursi
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore += self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
+                    total_right_ignore +=
+                        self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_left_or_default(root);
                 }
             }
@@ -152,7 +168,8 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalTargetsRecursi
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore += self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
+                    total_left_ignore +=
+                        self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_right_or_default(root);
                 }
             }
