@@ -4,9 +4,6 @@ resolver = "2"
 members = [
     "doublets",
 
-    # dev
-    "dev-deps/data-rs",
-
     # internal
     "integration"
 ]

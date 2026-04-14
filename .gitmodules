@@ -1,3 +1,0 @@
-[submodule "dev-deps/data-rs"]
-	path = dev-deps/data-rs
-	url = https://github.com/linksplatform/data-rs
