@@ -2,12 +2,13 @@
 name = "doublets"
 version = "0.1.0-pre+beta.15"
 edition = "2021"
+rust-version = "1.85"
 authors = [
     "uselessgoddess",
     "Linksplatform Team <linksplatformtechnologies@gmail.com>"
 ]
 categories = [
-    "database-implementations", # wait rfcs#3185 "asynchronous"
+    "database-implementations",
 ]
 keywords = [
     "associative", "doublets", "db",
@@ -17,23 +18,23 @@ license = "Unlicense"
 repository = "https://github.com/linksplatform/doublets-rs"
 homepage = "https://github.com/linksplatform/doublets-rs"
 description = """
+Doublets (links) data structure implementation.
 """
 
 [dependencies]
-tap = { version = "1.0.1" }
-cfg-if = { version = "1.0.0" }
-thiserror = { version = "1.0.30" }
-leak_slice = { version = "0.2.0" }
-bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
-
+tap = "1"
+cfg-if = "1"
+thiserror = "2"
+leak_slice = "0.2"
 # platform
-data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.1" }
-mem = { package = "platform-mem", version = "0.1.0-pre+beta.2", path = "../dev-deps/mem-rs" }
-trees = { package = "platform-trees", version = "0.1.0-alpha.2", path = "../dev-deps/trees-rs" }
+data = { package = "platform-data", path = "../dev-deps/data-rs", version = "0.1.0-beta.3" }
+mem = { package = "platform-mem", version = "0.3.0" }
+trees = { package = "platform-trees", version = "0.3.3" }
+num-traits = "0.2"
 
 # optional
-smallvec = { version = "1.8.1", features = ["union"], optional = true }
-rayon = { version = "1.5.3", optional = true }
+smallvec = { version = "1", features = ["union"], optional = true }
+rayon = { version = "1", optional = true }
 
 [features]
 mem = []
@@ -41,22 +42,40 @@ num = []
 data = []
 more-inline = []
 small-search = ["smallvec"]
-# todo: may be internal_platform
 platform = ["mem", "num", "data"]
 
 default = ["platform"]
 full = ["platform", "rayon", "small-search"]
 
 [dev-dependencies]
-tap = { version = "1.0.1" }
-rand = { version = "0.8.5" }
-criterion = { version = "0.3.6" }
-bumpalo = { version = "3.11.1", features = ["allocator_api", "collections"] }
-mimalloc = { version = "0.1.29", default-features = false }
-rpmalloc = "0.2.0"
-tinyvec = { version = "1.6.0", features = ["alloc"] }
-smallvec = { version = "1.9.0", features = [] }
-static_assertions = { version = "1.1.0" }
+tap = "1"
+rand = "0.8"
+criterion = "0.5"
+mimalloc = { version = "0.1", default-features = false }
+tinyvec = { version = "1", features = ["alloc"] }
+smallvec = { version = "1" }
+static_assertions = "1"
+
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+too_many_lines = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+missing_safety_doc = "allow"
+missing_const_for_fn = "allow"
+needless_pass_by_value = "allow"
+comparison_chain = "allow"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
 
 [[bench]]
 name = "iter"

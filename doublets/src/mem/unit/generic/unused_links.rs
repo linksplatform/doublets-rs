@@ -6,11 +6,11 @@ use crate::mem::{
 use data::LinkType;
 use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
 
-pub struct UnusedLinks<T: LinkType> {
+pub struct UnusedLinks<T: LinkType + crate::TreesLinkType> {
     mem: NonNull<[LinkPart<T>]>,
 }
 
-impl<T: LinkType> UnusedLinks<T> {
+impl<T: LinkType + crate::TreesLinkType> UnusedLinks<T> {
     #[must_use]
     pub fn new(mem: NonNull<[LinkPart<T>]>) -> Self {
         Self { mem }
@@ -33,7 +33,7 @@ impl<T: LinkType> UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
+impl<T: LinkType + crate::TreesLinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
     fn get_first(&self) -> T {
         self.get_header().first_free
     }
@@ -59,7 +59,7 @@ impl<T: LinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> LinkedList<T> for UnusedLinks<T> {
+impl<T: LinkType + crate::TreesLinkType> LinkedList<T> for UnusedLinks<T> {
     fn get_previous(&self, element: T) -> T {
         self.get_link(element).source
     }
@@ -77,9 +77,9 @@ impl<T: LinkType> LinkedList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> AbsoluteCircularLinkedList<T> for UnusedLinks<T> {}
+impl<T: LinkType + crate::TreesLinkType> AbsoluteCircularLinkedList<T> for UnusedLinks<T> {}
 
-impl<T: LinkType> LinksList<T> for UnusedLinks<T> {
+impl<T: LinkType + crate::TreesLinkType> LinksList<T> for UnusedLinks<T> {
     fn detach(&mut self, link: T) {
         AbsoluteCircularLinkedList::detach(self, link);
     }
@@ -89,10 +89,10 @@ impl<T: LinkType> LinksList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> UnitUpdateMem<T> for UnusedLinks<T> {
+impl<T: LinkType + crate::TreesLinkType> UnitUpdateMem<T> for UnusedLinks<T> {
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
         self.mem = mem;
     }
 }
 
-impl<T: LinkType> UnitList<T> for UnusedLinks<T> {}
+impl<T: LinkType + crate::TreesLinkType> UnitList<T> for UnusedLinks<T> {}

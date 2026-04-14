@@ -15,13 +15,13 @@ use crate::{
     Link,
 };
 use data::{Flow, LinkType, LinksConstants};
-use trees::{NoRecurSzbTree, SzbTree};
+use trees::{IterativeSizeBalancedTree, RecursiveSizeBalancedTree};
 
-pub struct LinksTargetsRecursionlessSizeBalancedTree<T: LinkType> {
+pub struct LinksTargetsRecursionlessSizeBalancedTree<T: LinkType + crate::TreesLinkType> {
     base: LinksRecursionlessSizeBalancedTreeBase<T>,
 }
 
-impl<T: LinkType> LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> LinksTargetsRecursionlessSizeBalancedTree<T> {
     pub fn new(constants: LinksConstants<T>, mem: NonNull<[LinkPart<T>]>) -> Self {
         Self {
             base: LinksRecursionlessSizeBalancedTreeBase::new(constants, mem),
@@ -29,7 +29,7 @@ impl<T: LinkType> LinksTargetsRecursionlessSizeBalancedTree<T> {
     }
 }
 
-impl<T: LinkType> SzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     unsafe fn get_left_reference(&self, node: T) -> *const T {
         std::ptr::addr_of!(self.get_link(node).left_as_target)
     }
@@ -94,61 +94,71 @@ impl<T: LinkType> SzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
 
     unsafe fn clear_node(&mut self, node: T) {
         let link = self.get_mut_link(node);
-        link.left_as_target = T::funty(0);
-        link.right_as_target = T::funty(0);
-        link.size_as_target = T::funty(0);
+        link.left_as_target = <T as data::FuntyPart>::funty(0);
+        link.right_as_target = <T as data::FuntyPart>::funty(0);
+        link.size_as_target = <T as data::FuntyPart>::funty(0);
     }
 }
 
-impl<T: LinkType> NoRecurSzbTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
 
-fn each_usages_core<T: LinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
+fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
     this: &LinksTargetsRecursionlessSizeBalancedTree<T>,
     base: T,
     link: T,
     handler: &mut H,
 ) -> Flow {
-    if link == T::funty(0) {
+    if link == <T as data::FuntyPart>::funty(0) {
         return Flow::Continue;
     }
     unsafe {
         let link_base_part = this.get_base_part(link);
         if link_base_part > base {
-            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
+            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         } else if link_base_part < base {
-            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
+            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         } else {
-            handler(this.get_link_value(link))?;
-            each_usages_core(this, base, this.get_left_or_default(link), handler)?;
-            each_usages_core(this, base, this.get_right_or_default(link), handler)?;
+            if handler(this.get_link_value(link)).is_break() {
+                return Flow::Break;
+            }
+            if each_usages_core(this, base, this.get_left_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
+            if each_usages_core(this, base, this.get_right_or_default(link), handler).is_break() {
+                return Flow::Break;
+            }
         }
     }
     Flow::Continue
 }
 
-impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     fn count_usages(&self, link: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
             let total = self.get_size(root);
-            let mut total_right_ignore = T::funty(0);
-            while root != T::funty(0) {
+            let mut total_right_ignore = <T as data::FuntyPart>::funty(0);
+            while root != <T as data::FuntyPart>::funty(0) {
                 let base = self.get_base_part(root);
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore += self.get_right_size(root) + T::funty(1);
+                    total_right_ignore += self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_left_or_default(root);
                 }
             }
             root = self.get_tree_root();
-            let mut total_left_ignore = T::funty(0);
-            while root != T::funty(0) {
+            let mut total_left_ignore = <T as data::FuntyPart>::funty(0);
+            while root != <T as data::FuntyPart>::funty(0) {
                 let base = self.get_base_part(root);
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore += self.get_left_size(root) + T::funty(1);
+                    total_left_ignore += self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
                     root = self.get_right_or_default(root);
                 }
             }
@@ -159,7 +169,7 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
     fn search(&self, source: T, target: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
-            while root != T::funty(0) {
+            while root != <T as data::FuntyPart>::funty(0) {
                 let root_link = self.get_link(root);
                 let root_source = root_link.source;
                 let root_target = root_link.target;
@@ -176,7 +186,7 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
                     return root;
                 }
             }
-            T::funty(0)
+            <T as data::FuntyPart>::funty(0)
         }
     }
 
@@ -185,21 +195,21 @@ impl<T: LinkType> LinksTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> 
     }
 
     fn detach(&mut self, root: &mut T, index: T) {
-        unsafe { NoRecurSzbTree::detach(self, root as *mut _, index) }
+        unsafe { IterativeSizeBalancedTree::detach(self, root as *mut _, index) }
     }
 
     fn attach(&mut self, root: &mut T, index: T) {
-        unsafe { NoRecurSzbTree::attach(self, root as *mut _, index) }
+        unsafe { IterativeSizeBalancedTree::attach(self, root as *mut _, index) }
     }
 }
 
-impl<T: LinkType> UnitUpdateMem<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
+impl<T: LinkType + crate::TreesLinkType> UnitUpdateMem<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
         self.base.mem = mem;
     }
 }
 
-impl<T: LinkType> LinkRecursionlessSizeBalancedTreeBaseAbstract<T>
+impl<T: LinkType + crate::TreesLinkType> LinkRecursionlessSizeBalancedTreeBaseAbstract<T>
     for LinksTargetsRecursionlessSizeBalancedTree<T>
 {
     fn get_header(&self) -> &LinksHeader<T> {
@@ -249,4 +259,4 @@ impl<T: LinkType> LinkRecursionlessSizeBalancedTreeBaseAbstract<T>
     }
 }
 
-impl<T: LinkType> UnitTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}
+impl<T: LinkType + crate::TreesLinkType> UnitTree<T> for LinksTargetsRecursionlessSizeBalancedTree<T> {}

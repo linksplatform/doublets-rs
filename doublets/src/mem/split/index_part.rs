@@ -2,7 +2,7 @@ use data::LinkType;
 
 #[derive(Debug, Default, Eq, PartialEq, Hash, Clone)]
 #[repr(C)]
-pub struct IndexPart<T: LinkType> {
+pub struct IndexPart<T: LinkType + crate::TreesLinkType> {
     pub(crate) root_as_source: T,
     pub(crate) left_as_source: T,
     pub(crate) right_as_source: T,

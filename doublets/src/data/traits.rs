@@ -1,10 +1,5 @@
-use bumpalo::Bump;
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
-use std::{
-    default::default,
-    ops::{ControlFlow, Try},
-};
 
 use crate::{Error, Fuse, Link};
 use data::{Flow, LinkType, LinksConstants, ToQuery};
@@ -49,37 +44,24 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.count_by([])
     }
 
-    fn create_by_with<F, R>(
+    fn create_by_with<F>(
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut output = R::from_output(());
         let query = query.to_query();
-
-        self.create_links(
-            &query[..],
-            &mut |before, after| match handler(before, after).branch() {
-                ControlFlow::Continue(_) => Flow::Continue,
-                ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
-                    Flow::Break
-                }
-            },
-        )
-        .map(|_| output)
+        self.create_links(&query[..], &mut handler)
     }
 
     fn create_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
-        let mut index = default();
+        let mut index = T::funty(0);
         self.create_by_with(query, |_before, link| {
             index = link.index;
             Flow::Continue
@@ -87,10 +69,9 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| index)
     }
 
-    fn create_with<F, R>(&mut self, handler: F) -> Result<R, Error<T>>
+    fn create_with<F>(&mut self, handler: F) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
         self.create_by_with([], handler)
@@ -103,69 +84,43 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.create_by([])
     }
 
-    fn each_by<F, R>(&self, query: impl ToQuery<T>, mut handler: F) -> R
+    fn each_by<F>(&self, query: impl ToQuery<T>, mut handler: F) -> Flow
     where
-        F: FnMut(Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut output = R::from_output(());
         let query = query.to_query();
-
-        self.each_links(&query[..], &mut |link| match handler(link).branch() {
-            ControlFlow::Continue(_) => Flow::Continue,
-            ControlFlow::Break(residual) => {
-                output = R::from_residual(residual);
-                Flow::Break
-            }
-        });
-
-        output
+        self.each_links(&query[..], &mut handler)
     }
 
-    fn each<F, R>(&self, handler: F) -> R
+    fn each<F>(&self, handler: F) -> Flow
     where
-        F: FnMut(Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>) -> Flow,
         Self: Sized,
     {
         self.each_by([], handler)
     }
 
-    fn update_by_with<H, R>(
+    fn update_by_with<H>(
         &mut self,
         query: impl ToQuery<T>,
         change: impl ToQuery<T>,
         mut handler: H,
-    ) -> Result<R, Error<T>>
+    ) -> Result<Flow, Error<T>>
     where
-        H: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        H: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut output = R::from_output(());
         let query = query.to_query();
         let change = change.to_query();
-
-        self.update_links(
-            &query[..],
-            &change[..],
-            &mut |before, after| match handler(before, after).branch() {
-                ControlFlow::Continue(_) => Flow::Continue,
-                ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
-                    Flow::Break
-                }
-            },
-        )
-        .map(|_| output)
+        self.update_links(&query[..], &change[..], &mut handler)
     }
 
     fn update_by(&mut self, query: impl ToQuery<T>, change: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = T::funty(0);
         self.update_by_with(query, change, |_, after| {
             result = after.index;
             Flow::Continue
@@ -173,16 +128,15 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
-    fn update_with<F, R>(
+    fn update_with<F>(
         &mut self,
         index: T,
         source: T,
         target: T,
         handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
         self.update_by_with([index], [index, source, target], handler)
@@ -195,37 +149,24 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update_by([index], [index, source, target])
     }
 
-    fn delete_by_with<F, R>(
+    fn delete_by_with<F>(
         &mut self,
         query: impl ToQuery<T>,
         mut handler: F,
-    ) -> Result<R, Error<T>>
+    ) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut output = R::from_output(());
         let query = query.to_query();
-
-        self.delete_links(
-            &query[..],
-            &mut |before, after| match handler(before, after).branch() {
-                ControlFlow::Continue(_) => Flow::Continue,
-                ControlFlow::Break(residual) => {
-                    output = R::from_residual(residual);
-                    Flow::Break
-                }
-            },
-        )
-        .map(|_| output)
+        self.delete_links(&query[..], &mut handler)
     }
 
     fn delete_by(&mut self, query: impl ToQuery<T>) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = T::funty(0);
         self.delete_by_with(query, |_before, after| {
             result = after.index;
             Flow::Continue
@@ -233,10 +174,9 @@ pub trait Doublets<T: LinkType>: Links<T> {
         .map(|_| result)
     }
 
-    fn delete_with<F, R>(&mut self, index: T, handler: F) -> Result<R, Error<T>>
+    fn delete_with<F>(&mut self, index: T, handler: F) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
         self.delete_by_with([index], handler)
@@ -259,7 +199,6 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        // delete all links while self.count() != T::funty(0)
         let mut count = self.count();
         while count != T::funty(0) {
             self.delete(count)?;
@@ -268,14 +207,13 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Ok(())
     }
 
-    fn delete_query_with<F, R>(
+    fn delete_query_with<F>(
         &mut self,
         query: impl ToQuery<T>,
         handler: F,
     ) -> Result<(), Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
         let query = query.to_query();
@@ -289,15 +227,14 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let mut handler = Fuse::new(handler);
         for index in vec.into_iter().rev() {
-            self.delete_with(index, &mut handler)?;
+            self.delete_links(&[index], &mut |before, after| handler.call(before, after))?;
         }
         Ok(())
     }
 
-    fn delete_usages_with<F, R>(&mut self, index: T, handler: F) -> Result<(), Error<T>>
+    fn delete_usages_with<F>(&mut self, index: T, handler: F) -> Result<(), Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
         let any = self.constants().any;
@@ -321,7 +258,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let mut handler = Fuse::new(handler);
         for index in to_delete.into_iter().rev() {
-            self.delete_with(index, &mut handler)?;
+            self.delete_links(&[index], &mut |before, after| handler.call(before, after))?;
         }
         Ok(())
     }
@@ -341,28 +278,31 @@ pub trait Doublets<T: LinkType>: Links<T> {
         self.update(new, new, new)
     }
 
-    fn create_link_with<F, R>(&mut self, source: T, target: T, handler: F) -> Result<Flow, Error<T>>
+    fn create_link_with<F>(&mut self, source: T, target: T, handler: F) -> Result<Flow, Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut new = default();
+        let mut new = T::funty(0);
         let mut handler = Fuse::new(handler);
         self.create_with(|before, after| {
             new = after.index;
-            handler(before, after);
+            handler.call(before, after);
             Flow::Continue
         })?;
 
-        self.update_with(new, source, target, handler)
+        self.update_links(
+            &[new],
+            &[new, source, target],
+            &mut |before, after| handler.call(before, after),
+        )
     }
 
     fn create_link(&mut self, source: T, target: T) -> Result<T, Error<T>>
     where
         Self: Sized,
     {
-        let mut result = default();
+        let mut result = T::funty(0);
         self.create_link_with(source, target, |_, link| {
             result = link.index;
             Flow::Continue
@@ -497,13 +437,11 @@ pub trait Doublets<T: LinkType>: Links<T> {
             .map_or(false, |link| link != T::funty(0))
     }
 
-    fn rebase_with<F, R>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
+    fn rebase_with<F>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
     where
-        F: FnMut(Link<T>, Link<T>) -> R,
-        R: Try<Output = ()>,
+        F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        // guard
         let _ = self.try_get_link(old)?;
 
         if old == new {
@@ -514,20 +452,29 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let mut handler = Fuse::new(handler);
 
-        None.into_iter()
-            // best readability
+        let usages: Vec<_> = None
+            .into_iter()
             .chain(self.each_iter([any, old, any]))
             .chain(self.each_iter([any, any, old]))
             .filter(|usage| usage.index != old)
-            .try_for_each(|usage| {
-                if usage.source == old {
-                    self.update_with(usage.index, new, usage.target, &mut handler)?;
-                }
-                if usage.target == old {
-                    self.update_with(usage.index, usage.source, new, &mut handler)?;
-                }
-                Ok(())
-            })
+            .collect();
+        for usage in usages {
+            if usage.source == old {
+                self.update_links(
+                    &[usage.index],
+                    &[usage.index, new, usage.target],
+                    &mut |before, after| handler.call(before, after),
+                )?;
+            }
+            if usage.target == old {
+                self.update_links(
+                    &[usage.index],
+                    &[usage.index, usage.source, new],
+                    &mut |before, after| handler.call(before, after),
+                )?;
+            }
+        }
+        Ok(())
     }
 
     fn rebase(&mut self, old: T, new: T) -> Result<T, Error<T>>
@@ -606,30 +553,26 @@ pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter;
 
-    // Box<dyn Iterator<Item = T>> must used while `-> impl Trait` is not stabilized
-    // Box<dyn> than easier `Self::ImplIterator1,2,...`
-    // and have same performance if has only one possible dyn variant
+    fn iter(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
-    type ImplIter: Iterator<Item = Link<T>>;
-    fn iter(&self) -> Self::ImplIter;
-
-    type ImplIterEach: Iterator<Item = Link<T>>;
-    fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach;
+    fn each_iter(
+        &self,
+        query: impl ToQuery<T>,
+    ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
-    type ImplIterSmall: Iterator<Item = Link<T>>;
-    #[cfg(feature = "small-search")]
-    fn iter_small(&self) -> Self::ImplIterSmall;
+    fn iter_small(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 
     #[cfg(feature = "small-search")]
-    type ImplIterEachSmall: Iterator<Item = Link<T>>;
-    #[cfg(feature = "small-search")]
-    fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall;
+    fn each_iter_small(
+        &self,
+        query: impl ToQuery<T>,
+    ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 }
 
 impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     #[cfg(feature = "rayon")]
-    type IdxParIter = impl IndexedParallelIterator<Item = Link<T>>;
+    type IdxParIter = rayon::vec::IntoIter<Link<T>>;
 
     #[cfg(feature = "rayon")]
     fn par_iter(&self) -> Self::IdxParIter {
@@ -646,17 +589,16 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         vec.into_par_iter()
     }
 
-    type ImplIter = Self::ImplIterEach;
-
     #[inline]
-    fn iter(&self) -> Self::ImplIter {
+    fn iter(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
         self.each_iter([self.constants().any; 3])
     }
 
-    type ImplIterEach = impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
-
     #[cfg_attr(feature = "more-inline", inline)]
-    fn each_iter(&self, query: impl ToQuery<T>) -> Self::ImplIterEach {
+    fn each_iter(
+        &self,
+        query: impl ToQuery<T>,
+    ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
         let cap = self.count_by(query.to_query()).as_usize();
 
         let mut vec = Vec::with_capacity(cap);
@@ -667,23 +609,18 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         vec.into_iter()
     }
 
-    #[cfg(feature = "small-search")]
-    type ImplIterSmall = Self::ImplIterEachSmall;
-
     #[inline]
     #[cfg(feature = "small-search")]
-    fn iter_small(&self) -> Self::ImplIterSmall {
+    fn iter_small(&self) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
         self.each_iter_small([self.constants().any; 3])
     }
 
     #[cfg(feature = "small-search")]
-    type ImplIterEachSmall =
-        impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
-
-    #[cfg(feature = "small-search")]
     #[cfg_attr(feature = "more-inline", inline)]
-    fn each_iter_small(&self, query: impl ToQuery<T>) -> Self::ImplIterEachSmall {
-        // fixme: later use const generics
+    fn each_iter_small(
+        &self,
+        query: impl ToQuery<T>,
+    ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
         const SIZE_HINT: usize = 2;
 
         let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(

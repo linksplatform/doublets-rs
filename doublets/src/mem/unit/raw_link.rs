@@ -2,7 +2,7 @@ use data::LinkType;
 
 #[derive(Debug, Default, PartialEq, Eq, Hash, Clone)]
 #[repr(C)]
-pub struct LinkPart<T: LinkType> {
+pub struct LinkPart<T: LinkType + crate::TreesLinkType> {
     pub(crate) source: T,
     pub(crate) target: T,
     pub(crate) left_as_source: T,

@@ -1,15 +1,3 @@
-#![feature(fn_traits)]
-#![feature(generators)]
-#![feature(try_trait_v2)]
-#![feature(default_free_fn)]
-#![feature(unboxed_closures)]
-#![feature(nonnull_slice_from_raw_parts)]
-#![feature(associated_type_defaults)]
-#![feature(type_alias_impl_trait)]
-#![feature(maybe_uninit_uninit_array)]
-#![feature(allocator_api)]
-#![feature(bench_black_box)]
-#![feature(maybe_uninit_array_assume_init)]
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,
@@ -60,7 +48,9 @@
 pub mod data;
 pub mod mem;
 
+pub(crate) use trees::LinkType as TreesLinkType;
+
 pub use self::mem::{parts, split, unit};
 
-pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
+pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};

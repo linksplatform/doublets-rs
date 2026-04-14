@@ -2,7 +2,7 @@ use data::LinkType;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 #[repr(C)]
-pub struct LinksHeader<T: LinkType> {
+pub struct LinksHeader<T: LinkType + crate::TreesLinkType> {
     pub allocated: T,
     pub reserved: T,
     pub free: T,
