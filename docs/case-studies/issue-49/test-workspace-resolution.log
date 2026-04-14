@@ -1,0 +1,34 @@
+=== Testing workspace resolution ===
+
+--- rust-paths.rs ---
+Detected single-language repository (Cargo.toml in root)
+Rust root: .
+Cargo.toml: ./Cargo.toml
+Package Cargo.toml: ./doublets/Cargo.toml
+Changelog dir: ./changelog.d
+
+--- get-version.rs ---
+Detected single-language repository (Cargo.toml in root)
+Detected workspace Cargo.toml, searching for publishable member...
+Using publishable workspace member: doublets (doublets/Cargo.toml)
+Current version: 0.1.0-pre+beta.15
+Output: version=0.1.0-pre+beta.15
+
+--- check-release-needed.rs ---
+Detected single-language repository (Cargo.toml in root)
+Detected workspace Cargo.toml, searching for publishable member...
+Using publishable workspace member: doublets (doublets/Cargo.toml)
+Max published version on crates.io: 0.1.0-pre+beta.15
+Output: max_published_version=0.1.0-pre+beta.15
+Crate: doublets, Version: 0.1.0-pre+beta.15, Published on crates.io: true
+No changelog fragments and v0.1.0-pre+beta.15 already published on crates.io
+Output: should_release=false
+
+--- bump-version.rs --dry-run ---
+Detected single-language repository (Cargo.toml in root)
+Detected workspace Cargo.toml, searching for publishable member...
+Using publishable workspace member: doublets (doublets/Cargo.toml)
+Error: Could not parse version from doublets/Cargo.toml
+FAILED: bump-version.rs
+
+=== All tests completed ===

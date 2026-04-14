@@ -96,6 +96,65 @@ pub fn get_cargo_toml_path(rust_root: &str) -> PathBuf {
     }
 }
 
+/// Check if a Cargo.toml is a workspace root (has [workspace] but may lack [package])
+pub fn is_workspace_toml(cargo_toml_path: &Path) -> bool {
+    std::fs::read_to_string(cargo_toml_path)
+        .map(|c| c.contains("[workspace]"))
+        .unwrap_or(false)
+}
+
+/// Parse workspace members from a workspace Cargo.toml
+pub fn parse_workspace_members(cargo_toml_path: &Path) -> Vec<String> {
+    let content = match std::fs::read_to_string(cargo_toml_path) {
+        Ok(c) => c,
+        Err(_) => return vec![],
+    };
+    let mut members = vec![];
+    if let Some(start) = content.find("members") {
+        if let Some(bracket_start) = content[start..].find('[') {
+            let after_bracket = &content[start + bracket_start + 1..];
+            if let Some(bracket_end) = after_bracket.find(']') {
+                let member_section = &after_bracket[..bracket_end];
+                for line in member_section.lines() {
+                    let trimmed = line.trim().trim_matches(',').trim();
+                    if trimmed.starts_with('"') && trimmed.ends_with('"') {
+                        members.push(trimmed.trim_matches('"').to_string());
+                    }
+                }
+            }
+        }
+    }
+    members
+}
+
+/// Resolve the publishable package Cargo.toml path
+/// For workspace repos, finds the first member without `publish = false`
+pub fn resolve_package_cargo_toml(rust_root: &str) -> PathBuf {
+    let root_toml = get_cargo_toml_path(rust_root);
+    if !is_workspace_toml(&root_toml) {
+        return root_toml;
+    }
+
+    let members = parse_workspace_members(&root_toml);
+    let base = if rust_root == "." {
+        PathBuf::from(".")
+    } else {
+        PathBuf::from(rust_root)
+    };
+
+    for member in &members {
+        let member_toml = base.join(member).join("Cargo.toml");
+        if member_toml.exists() {
+            let content = std::fs::read_to_string(&member_toml).unwrap_or_default();
+            if !content.contains("publish = false") {
+                return member_toml;
+            }
+        }
+    }
+
+    root_toml
+}
+
 /// Get the path to Cargo.lock
 pub fn get_cargo_lock_path(rust_root: &str) -> PathBuf {
     if rust_root == "." {
@@ -138,11 +197,11 @@ pub fn parse_rust_root_from_args() -> Option<String> {
 }
 
 fn main() {
-    // When run directly, just print the detected rust root
     match get_rust_root(None, true) {
         Ok(root) => {
             println!("Rust root: {}", root);
             println!("Cargo.toml: {}", get_cargo_toml_path(&root).display());
+            println!("Package Cargo.toml: {}", resolve_package_cargo_toml(&root).display());
             println!("Changelog dir: {}", get_changelog_dir(&root).display());
         }
         Err(e) => {

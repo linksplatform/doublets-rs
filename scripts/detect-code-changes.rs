@@ -1,11 +1,14 @@
 #!/usr/bin/env rust-script
 //! Detect code changes for CI/CD pipeline
 //!
-//! This script detects what types of files have changed between two commits
+//! This script detects what types of files have changed in the latest commit
 //! and outputs the results for use in GitHub Actions workflow conditions.
 //!
 //! Key behavior:
-//! - For PRs: compares PR head against base branch
+//! - For PRs: detects GitHub Actions' synthetic merge commit and uses
+//!   HEAD^2^..HEAD^2 to get the per-commit diff of the actual PR head,
+//!   so a commit touching only non-code files correctly skips CI jobs
+//!   even when earlier commits in the same PR touched code files.
 //! - For pushes: compares HEAD against HEAD^
 //! - Excludes certain folders and file types from "code changes" detection
 //!
@@ -20,8 +23,6 @@
 //!
 //! Environment variables (set by GitHub Actions):
 //!   - GITHUB_EVENT_NAME: 'pull_request' or 'push'
-//!   - GITHUB_BASE_SHA: Base commit SHA for PR
-//!   - GITHUB_HEAD_SHA: Head commit SHA for PR
 //!
 //! Outputs (written to GITHUB_OUTPUT):
 //!   - rs-changed: 'true' if any .rs files changed
@@ -60,14 +61,6 @@ fn exec(command: &str, args: &[&str]) -> String {
     }
 }
 
-fn exec_silent(command: &str, args: &[&str]) {
-    let _ = Command::new(command)
-        .args(args)
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .status();
-}
-
 fn set_output(name: &str, value: &str) {
     if let Ok(output_file) = env::var("GITHUB_OUTPUT") {
         if let Ok(mut file) = fs::OpenOptions::new().create(true).append(true).open(&output_file) {
@@ -77,32 +70,36 @@ fn set_output(name: &str, value: &str) {
     println!("{}={}", name, value);
 }
 
+fn is_merge_commit() -> bool {
+    let output = exec("git", &["cat-file", "-p", "HEAD"]);
+    output.lines().filter(|line| line.starts_with("parent ")).count() > 1
+}
+
 fn get_changed_files() -> Vec<String> {
-    let event_name = env::var("GITHUB_EVENT_NAME").unwrap_or_else(|_| "local".to_string());
-
-    if event_name == "pull_request" {
-        let base_sha = env::var("GITHUB_BASE_SHA").ok();
-        let head_sha = env::var("GITHUB_HEAD_SHA").ok();
-
-        if let (Some(base), Some(head)) = (base_sha, head_sha) {
-            println!("Comparing PR: {}...{}", base, head);
-
-            // Ensure we have the base commit
-            exec_silent("git", &["fetch", "origin", &base]);
-
-            let output = exec("git", &["diff", "--name-only", &base, &head]);
-            if !output.is_empty() {
-                return output.lines().filter(|s| !s.is_empty()).map(String::from).collect();
-            }
+    // GitHub Actions checks out a synthetic merge commit for pull_request
+    // events: HEAD is the merge commit, HEAD^ is the base branch, HEAD^2
+    // is the actual PR head. To get the per-commit diff (what the latest
+    // push actually changed), we compare HEAD^2^ to HEAD^2.
+    // For push events, HEAD is the real commit, so HEAD^ to HEAD works.
+    if is_merge_commit() {
+        println!("Merge commit detected (pull_request event)");
+        println!("Comparing HEAD^2^ to HEAD^2 (per-commit diff of PR head)");
+        let output = exec("git", &["diff", "--name-only", "HEAD^2^", "HEAD^2"]);
+        if !output.is_empty() {
+            return output.lines().filter(|s| !s.is_empty()).map(String::from).collect();
+        }
+        // Fallback: first commit in PR, compare base to PR head
+        println!("HEAD^2^ not available (first commit in PR), comparing HEAD^ to HEAD^2");
+        let output = exec("git", &["diff", "--name-only", "HEAD^", "HEAD^2"]);
+        if !output.is_empty() {
+            return output.lines().filter(|s| !s.is_empty()).map(String::from).collect();
         }
     }
 
-    // For push events or fallback
     println!("Comparing HEAD^ to HEAD");
     let output = exec("git", &["diff", "--name-only", "HEAD^", "HEAD"]);
 
     if output.is_empty() {
-        // If HEAD^ doesn't exist (first commit), list all files in HEAD
         println!("HEAD^ not available, listing all files in HEAD");
         let output = exec("git", &["ls-tree", "--name-only", "-r", "HEAD"]);
         return output.lines().filter(|s| !s.is_empty()).map(String::from).collect();
