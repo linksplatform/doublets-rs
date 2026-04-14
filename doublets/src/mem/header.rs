@@ -1,8 +1,8 @@
-use data::LinkType;
+use data::LinkReference;
 
 #[derive(Debug, Default, Clone, Eq, PartialEq)]
 #[repr(C)]
-pub struct LinksHeader<T: LinkType + crate::TreesLinkType> {
+pub struct LinksHeader<T: LinkReference> {
     pub allocated: T,
     pub reserved: T,
     pub free: T,

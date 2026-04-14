@@ -1,13 +1,13 @@
 use rand::Rng;
 
-use data::{Flow, Hybrid, LinkType};
+use data::{Flow, Hybrid, LinkReference};
 use doublets::{Doublets, Link};
 
 #[allow(dead_code)]
-pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
+pub fn test_crud<T: LinkReference>(store: &mut impl Doublets<T>) {
     let constants = store.constants().clone();
 
-    assert_eq!(store.count(), T::funty(0));
+    assert_eq!(store.count(), T::from_byte(0));
 
     let address = store.create().unwrap();
     // TODO: expect
@@ -16,7 +16,7 @@ pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(link.index, address);
     assert_eq!(link.source, constants.null);
     assert_eq!(link.target, constants.null);
-    assert_eq!(store.count(), T::funty(0));
+    assert_eq!(store.count(), T::from_byte(0));
 
     store.update(address, address, address).unwrap();
 
@@ -35,11 +35,11 @@ pub fn test_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(link.target, constants.null);
 
     store.delete(address).unwrap();
-    assert_eq!(store.count(), T::funty(0));
+    assert_eq!(store.count(), T::from_byte(0));
 }
 
 #[allow(dead_code)]
-pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
+pub fn test_raw_numbers_crud<T: LinkReference>(store: &mut impl Doublets<T>) {
     let links = store;
 
     let constants = links.constants().clone();
@@ -53,9 +53,9 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     let h107 = Hybrid::new(n107);
     let h108 = Hybrid::new(n108);
 
-    assert_eq!(h106.abs().as_usize(), 106);
-    assert_eq!(h107.abs().as_usize(), 107);
-    assert_eq!(h108.abs().as_usize(), 108);
+    assert_eq!(h106.abs().as_(), 106);
+    assert_eq!(h107.abs().as_(), 107);
+    assert_eq!(h108.abs().as_(), 108);
 
     let address1 = links.create().unwrap();
     links
@@ -96,12 +96,14 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     }); // TODO: !!!
     assert_eq!(result, None);
 
-    let updated = links.update(address3, T::funty(0), T::funty(0)).unwrap();
+    let updated = links
+        .update(address3, T::from_byte(0), T::from_byte(0))
+        .unwrap();
     assert_eq!(updated, address3);
 
     let link = links.get_link(updated).unwrap();
-    assert_eq!(link.source, T::funty(0));
-    assert_eq!(link.target, T::funty(0));
+    assert_eq!(link.source, T::from_byte(0));
+    assert_eq!(link.target, T::from_byte(0));
     links.delete(updated).unwrap();
 
     assert_eq!(links.count(), T::try_from(2).unwrap());
@@ -115,14 +117,14 @@ pub fn test_raw_numbers_crud<T: LinkType>(store: &mut impl Doublets<T>) {
     assert_eq!(result, Some(address2));
 }
 
-pub fn test_random_creations_and_deletions<T: LinkType>(
+pub fn test_random_creations_and_deletions<T: LinkReference>(
     store: &mut impl Doublets<T>,
     per_cycle: usize,
 ) {
     for n in 1..per_cycle {
         let mut created = 0;
         for _ in 0..n {
-            let count = store.count().as_usize();
+            let count = store.count().as_();
             let create_point: bool = rand::random();
             if count >= 2 && create_point {
                 let address = 1..=count;
@@ -131,7 +133,7 @@ pub fn test_random_creations_and_deletions<T: LinkType>(
                 let result = store
                     .get_or_create(T::try_from(source).unwrap(), T::try_from(target).unwrap())
                     .unwrap()
-                    .as_usize();
+                    .as_();
 
                 if result > count {
                     created += 1;
@@ -140,11 +142,11 @@ pub fn test_random_creations_and_deletions<T: LinkType>(
                 store.create().unwrap();
                 created += 1;
             }
-            assert_eq!(created, store.count().as_usize());
+            assert_eq!(created, store.count().as_());
         }
 
         store.delete_all().unwrap();
 
-        assert_eq!(store.count(), T::funty(0));
+        assert_eq!(store.count(), T::from_byte(0));
     }
 }

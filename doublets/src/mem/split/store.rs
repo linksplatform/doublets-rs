@@ -11,7 +11,7 @@ use crate::{
     },
     Doublets, DoubletsExt, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, LinkType, LinksConstants, ToQuery};
+use data::{Flow, LinkReference, LinksConstants, ToQuery};
 use mem::RawMem;
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
@@ -21,7 +21,7 @@ const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 /// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
 /// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
 pub struct Store<
-    T: LinkType + crate::TreesLinkType,
+    T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
     MI: RawMem<Item = IndexPart<T>>,
     IS: SplitTree<T> = InternalSourcesRecursionlessTree<T>,
@@ -51,7 +51,7 @@ pub struct Store<
 }
 
 impl<
-        T: LinkType + crate::TreesLinkType,
+        T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
         IS: SplitTree<T>,
@@ -155,27 +155,25 @@ impl<
 
     /// Returns the raw data part (source/target) for the link at `index`.
     pub fn get_data_part(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::get_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
     unsafe fn get_data_unchecked(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_usize()).unwrap_unchecked()
+        Self::get_from_mem(self.data_ptr, index.as_()).unwrap_unchecked()
     }
 
     fn mut_data_part(&mut self, index: T) -> &mut DataPart<T> {
-        Self::mut_from_mem(self.data_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::mut_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
     /// Returns the raw index part (tree metadata) for the link at `index`.
     pub fn get_index_part(&self, index: T) -> &IndexPart<T> {
-        Self::get_from_mem(self.index_ptr, index.as_usize())
+        Self::get_from_mem(self.index_ptr, index.as_())
             .expect("Index part should be in index memory")
     }
 
     fn mut_index_part(&mut self, index: T) -> &mut IndexPart<T> {
-        Self::mut_from_mem(self.index_ptr, index.as_usize())
+        Self::mut_from_mem(self.index_ptr, index.as_())
             .expect("Index part should be in index memory")
     }
 
@@ -301,7 +299,7 @@ impl<
         self.update_mem(data, index);
 
         let header = self.get_header().clone();
-        let allocated = header.allocated.as_usize();
+        let allocated = header.allocated.as_();
 
         let mut data_capacity = allocated;
         data_capacity = data_capacity.max(self.data_mem.allocated().len());
@@ -335,7 +333,7 @@ impl<
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == crate::funty::<T>(0) && data.source != crate::funty::<T>(0)
+            index.size_as_target == T::from_byte(0) && data.source != T::from_byte(0)
         } else {
             true
         }
@@ -372,7 +370,7 @@ impl<
         let query = query.to_query();
 
         if query.is_empty() {
-            let mut index = crate::funty::<T>(1);
+            let mut index = T::from_byte(1);
             let allocated = self.get_header().allocated;
             while index <= allocated {
                 if let Some(link) = self.get_link(index) {
@@ -380,14 +378,14 @@ impl<
                         return Flow::Break;
                     }
                 }
-                index = index + crate::funty::<T>(1);
+                index = index + T::from_byte(1);
             }
             return Flow::Continue;
         }
 
         let constants = self.constants.clone();
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
         if query.len() == 1 {
             return if index == any {
                 self.try_each_by_core(handler, &[])
@@ -424,8 +422,8 @@ impl<
         }
         //
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
 
@@ -567,7 +565,7 @@ impl<
 }
 
 impl<
-        T: LinkType + crate::TreesLinkType,
+        T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
         IS: SplitTree<T>,
@@ -588,14 +586,14 @@ impl<
 
         let constants = self.constants();
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
         if query.len() == 1 {
             return if index == any {
                 self.total()
             } else if self.exists(index) {
-                crate::funty::<T>(1)
+                T::from_byte(1)
             } else {
-                crate::funty::<T>(0)
+                T::from_byte(0)
             };
         }
 
@@ -617,22 +615,22 @@ impl<
                         + self.internal_targets.count_usages(value)
                 }
             } else if !self.exists(index) {
-                crate::funty::<T>(0)
+                T::from_byte(0)
             } else if value == any {
-                crate::funty::<T>(1)
+                T::from_byte(1)
             } else {
                 let stored = self.get_data_part(index);
                 if (stored.source, stored.target) == (value, value) {
-                    crate::funty::<T>(1)
+                    T::from_byte(1)
                 } else {
-                    crate::funty::<T>(0)
+                    T::from_byte(0)
                 }
             };
         }
 
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
 
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
@@ -683,37 +681,37 @@ impl<
                         self.internal_sources.search(source, target)
                     };
                     return if link == constants.null {
-                        crate::funty::<T>(0)
+                        T::from_byte(0)
                     } else {
-                        crate::funty::<T>(1)
+                        T::from_byte(1)
                     };
                 }
             } else if !self.exists(index) {
-                crate::funty::<T>(0)
+                T::from_byte(0)
             } else if (source, target) == (any, any) {
-                crate::funty::<T>(1)
+                T::from_byte(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        crate::funty::<T>(1)
+                        T::from_byte(1)
                     } else {
-                        crate::funty::<T>(0)
+                        T::from_byte(0)
                     }
                 } else if source == any {
                     if link.target == target {
-                        crate::funty::<T>(1)
+                        T::from_byte(1)
                     } else {
-                        crate::funty::<T>(0)
+                        T::from_byte(0)
                     }
                 } else if target == any {
                     if link.source == source {
-                        crate::funty::<T>(1)
+                        T::from_byte(1)
                     } else {
-                        crate::funty::<T>(0)
+                        T::from_byte(0)
                     }
                 } else {
-                    crate::funty::<T>(0)
+                    T::from_byte(0)
                 }
             };
         }
@@ -735,7 +733,7 @@ impl<
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            if header.allocated >= header.reserved - crate::funty::<T>(1) {
+            if header.allocated >= header.reserved - T::from_byte(1) {
                 let new_data_cap = self.data_mem.allocated().len() + self.data_step;
                 let new_index_cap = self.index_mem.allocated().len() + self.index_step;
                 let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, new_data_cap)?);
@@ -747,7 +745,7 @@ impl<
                 header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
-            header.allocated += crate::funty::<T>(1);
+            header.allocated = header.allocated + T::from_byte(1);
             free = header.allocated;
         } else {
             self.unused.detach(free);
@@ -757,7 +755,7 @@ impl<
 
         Ok(handler(
             Link::nothing(),
-            Link::new(free, crate::funty::<T>(0), crate::funty::<T>(0)),
+            Link::new(free, T::from_byte(0), T::from_byte(0)),
         ))
     }
 
@@ -777,7 +775,7 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        if link.source != crate::funty::<T>(0) {
+        if link.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if self.is_virtual(link.source) {
@@ -791,7 +789,7 @@ impl<
             }
         }
 
-        if link.target != crate::funty::<T>(0) {
+        if link.target != T::from_byte(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if self.is_virtual(link.target) {
@@ -809,7 +807,7 @@ impl<
         place.target = new_target;
         let place = place.clone();
 
-        if place.source != crate::funty::<T>(0) {
+        if place.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if virtual_source {
@@ -823,7 +821,7 @@ impl<
             }
         }
 
-        if place.target != crate::funty::<T>(0) {
+        if place.target != T::from_byte(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if virtual_target {
@@ -847,7 +845,7 @@ impl<
 
         self.resolve_danglind_internal(index);
 
-        self.update(index, crate::funty::<T>(0), crate::funty::<T>(0))?;
+        self.update(index, T::from_byte(0), T::from_byte(0))?;
 
         // TODO: move to `delete_core`
         let header = self.get_header();
@@ -858,15 +856,15 @@ impl<
             Ordering::Equal => {
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - crate::funty::<T>(1);
+                header.allocated = allocated - T::from_byte(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated)) {
+                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - crate::funty::<T>(1);
+                    self.mut_header().allocated = allocated - T::from_byte(1);
                 }
             }
         }
@@ -878,7 +876,7 @@ impl<
 }
 
 impl<
-        T: LinkType + crate::TreesLinkType,
+        T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
         IS: SplitTree<T>,
@@ -898,7 +896,7 @@ impl<
 }
 
 unsafe impl<
-        T: LinkType + crate::TreesLinkType,
+        T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
         IS: SplitTree<T>,
@@ -911,7 +909,7 @@ unsafe impl<
 }
 
 unsafe impl<
-        T: LinkType + crate::TreesLinkType,
+        T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
         IS: SplitTree<T>,

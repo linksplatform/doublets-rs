@@ -4,11 +4,11 @@ use crate::{
     mem::{header::LinksHeader, unit::raw_link::LinkPart, LinksTree},
     Link,
 };
-use data::{LinkType, LinksConstants};
+use data::{LinkReference, LinksConstants};
 use trees::IterativeSizeBalancedTree;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
-pub struct LinksRecursionlessSizeBalancedTreeBase<T: LinkType + crate::TreesLinkType> {
+pub struct LinksRecursionlessSizeBalancedTreeBase<T: LinkReference> {
     pub mem: NonNull<[LinkPart<T>]>,
     pub r#break: T,
     pub r#continue: T,
@@ -16,7 +16,7 @@ pub struct LinksRecursionlessSizeBalancedTreeBase<T: LinkType + crate::TreesLink
     _phantom: PhantomData<T>,
 }
 
-impl<T: LinkType + crate::TreesLinkType> LinksRecursionlessSizeBalancedTreeBase<T> {
+impl<T: LinkReference> LinksRecursionlessSizeBalancedTreeBase<T> {
     pub fn new(constants: LinksConstants<T>, mem: NonNull<[LinkPart<T>]>) -> Self {
         Self {
             mem,
@@ -27,7 +27,7 @@ impl<T: LinkType + crate::TreesLinkType> LinksRecursionlessSizeBalancedTreeBase<
     }
 }
 
-pub trait LinkRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType + crate::TreesLinkType>:
+pub trait LinkRecursionlessSizeBalancedTreeBaseAbstract<T: LinkReference>:
     IterativeSizeBalancedTree<T> + LinksTree<T>
 {
     fn get_header(&self) -> &LinksHeader<T>;

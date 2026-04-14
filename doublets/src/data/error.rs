@@ -1,10 +1,10 @@
 use crate::{Doublet, Link};
-use data::LinkType;
+use data::LinkReference;
 use std::{error::Error as StdError, io};
 
 /// Errors that can be returned by doublets store operations.
 #[derive(thiserror::Error, Debug)]
-pub enum Error<T: LinkType> {
+pub enum Error<T: LinkReference> {
     /// The requested link index does not exist in the store.
     #[error("link {0} does not exist.")]
     NotExists(T),
@@ -30,7 +30,7 @@ pub enum Error<T: LinkType> {
     Other(#[from] Box<dyn StdError + Sync + Send>),
 }
 
-impl<T: LinkType> From<io::Error> for Error<T> {
+impl<T: LinkReference> From<io::Error> for Error<T> {
     fn from(err: io::Error) -> Self {
         Self::AllocFailed(err.into())
     }

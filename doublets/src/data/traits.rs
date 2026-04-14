@@ -2,7 +2,7 @@
 use rayon::prelude::*;
 
 use crate::{Error, Fuse, Link};
-use data::{Flow, LinkType, LinksConstants, ToQuery};
+use data::{Flow, LinkReference, LinksConstants, ToQuery};
 
 /// Callback type for read-only link enumeration.
 pub type ReadHandler<'a, T> = &'a mut dyn FnMut(Link<T>) -> Flow;
@@ -14,7 +14,7 @@ pub type WriteHandler<'a, T> = &'a mut dyn FnMut(Link<T>, Link<T>) -> Flow;
 ///
 /// Implementors are required to be `Send + Sync`. Most users should prefer the
 /// higher-level [`Doublets`] trait which builds on this one.
-pub trait Links<T: LinkType>: Send + Sync {
+pub trait Links<T: LinkReference>: Send + Sync {
     /// Returns the store's [`LinksConstants`] (any/null/range values).
     fn constants(&self) -> &LinksConstants<T>;
 
@@ -44,7 +44,7 @@ pub trait Links<T: LinkType>: Send + Sync {
 /// High-level API for a doublets link store, extending [`Links`] with ergonomic helpers.
 ///
 /// All methods have default implementations built on top of [`Links`].
-pub trait Doublets<T: LinkType>: Links<T> {
+pub trait Doublets<T: LinkReference>: Links<T> {
     /// Counts links matching `query`.
     fn count_by(&self, query: impl ToQuery<T>) -> T
     where
@@ -80,7 +80,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut index = T::funty(0);
+        let mut index = T::from_byte(0);
         self.create_by_with(query, |_before, link| {
             index = link.index;
             Flow::Continue
@@ -145,7 +145,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = T::funty(0);
+        let mut result = T::from_byte(0);
         self.update_by_with(query, change, |_, after| {
             result = after.index;
             Flow::Continue
@@ -195,7 +195,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = T::funty(0);
+        let mut result = T::from_byte(0);
         self.delete_by_with(query, |_before, after| {
             result = after.index;
             Flow::Continue
@@ -234,7 +234,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let mut count = self.count();
-        while count != T::funty(0) {
+        while count != T::from_byte(0) {
             self.delete(count)?;
             count = self.count();
         }
@@ -248,7 +248,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let query = query.to_query();
-        let len = self.count_by(query.to_query()).as_usize();
+        let len = self.count_by(query.to_query()).as_();
         let mut vec = Vec::with_capacity(len);
 
         self.each_by(query, |link| {
@@ -271,8 +271,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     {
         let any = self.constants().any;
         let mut to_delete = Vec::with_capacity(
-            self.count_by([any, index, any]).as_usize()
-                + self.count_by([any, any, index]).as_usize(),
+            self.count_by([any, index, any]).as_() + self.count_by([any, any, index]).as_(),
         );
         self.each_by([any, index, any], |link| {
             if link.index != index {
@@ -318,7 +317,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         F: FnMut(Link<T>, Link<T>) -> Flow,
         Self: Sized,
     {
-        let mut new = T::funty(0);
+        let mut new = T::from_byte(0);
         let mut handler = Fuse::new(handler);
         self.create_with(|before, after| {
             new = after.index;
@@ -336,7 +335,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        let mut result = T::funty(0);
+        let mut result = T::from_byte(0);
         self.create_link_with(source, target, |_, link| {
             result = link.index;
             Flow::Continue
@@ -349,7 +348,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     where
         Self: Sized,
     {
-        self.count_by(query) != T::funty(0)
+        self.count_by(query) != T::from_byte(0)
     }
 
     /// Returns the first link matching `query`, or `None`.
@@ -423,12 +422,12 @@ pub trait Doublets<T: LinkType>: Links<T> {
 
         let mut usage_source = self.count_by([any, index, any]);
         if index == link.source {
-            usage_source -= T::funty(1);
+            usage_source = usage_source - T::from_byte(1);
         }
 
         let mut usage_target = self.count_by([any, any, index]);
         if index == link.target {
-            usage_target -= T::funty(1);
+            usage_target = usage_target - T::from_byte(1);
         }
 
         Ok(usage_source + usage_target)
@@ -440,7 +439,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         let any = self.constants().any;
-        let mut usages = Vec::with_capacity(self.count_usages(index)?.as_usize());
+        let mut usages = Vec::with_capacity(self.count_usages(index)?.as_());
 
         self.each_by([any, index, any], |link| {
             if link.index != index {
@@ -467,7 +466,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         if constants.is_external(link) {
             true
         } else {
-            constants.is_internal(link) && self.count_by([link]) != T::funty(0)
+            constants.is_internal(link) && self.count_by([link]) != T::from_byte(0)
         }
     }
 
@@ -477,7 +476,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
         Self: Sized,
     {
         self.count_usages(link)
-            .is_ok_and(|link| link != T::funty(0))
+            .is_ok_and(|link| link != T::from_byte(0))
     }
 
     /// Re-points all usages of `old` to `new`, calling `handler` for each update.
@@ -543,7 +542,7 @@ pub trait Doublets<T: LinkType>: Links<T> {
     }
 }
 
-impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
+impl<T: LinkReference, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
     fn constants(&self) -> &LinksConstants<T> {
         (**self).constants()
     }
@@ -582,7 +581,7 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Links<T> for Box<All> {
     }
 }
 
-impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
+impl<T: LinkReference, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         (**self).get_link(index)
     }
@@ -591,7 +590,7 @@ impl<T: LinkType, All: Doublets<T> + ?Sized> Doublets<T> for Box<All> {
 /// Extension trait that adds iterator-based access to a [`Doublets`] store.
 ///
 /// Automatically implemented for any type that implements [`Doublets`].
-pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
+pub trait DoubletsExt<T: LinkReference>: Sized + Doublets<T> {
     /// The parallel iterator type returned by [`par_iter`](DoubletsExt::par_iter).
     #[cfg(feature = "rayon")]
     type IdxParIter: IndexedParallelIterator<Item = Link<T>>;
@@ -626,7 +625,7 @@ pub trait DoubletsExt<T: LinkType>: Sized + Doublets<T> {
     ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator;
 }
 
-impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
+impl<T: LinkReference, All: Doublets<T> + Sized> DoubletsExt<T> for All {
     #[cfg(feature = "rayon")]
     type IdxParIter = rayon::vec::IntoIter<Link<T>>;
 
@@ -637,7 +636,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
 
     #[cfg(feature = "rayon")]
     fn par_each_iter(&self, query: impl ToQuery<T>) -> Self::IdxParIter {
-        let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_usize());
+        let mut vec = Vec::with_capacity(self.count_by(query.to_query()).as_());
         self.each_by(query, |link| {
             vec.push(link);
             Flow::Continue
@@ -655,7 +654,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         &self,
         query: impl ToQuery<T>,
     ) -> impl Iterator<Item = Link<T>> + ExactSizeIterator + DoubleEndedIterator {
-        let cap = self.count_by(query.to_query()).as_usize();
+        let cap = self.count_by(query.to_query()).as_();
 
         let mut vec = Vec::with_capacity(cap);
         self.each_by(query, &mut |link| {
@@ -682,7 +681,7 @@ impl<T: LinkType, All: Doublets<T> + Sized> DoubletsExt<T> for All {
         const SIZE_HINT: usize = 2;
 
         let mut vec = smallvec::SmallVec::<[Link<_>; SIZE_HINT]>::with_capacity(
-            self.count_by(query.to_query()).as_usize(),
+            self.count_by(query.to_query()).as_(),
         );
         self.each_by(query, |link| {
             vec.push(link);

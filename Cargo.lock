@@ -211,6 +211,7 @@ dependencies = [
  "mimalloc",
  "platform-data",
  "platform-mem",
+ "platform-num",
  "platform-trees",
  "rand",
  "rayon",
@@ -235,12 +236,6 @@ checksum = "a7a407cfaa3385c4ae6b23e84623d48c2798d06e3e6a1878f7f59f17b3f86499"
 dependencies = [
  "instant",
 ]
-
-[[package]]
-name = "funty"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "getrandom"
@@ -421,12 +416,12 @@ checksum = "0ab1bc2a289d34bd04a330323ac98a1b4bc82c9d9fcb1e66b63caa84da26b575"
 
 [[package]]
 name = "platform-data"
-version = "1.0.0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0123dc3cc4b967a22cc3c1b57e3e7117f8ec1a6ef25bf15925911db7d010ff1f"
+checksum = "6782bc71345465116de96d250a36dcf49336010a2320d958d12a5d4390186c90"
 dependencies = [
  "beef",
- "funty",
+ "platform-num",
  "thiserror",
 ]
 
@@ -444,20 +439,19 @@ dependencies = [
 
 [[package]]
 name = "platform-num"
-version = "0.6.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51306628a5a0398b4216348a9b826866c83f9709661dd994865baf2a486b052b"
+checksum = "2c4ca8e18138b1c90ad802aff931f946a0e6bd760c35af30f1ff2489489ab54a"
 dependencies = [
  "num-traits",
 ]
 
 [[package]]
 name = "platform-trees"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "164642d79d5add67b3a068d96102f2cb0c6444acc6edf57381f981b7278a44e4"
+checksum = "40e25a531617fa762c8505826c930f6c1cfcc226f63dea09882b56ae0b8ed078"
 dependencies = [
- "num-traits",
  "platform-num",
 ]
 

@@ -1,13 +1,13 @@
 use std::fmt::{self, Debug, Formatter};
 
-use data::{LinkType, Query, ToQuery};
+use data::{LinkReference, Query, ToQuery};
 
 /// A link triple `(index, source, target)` that represents one node in the doublets graph.
 ///
 /// Every link is uniquely identified by its `index` and connects a `source` to a `target`.
 #[derive(Default, Eq, PartialEq, Clone, Hash)]
 #[repr(C)]
-pub struct Link<T: LinkType> {
+pub struct Link<T: LinkReference> {
     /// Unique identifier of this link within the store.
     pub index: T,
     /// The source (left) endpoint of this link.
@@ -16,7 +16,7 @@ pub struct Link<T: LinkType> {
     pub target: T,
 }
 
-impl<T: LinkType> Link<T> {
+impl<T: LinkReference> Link<T> {
     /// Returns a default/null link with all fields set to zero.
     #[inline]
     #[must_use]
@@ -68,7 +68,7 @@ impl<T: LinkType> Link<T> {
     #[inline]
     #[must_use]
     pub fn is_null(&self) -> bool {
-        *self == Self::point(T::funty(0))
+        *self == Self::point(T::from_byte(0))
     }
 
     /// Returns `true` if the link is a full point (`index == source == target`).
@@ -94,13 +94,13 @@ impl<T: LinkType> Link<T> {
     }
 }
 
-impl<T: LinkType> Debug for Link<T> {
+impl<T: LinkReference> Debug for Link<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}: {} {}", self.index, self.source, self.target)
     }
 }
 
-impl<T: LinkType> ToQuery<T> for Link<T> {
+impl<T: LinkReference> ToQuery<T> for Link<T> {
     fn to_query(&self) -> Query<'_, T> {
         self.as_slice().to_query()
     }

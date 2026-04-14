@@ -16,14 +16,14 @@ use crate::{
     mem::{SplitTree, SplitUpdateMem},
     Link,
 };
-use data::{Flow, LinkType, LinksConstants};
+use data::{Flow, LinkReference, LinksConstants};
 use trees::{IterativeSizeBalancedTree, RecursiveSizeBalancedTree};
 
-pub struct ExternalSourcesRecursionlessTree<T: LinkType + crate::TreesLinkType> {
+pub struct ExternalSourcesRecursionlessTree<T: LinkReference> {
     base: ExternalRecursionlessSizeBalancedTreeBase<T>,
 }
 
-impl<T: LinkType + crate::TreesLinkType> ExternalSourcesRecursionlessTree<T> {
+impl<T: LinkReference> ExternalSourcesRecursionlessTree<T> {
     pub fn new(
         constants: LinksConstants<T>,
         data: NonNull<[DataPart<T>]>,
@@ -35,9 +35,7 @@ impl<T: LinkType + crate::TreesLinkType> ExternalSourcesRecursionlessTree<T> {
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
-    for ExternalSourcesRecursionlessTree<T>
-{
+impl<T: LinkReference> RecursiveSizeBalancedTree<T> for ExternalSourcesRecursionlessTree<T> {
     unsafe fn get_left_reference(&self, node: T) -> *const T {
         std::ptr::addr_of!(self.get_index_part(node).left_as_source)
     }
@@ -102,24 +100,21 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
 
     unsafe fn clear_node(&mut self, node: T) {
         let link = self.get_mut_index_part(node);
-        link.left_as_source = crate::funty::<T>(0);
-        link.right_as_source = crate::funty::<T>(0);
-        link.size_as_source = crate::funty::<T>(0);
+        link.left_as_source = T::from_byte(0);
+        link.right_as_source = T::from_byte(0);
+        link.size_as_source = T::from_byte(0);
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> IterativeSizeBalancedTree<T>
-    for ExternalSourcesRecursionlessTree<T>
-{
-}
+impl<T: LinkReference> IterativeSizeBalancedTree<T> for ExternalSourcesRecursionlessTree<T> {}
 
-fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flow + ?Sized>(
+fn each_usages_core<T: LinkReference, H: FnMut(Link<T>) -> Flow + ?Sized>(
     this: &ExternalSourcesRecursionlessTree<T>,
     base: T,
     link: T,
     handler: &mut H,
 ) -> Flow {
-    if link == crate::funty::<T>(0) {
+    if link == T::from_byte(0) {
         return Flow::Continue;
     }
     let link_base_part = this.get_base_part(link);
@@ -147,29 +142,31 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
     Flow::Continue
 }
 
-impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalSourcesRecursionlessTree<T> {
+impl<T: LinkReference> LinksTree<T> for ExternalSourcesRecursionlessTree<T> {
     fn count_usages(&self, link: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
             let total = self.get_size(root);
-            let mut total_right_ignore = crate::funty::<T>(0);
-            while root != crate::funty::<T>(0) {
+            let mut total_right_ignore = T::from_byte(0);
+            while root != T::from_byte(0) {
                 let base = self.get_base_part(root);
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
-                    total_right_ignore += self.get_right_size(root) + crate::funty::<T>(1);
+                    total_right_ignore =
+                        total_right_ignore + self.get_right_size(root) + T::from_byte(1);
                     root = self.get_left_or_default(root);
                 }
             }
             root = self.get_tree_root();
-            let mut total_left_ignore = crate::funty::<T>(0);
-            while root != crate::funty::<T>(0) {
+            let mut total_left_ignore = T::from_byte(0);
+            while root != T::from_byte(0) {
                 let base = self.get_base_part(root);
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
-                    total_left_ignore += self.get_left_size(root) + crate::funty::<T>(1);
+                    total_left_ignore =
+                        total_left_ignore + self.get_left_size(root) + T::from_byte(1);
                     root = self.get_right_or_default(root);
                 }
             }
@@ -180,7 +177,7 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalSourcesRecursi
     fn search(&self, source: T, target: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
-            while root != crate::funty::<T>(0) {
+            while root != T::from_byte(0) {
                 let root_link = self.get_data_part(root);
                 let root_source = root_link.source;
                 let root_target = root_link.target;
@@ -197,7 +194,7 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalSourcesRecursi
                     return root;
                 }
             }
-            crate::funty::<T>(0)
+            T::from_byte(0)
         }
     }
 
@@ -214,16 +211,16 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T> for ExternalSourcesRecursi
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> SplitUpdateMem<T> for ExternalSourcesRecursionlessTree<T> {
+impl<T: LinkReference> SplitUpdateMem<T> for ExternalSourcesRecursionlessTree<T> {
     fn update_mem(&mut self, data: NonNull<[DataPart<T>]>, indexes: NonNull<[IndexPart<T>]>) {
         self.base.indexes = indexes;
         self.base.data = data;
     }
 }
 
-impl<T: LinkType + crate::TreesLinkType> SplitTree<T> for ExternalSourcesRecursionlessTree<T> {}
+impl<T: LinkReference> SplitTree<T> for ExternalSourcesRecursionlessTree<T> {}
 
-impl<T: LinkType + crate::TreesLinkType> ExternalRecursionlessSizeBalancedTreeBaseAbstract<T>
+impl<T: LinkReference> ExternalRecursionlessSizeBalancedTreeBaseAbstract<T>
     for ExternalSourcesRecursionlessTree<T>
 {
     fn get_header(&self) -> &LinksHeader<T> {
@@ -235,19 +232,19 @@ impl<T: LinkType + crate::TreesLinkType> ExternalRecursionlessSizeBalancedTreeBa
     }
 
     fn get_index_part(&self, link: T) -> &IndexPart<T> {
-        unsafe { &self.base.indexes.as_ref()[link.as_usize()] }
+        unsafe { &self.base.indexes.as_ref()[link.as_()] }
     }
 
     fn get_mut_index_part(&mut self, link: T) -> &mut IndexPart<T> {
-        unsafe { &mut self.base.indexes.as_mut()[link.as_usize()] }
+        unsafe { &mut self.base.indexes.as_mut()[link.as_()] }
     }
 
     fn get_data_part(&self, link: T) -> &DataPart<T> {
-        unsafe { &self.base.data.as_ref()[link.as_usize()] }
+        unsafe { &self.base.data.as_ref()[link.as_()] }
     }
 
     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T> {
-        unsafe { &mut self.base.data.as_mut()[link.as_usize()] }
+        unsafe { &mut self.base.data.as_mut()[link.as_()] }
     }
 
     fn get_tree_root(&self) -> T {
