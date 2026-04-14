@@ -45,7 +45,7 @@ fn link_from_slice() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "assertion failed: slice.len() >= 3")]
 fn link_from_slice_too_small() {
     let slice = [1usize, 2];
     let _ = Link::from_slice(&slice);
@@ -111,7 +111,7 @@ fn link_as_slice() {
 #[test]
 fn link_debug_format() {
     let link = Link::<usize>::new(1, 2, 3);
-    let debug_str = format!("{:?}", link);
+    let debug_str = format!("{link:?}");
     assert_eq!(debug_str, "1: 2 3");
 }
 

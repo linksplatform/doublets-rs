@@ -1,7 +1,7 @@
 use doublets::{
     data::{
         Flow::{Break, Continue},
-        LinkType, ToQuery,
+        LinkReference, ToQuery,
     },
     mem::Global,
     split, Doublets, DoubletsExt, Error as LinksError, Link, Links,
@@ -9,12 +9,15 @@ use doublets::{
 
 use std::{error::Error, time::Instant};
 
-fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, LinksError<T>> {
+fn write_seq<T: LinkReference>(
+    store: &mut impl Doublets<T>,
+    seq: &[T],
+) -> Result<T, LinksError<T>> {
     let mut aliases = vec![store.create()?];
 
     for id in seq {
         let link = store.create()?;
-        aliases.push(store.update(link, link, *id)?)
+        aliases.push(store.update(link, link, *id)?);
     }
 
     for (i, cur) in aliases.iter().enumerate() {
@@ -22,10 +25,14 @@ fn write_seq<T: LinkType>(store: &mut impl Doublets<T>, seq: &[T]) -> Result<T, 
             store.create_link(*cur, *next)?;
         }
     }
-    Ok(*aliases.first().unwrap_or(&T::funty(0)))
+    let zero = T::from_byte(0);
+    Ok(*aliases.first().unwrap_or(&zero))
 }
 
-fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) -> Option<Link<T>> {
+fn custom_single<T: LinkReference>(
+    store: &impl Doublets<T>,
+    query: impl ToQuery<T>,
+) -> Option<Link<T>> {
     // todo:
     //  store.each_iter(query).filter(Link::is_partial);
 
@@ -44,7 +51,7 @@ fn custom_single<T: LinkType>(store: &impl Doublets<T>, query: impl ToQuery<T>) 
     single
 }
 
-fn read_seq<T: LinkType>(store: &impl Doublets<T>, root: T) -> Result<Vec<T>, LinksError<T>> {
+fn read_seq<T: LinkReference>(store: &impl Doublets<T>, root: T) -> Result<Vec<T>, LinksError<T>> {
     let any = store.constants().any;
     let mut seq = vec![];
     let mut cur = root;
@@ -125,7 +132,7 @@ fn bug() -> Result<(), Box<dyn Error>> {
     let any = store.constants().any;
 
     for link in store.each_iter([any, any, 1]) {
-        println!("{:?}", link);
+        println!("{link:?}");
     }
 
     Ok(())

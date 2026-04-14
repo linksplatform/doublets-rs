@@ -1,15 +1,21 @@
-#![feature(fn_traits)]
-#![feature(generators)]
-#![feature(try_trait_v2)]
-#![feature(default_free_fn)]
-#![feature(unboxed_closures)]
-#![feature(nonnull_slice_from_raw_parts)]
-#![feature(associated_type_defaults)]
-#![feature(type_alias_impl_trait)]
-#![feature(maybe_uninit_uninit_array)]
-#![feature(allocator_api)]
-#![feature(bench_black_box)]
-#![feature(maybe_uninit_array_assume_init)]
+//! A doublets graph database library for working with associative link structures.
+//!
+//! Doublets stores data as a graph of typed links, each represented as a triple
+//! `(index, source, target)`. Two store implementations are provided:
+//!
+//! - [`unit::Store`] — a single-memory store for smaller graphs.
+//! - [`split::Store`] — a two-memory (data + index) store that separates link
+//!   data from tree-index metadata for larger graphs.
+//!
+//! # Quick start
+//!
+//! ```rust,ignore
+//! use doublets::{unit, Doublets, DoubletsExt};
+//! use mem::FileMapped;
+//!
+//! let store = unit::Store::<u64, _>::new(FileMapped::from_path("db.links")?)?;
+//! ```
+
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,
@@ -55,12 +61,28 @@
     nonstandard_style,
 )]
 // must be fixed later
-#![allow(clippy::needless_pass_by_value, clippy::comparison_chain)]
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::comparison_chain,
+    clippy::transmute_ptr_to_ptr,
+    clippy::ref_as_ptr,
+    clippy::borrow_as_ptr,
+    clippy::missing_const_for_fn,
+    clippy::needless_pass_by_ref_mut,
+    clippy::non_send_fields_in_send_ty,
+    clippy::too_many_lines,
+    clippy::redundant_pub_crate,
+    clippy::implied_bounds_in_impls,
+    clippy::only_used_in_recursion,
+    clippy::option_if_let_else,
+    clippy::assign_op_pattern,
+    dead_code
+)]
 
 pub mod data;
 pub mod mem;
 
 pub use self::mem::{parts, split, unit};
 
-pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
+pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};

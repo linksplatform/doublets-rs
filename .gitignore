@@ -1,0 +1,3 @@
+target/
+log*.txt
+*.yml.bak

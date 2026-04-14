@@ -40,7 +40,7 @@ fn links_header_clone() {
 #[test]
 fn links_header_debug() {
     let header = LinksHeader::<usize>::default();
-    let debug_str = format!("{:?}", header);
+    let debug_str = format!("{header:?}");
     assert!(debug_str.contains("LinksHeader"));
 }
 
@@ -83,7 +83,7 @@ fn link_part_hash() {
 #[test]
 fn link_part_debug() {
     let part = LinkPart::<usize>::default();
-    let debug_str = format!("{:?}", part);
+    let debug_str = format!("{part:?}");
     assert!(debug_str.contains("LinkPart"));
 }
 
@@ -126,7 +126,7 @@ fn data_part_hash() {
 #[test]
 fn data_part_debug() {
     let part = DataPart::<usize>::default();
-    let debug_str = format!("{:?}", part);
+    let debug_str = format!("{part:?}");
     assert!(debug_str.contains("DataPart"));
 }
 
@@ -169,7 +169,7 @@ fn index_part_hash() {
 #[test]
 fn index_part_debug() {
     let part = IndexPart::<usize>::default();
-    let debug_str = format!("{:?}", part);
+    let debug_str = format!("{part:?}");
     assert!(debug_str.contains("IndexPart"));
 }
 

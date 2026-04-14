@@ -10,4 +10,4 @@ path = "src/bins/test-mem.rs"
 
 [dependencies]
 doublets = { path = "../doublets" }
-mem = { package = "platform-mem", version = "0.1.0-alpha.0" }
+mem = { package = "platform-mem", version = "0.3.0" }
