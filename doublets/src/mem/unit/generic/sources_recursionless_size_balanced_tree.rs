@@ -96,9 +96,9 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
 
     unsafe fn clear_node(&mut self, node: T) {
         let link = self.get_mut_link(node);
-        link.left_as_source = <T as data::FuntyPart>::funty(0);
-        link.right_as_source = <T as data::FuntyPart>::funty(0);
-        link.size_as_source = <T as data::FuntyPart>::funty(0);
+        link.left_as_source = crate::funty::<T>(0);
+        link.right_as_source = crate::funty::<T>(0);
+        link.size_as_source = crate::funty::<T>(0);
     }
 }
 
@@ -114,7 +114,7 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
     handler: &mut H,
 ) -> Flow {
     unsafe {
-        if link == <T as data::FuntyPart>::funty(0) {
+        if link == crate::funty::<T>(0) {
             return Flow::Continue;
         }
         let link_base_part = this.get_base_part(link);
@@ -148,26 +148,26 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T>
         unsafe {
             let mut root = self.get_tree_root();
             let total = self.get_size(root);
-            let mut total_right_ignore = <T as data::FuntyPart>::funty(0);
-            while root != <T as data::FuntyPart>::funty(0) {
+            let mut total_right_ignore = crate::funty::<T>(0);
+            while root != crate::funty::<T>(0) {
                 let base = self.get_base_part(root);
                 if base <= link {
                     root = self.get_right_or_default(root);
                 } else {
                     total_right_ignore +=
-                        self.get_right_size(root) + <T as data::FuntyPart>::funty(1);
+                        self.get_right_size(root) + crate::funty::<T>(1);
                     root = self.get_left_or_default(root);
                 }
             }
             root = self.get_tree_root();
-            let mut total_left_ignore = <T as data::FuntyPart>::funty(0);
-            while root != <T as data::FuntyPart>::funty(0) {
+            let mut total_left_ignore = crate::funty::<T>(0);
+            while root != crate::funty::<T>(0) {
                 let base = self.get_base_part(root);
                 if base >= link {
                     root = self.get_left_or_default(root);
                 } else {
                     total_left_ignore +=
-                        self.get_left_size(root) + <T as data::FuntyPart>::funty(1);
+                        self.get_left_size(root) + crate::funty::<T>(1);
                     root = self.get_right_or_default(root);
                 }
             }
@@ -178,7 +178,7 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T>
     fn search(&self, source: T, target: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
-            while root != <T as data::FuntyPart>::funty(0) {
+            while root != crate::funty::<T>(0) {
                 let root_link = self.get_link(root);
                 let root_source = root_link.source;
                 let root_target = root_link.target;
@@ -195,7 +195,7 @@ impl<T: LinkType + crate::TreesLinkType> LinksTree<T>
                     return root;
                 }
             }
-            <T as data::FuntyPart>::funty(0)
+            crate::funty::<T>(0)
         }
     }
 

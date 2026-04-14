@@ -326,8 +326,8 @@ impl<
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == <T as data::FuntyPart>::funty(0)
-                && data.source != <T as data::FuntyPart>::funty(0)
+            index.size_as_target == crate::funty::<T>(0)
+                && data.source != crate::funty::<T>(0)
         } else {
             true
         }
@@ -362,7 +362,7 @@ impl<
         let query = query.to_query();
 
         if query.is_empty() {
-            let mut index = <T as data::FuntyPart>::funty(1);
+            let mut index = crate::funty::<T>(1);
             let allocated = self.get_header().allocated;
             while index <= allocated {
                 if let Some(link) = self.get_link(index) {
@@ -370,7 +370,7 @@ impl<
                         return Flow::Break;
                     }
                 }
-                index = index + <T as data::FuntyPart>::funty(1);
+                index = index + crate::funty::<T>(1);
             }
             return Flow::Continue;
         }
@@ -583,9 +583,9 @@ impl<
             return if index == any {
                 self.total()
             } else if self.exists(index) {
-                <T as data::FuntyPart>::funty(1)
+                crate::funty::<T>(1)
             } else {
-                <T as data::FuntyPart>::funty(0)
+                crate::funty::<T>(0)
             };
         }
 
@@ -607,15 +607,15 @@ impl<
                         + self.internal_targets.count_usages(value)
                 }
             } else if !self.exists(index) {
-                <T as data::FuntyPart>::funty(0)
+                crate::funty::<T>(0)
             } else if value == any {
-                <T as data::FuntyPart>::funty(1)
+                crate::funty::<T>(1)
             } else {
                 let stored = self.get_data_part(index);
                 if (stored.source, stored.target) == (value, value) {
-                    <T as data::FuntyPart>::funty(1)
+                    crate::funty::<T>(1)
                 } else {
-                    <T as data::FuntyPart>::funty(0)
+                    crate::funty::<T>(0)
                 }
             };
         }
@@ -673,37 +673,37 @@ impl<
                         self.internal_sources.search(source, target)
                     };
                     return if link == constants.null {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     } else {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     };
                 }
             } else if !self.exists(index) {
-                <T as data::FuntyPart>::funty(0)
+                crate::funty::<T>(0)
             } else if (source, target) == (any, any) {
-                <T as data::FuntyPart>::funty(1)
+                crate::funty::<T>(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else if source == any {
                     if link.target == target {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else if target == any {
                     if link.source == source {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else {
-                    <T as data::FuntyPart>::funty(0)
+                    crate::funty::<T>(0)
                 }
             };
         }
@@ -725,7 +725,7 @@ impl<
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            if header.allocated >= header.reserved - <T as data::FuntyPart>::funty(1) {
+            if header.allocated >= header.reserved - crate::funty::<T>(1) {
                 let new_data_cap = self.data_mem.allocated().len() + self.data_step;
                 let new_index_cap = self.index_mem.allocated().len() + self.index_step;
                 let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, new_data_cap)?);
@@ -737,7 +737,7 @@ impl<
                 header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
-            header.allocated += <T as data::FuntyPart>::funty(1);
+            header.allocated += crate::funty::<T>(1);
             free = header.allocated;
         } else {
             self.unused.detach(free);
@@ -749,8 +749,8 @@ impl<
             Link::nothing(),
             Link::new(
                 free,
-                <T as data::FuntyPart>::funty(0),
-                <T as data::FuntyPart>::funty(0),
+                crate::funty::<T>(0),
+                crate::funty::<T>(0),
             ),
         ))
     }
@@ -771,7 +771,7 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        if link.source != <T as data::FuntyPart>::funty(0) {
+        if link.source != crate::funty::<T>(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if self.is_virtual(link.source) {
@@ -785,7 +785,7 @@ impl<
             }
         }
 
-        if link.target != <T as data::FuntyPart>::funty(0) {
+        if link.target != crate::funty::<T>(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if self.is_virtual(link.target) {
@@ -803,7 +803,7 @@ impl<
         place.target = new_target;
         let place = place.clone();
 
-        if place.source != <T as data::FuntyPart>::funty(0) {
+        if place.source != crate::funty::<T>(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if virtual_source {
@@ -817,7 +817,7 @@ impl<
             }
         }
 
-        if place.target != <T as data::FuntyPart>::funty(0) {
+        if place.target != crate::funty::<T>(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if virtual_target {
@@ -843,8 +843,8 @@ impl<
 
         self.update(
             index,
-            <T as data::FuntyPart>::funty(0),
-            <T as data::FuntyPart>::funty(0),
+            crate::funty::<T>(0),
+            crate::funty::<T>(0),
         )?;
 
         // TODO: move to `delete_core`
@@ -856,16 +856,16 @@ impl<
             Ordering::Equal => {
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - <T as data::FuntyPart>::funty(1);
+                header.allocated = allocated - crate::funty::<T>(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated))
+                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated))
                     {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - <T as data::FuntyPart>::funty(1);
+                    self.mut_header().allocated = allocated - crate::funty::<T>(1);
                 }
             }
         }

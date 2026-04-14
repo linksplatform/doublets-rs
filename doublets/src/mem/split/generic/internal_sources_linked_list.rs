@@ -75,7 +75,7 @@ impl<T: LinkType + crate::TreesLinkType> InternalSourcesLinkedList<T> {
         let mut current = self.get_first(source);
         let first = current;
 
-        while current != <T as data::FuntyPart>::funty(0) {
+        while current != crate::funty::<T>(0) {
             if handler(self.get_link_value(current)).is_break() {
                 return Flow::Break;
             }
@@ -95,7 +95,7 @@ impl<T: LinkType + crate::TreesLinkType> RelativeLinkedList<T> for InternalSourc
 
     fn get_last(&self, head: T) -> T {
         let first = self.get_first(head);
-        if first == <T as data::FuntyPart>::funty(0) {
+        if first == crate::funty::<T>(0) {
             first
         } else {
             self.get_previous(first)

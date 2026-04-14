@@ -206,8 +206,8 @@ impl<
             // If the link is unused (that is, it was created but deleted),
             // its search tree size is 0,
             // its source and target will be used to build a LinkedList from similar links
-            link.size_as_source == <T as data::FuntyPart>::funty(0)
-                && link.source != <T as data::FuntyPart>::funty(0)
+            link.size_as_source == crate::funty::<T>(0)
+                && link.source != crate::funty::<T>(0)
         } else {
             true
         }
@@ -240,7 +240,7 @@ impl<
         let constants = self.constants();
 
         if query.is_empty() {
-            let mut index = <T as data::FuntyPart>::funty(1);
+            let mut index = crate::funty::<T>(1);
             let allocated = self.get_header().allocated;
             while index <= allocated {
                 if let Some(link) = self.get_link(index) {
@@ -248,7 +248,7 @@ impl<
                         return Flow::Break;
                     }
                 }
-                index = index + <T as data::FuntyPart>::funty(1);
+                index = index + crate::funty::<T>(1);
             }
             return Flow::Continue;
         }
@@ -360,9 +360,9 @@ impl<
             return if index == any {
                 self.get_total()
             } else if self.exists(index) {
-                <T as data::FuntyPart>::funty(1)
+                crate::funty::<T>(1)
             } else {
-                <T as data::FuntyPart>::funty(0)
+                crate::funty::<T>(0)
             };
         }
 
@@ -376,19 +376,19 @@ impl<
                 }
             } else {
                 if !self.exists(index) {
-                    return <T as data::FuntyPart>::funty(0);
+                    return crate::funty::<T>(0);
                 }
                 if value == any {
-                    return <T as data::FuntyPart>::funty(1);
+                    return crate::funty::<T>(1);
                 }
 
                 return self.get_link(index).map_or_else(
-                    || <T as data::FuntyPart>::funty(0),
+                    || crate::funty::<T>(0),
                     |stored| {
                         if stored.source == value || stored.target == value {
-                            <T as data::FuntyPart>::funty(1)
+                            crate::funty::<T>(1)
                         } else {
-                            <T as data::FuntyPart>::funty(0)
+                            crate::funty::<T>(0)
                         }
                     },
                 );
@@ -409,37 +409,37 @@ impl<
                 } else {
                     let link = self.sources.search(source, target);
                     if link == constants.null {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     } else {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     }
                 }
             } else if !self.exists(index) {
-                <T as data::FuntyPart>::funty(0)
+                crate::funty::<T>(0)
             } else if (source, target) == (any, any) {
-                <T as data::FuntyPart>::funty(1)
+                crate::funty::<T>(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else if source == any {
                     if link.target == target {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else if target == any {
                     if link.source == source {
-                        <T as data::FuntyPart>::funty(1)
+                        crate::funty::<T>(1)
                     } else {
-                        <T as data::FuntyPart>::funty(0)
+                        crate::funty::<T>(0)
                     }
                 } else {
-                    <T as data::FuntyPart>::funty(0)
+                    crate::funty::<T>(0)
                 }
             };
         }
@@ -460,7 +460,7 @@ impl<
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            if header.allocated >= header.reserved - <T as data::FuntyPart>::funty(1) {
+            if header.allocated >= header.reserved - crate::funty::<T>(1) {
                 let new_cap = self.mem.allocated().len() + self.reserve_step;
                 let mem = crate::mem::resize_mem(&mut self.mem, new_cap)?.leak();
                 self.update_mem(mem);
@@ -469,7 +469,7 @@ impl<
                 header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
-            header.allocated += <T as data::FuntyPart>::funty(1);
+            header.allocated += crate::funty::<T>(1);
             free = header.allocated;
         } else {
             self.unused.detach(free);
@@ -478,8 +478,8 @@ impl<
             Link::nothing(),
             Link::new(
                 free,
-                <T as data::FuntyPart>::funty(0),
-                <T as data::FuntyPart>::funty(0),
+                crate::funty::<T>(0),
+                crate::funty::<T>(0),
             ),
         ))
     }
@@ -502,14 +502,14 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        if link.source != <T as data::FuntyPart>::funty(0) {
+        if link.source != crate::funty::<T>(0) {
             // SAFETY: Here index detach from sources
             // by default source is zero
             unsafe {
                 self.detach_source(index);
             }
         }
-        if link.target != <T as data::FuntyPart>::funty(0) {
+        if link.target != crate::funty::<T>(0) {
             // SAFETY: Here index detach from targets
             // by default target is zero
             unsafe {
@@ -522,13 +522,13 @@ impl<
         place.target = target;
         let place = place.clone();
 
-        if place.source != <T as data::FuntyPart>::funty(0) {
+        if place.source != crate::funty::<T>(0) {
             // SAFETY: Here index attach to sources
             unsafe {
                 self.attach_source(index);
             }
         }
-        if place.target != <T as data::FuntyPart>::funty(0) {
+        if place.target != crate::funty::<T>(0) {
             // SAFETY: Here index attach to targets
             unsafe {
                 self.attach_target(index);
@@ -551,8 +551,8 @@ impl<
         let link = self.try_get_link(index)?;
         self.update(
             index,
-            <T as data::FuntyPart>::funty(0),
-            <T as data::FuntyPart>::funty(0),
+            crate::funty::<T>(0),
+            crate::funty::<T>(0),
         )?;
 
         let header = self.get_header();
@@ -561,16 +561,16 @@ impl<
             Ordering::Equal => {
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - <T as data::FuntyPart>::funty(1);
+                header.allocated = allocated - crate::funty::<T>(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > <T as data::FuntyPart>::funty(0) && self.is_unused(allocated))
+                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated))
                     {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - <T as data::FuntyPart>::funty(1);
+                    self.mut_header().allocated = allocated - crate::funty::<T>(1);
                 }
             }
             // fixme: possible unreachable_unchecked

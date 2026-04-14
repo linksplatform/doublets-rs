@@ -57,7 +57,7 @@ pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<
 
     fn search_core(&self, mut root: T, key: T) -> T {
         unsafe {
-            while root != <T as data::FuntyPart>::funty(0) {
+            while root != crate::funty::<T>(0) {
                 let root_key = self.get_key_part(root);
                 if key < root_key {
                     root = self.get_left_or_default(root);
@@ -67,7 +67,7 @@ pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<
                     return root;
                 }
             }
-            <T as data::FuntyPart>::funty(0)
+            crate::funty::<T>(0)
         }
     }
 

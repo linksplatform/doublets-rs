@@ -64,6 +64,10 @@
 pub mod data;
 pub mod mem;
 
+pub(crate) fn funty<T: data::LinkType>(n: u8) -> T {
+    T::try_from(n).expect("conversion from u8 should succeed for all unsigned types")
+}
+
 pub(crate) use trees::LinkType as TreesLinkType;
 
 pub use self::mem::{parts, split, unit};

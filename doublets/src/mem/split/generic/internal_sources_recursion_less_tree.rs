@@ -86,9 +86,9 @@ impl<T: LinkType + crate::TreesLinkType> RecursiveSizeBalancedTree<T>
 
     unsafe fn clear_node(&mut self, node: T) {
         let link = self.get_mut_index_part(node);
-        link.left_as_source = <T as data::FuntyPart>::funty(0);
-        link.right_as_source = <T as data::FuntyPart>::funty(0);
-        link.size_as_source = <T as data::FuntyPart>::funty(0);
+        link.left_as_source = crate::funty::<T>(0);
+        link.right_as_source = crate::funty::<T>(0);
+        link.size_as_source = crate::funty::<T>(0);
     }
 }
 
@@ -103,7 +103,7 @@ fn each_usages_core<T: LinkType + crate::TreesLinkType, H: FnMut(Link<T>) -> Flo
     link: T,
     handler: &mut H,
 ) -> Flow {
-    if link == <T as data::FuntyPart>::funty(0) {
+    if link == crate::funty::<T>(0) {
         return Flow::Continue;
     }
     unsafe {
