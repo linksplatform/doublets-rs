@@ -206,8 +206,7 @@ impl<
             // If the link is unused (that is, it was created but deleted),
             // its search tree size is 0,
             // its source and target will be used to build a LinkedList from similar links
-            link.size_as_source == crate::funty::<T>(0)
-                && link.source != crate::funty::<T>(0)
+            link.size_as_source == crate::funty::<T>(0) && link.source != crate::funty::<T>(0)
         } else {
             true
         }
@@ -476,11 +475,7 @@ impl<
         }
         Ok(handler(
             Link::nothing(),
-            Link::new(
-                free,
-                crate::funty::<T>(0),
-                crate::funty::<T>(0),
-            ),
+            Link::new(free, crate::funty::<T>(0), crate::funty::<T>(0)),
         ))
     }
 
@@ -549,11 +544,7 @@ impl<
         let index = query[0];
 
         let link = self.try_get_link(index)?;
-        self.update(
-            index,
-            crate::funty::<T>(0),
-            crate::funty::<T>(0),
-        )?;
+        self.update(index, crate::funty::<T>(0), crate::funty::<T>(0))?;
 
         let header = self.get_header();
         match index.cmp(&header.allocated) {
@@ -565,8 +556,7 @@ impl<
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated))
-                    {
+                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);

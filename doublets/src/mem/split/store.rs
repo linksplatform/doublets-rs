@@ -326,8 +326,7 @@ impl<
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == crate::funty::<T>(0)
-                && data.source != crate::funty::<T>(0)
+            index.size_as_target == crate::funty::<T>(0) && data.source != crate::funty::<T>(0)
         } else {
             true
         }
@@ -747,11 +746,7 @@ impl<
 
         Ok(handler(
             Link::nothing(),
-            Link::new(
-                free,
-                crate::funty::<T>(0),
-                crate::funty::<T>(0),
-            ),
+            Link::new(free, crate::funty::<T>(0), crate::funty::<T>(0)),
         ))
     }
 
@@ -841,11 +836,7 @@ impl<
 
         self.resolve_danglind_internal(index);
 
-        self.update(
-            index,
-            crate::funty::<T>(0),
-            crate::funty::<T>(0),
-        )?;
+        self.update(index, crate::funty::<T>(0), crate::funty::<T>(0))?;
 
         // TODO: move to `delete_core`
         let header = self.get_header();
@@ -860,8 +851,7 @@ impl<
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated))
-                    {
+                    if !(allocated > crate::funty::<T>(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);
