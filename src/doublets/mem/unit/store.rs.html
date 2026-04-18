@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `doublets/src/mem/unit/store.rs`."><title>store.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-77263533.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="doublets" data-themes="" data-resource-suffix="" data-rustdoc-version="1.94.1 (e408947bf 2026-03-25)" data-channel="1.94.1" data-search-js="search-9e2438ea.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-c38705f0.js" ><script src="../../../../static.files/storage-e2aeef58.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-7bab91a1.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-ffcac47a.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">doublets/mem/unit/</div>store.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>crate::{
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `doublets/src/mem/unit/store.rs`."><title>store.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-b7b9f40b.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="doublets" data-themes="" data-resource-suffix="" data-rustdoc-version="1.95.0 (59807616e 2026-04-14)" data-channel="1.95.0" data-search-js="search-63369b7b.js" data-stringdex-js="stringdex-b897f86f.js" data-settings-js="settings-170eb4bf.js" ><script src="../../../../static.files/storage-41dd4d93.js"></script><script defer src="../../../../static.files/src-script-813739b1.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><h1><div class="sub-heading">doublets/mem/unit/</div>store.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap digits-3"><pre class="rust"><code><a href=#1 id=1 data-nosnippet>1</a><span class="kw">use </span>crate::{
 <a href=#2 id=2 data-nosnippet>2</a>    mem::{
 <a href=#3 id=3 data-nosnippet>3</a>        header::LinksHeader,
 <a href=#4 id=4 data-nosnippet>4</a>        traits::UnitList,
@@ -204,13 +204,13 @@
 <a href=#204 id=204 data-nosnippet>204</a>
 <a href=#205 id=205 data-nosnippet>205</a>    <span class="kw">fn </span>is_unused(<span class="kw-2">&amp;</span><span class="self">self</span>, link: T) -&gt; bool {
 <a href=#206 id=206 data-nosnippet>206</a>        <span class="kw">let </span>header = <span class="self">self</span>.get_header();
-<a href=#207 id=207 data-nosnippet>207</a>        <span class="kw">if </span>link &lt;= header.allocated &amp;&amp; header.<span class="macro">first_free !</span>= link {
+<a href=#207 id=207 data-nosnippet>207</a>        <span class="kw">if </span>link &lt;= header.allocated &amp;&amp; header.first_free != link {
 <a href=#208 id=208 data-nosnippet>208</a>            <span class="comment">// SAFETY: link part memory is allocated
 <a href=#209 id=209 data-nosnippet>209</a>            </span><span class="kw">let </span>link = <span class="kw">unsafe </span>{ <span class="self">self</span>.get_link_part_unchecked(link) };
 <a href=#210 id=210 data-nosnippet>210</a>            <span class="comment">// If the link is unused (that is, it was created but deleted),
 <a href=#211 id=211 data-nosnippet>211</a>            // its search tree size is 0,
 <a href=#212 id=212 data-nosnippet>212</a>            // its source and target will be used to build a LinkedList from similar links
-<a href=#213 id=213 data-nosnippet>213</a>            </span>link.size_as_source == T::from_byte(<span class="number">0</span>) &amp;&amp; link.<span class="macro">source !</span>= T::from_byte(<span class="number">0</span>)
+<a href=#213 id=213 data-nosnippet>213</a>            </span>link.size_as_source == T::from_byte(<span class="number">0</span>) &amp;&amp; link.source != T::from_byte(<span class="number">0</span>)
 <a href=#214 id=214 data-nosnippet>214</a>        } <span class="kw">else </span>{
 <a href=#215 id=215 data-nosnippet>215</a>            <span class="bool-val">true
 <a href=#216 id=216 data-nosnippet>216</a>        </span>}
@@ -309,7 +309,7 @@
 <a href=#309 id=309 data-nosnippet>309</a>            } <span class="kw">else if let </span><span class="prelude-val">Some</span>(link) = <span class="self">self</span>.get_link(index) {
 <a href=#310 id=310 data-nosnippet>310</a>                <span class="kw">if </span>(target, source) == (any, any) {
 <a href=#311 id=311 data-nosnippet>311</a>                    handler(link) <span class="comment">// TODO: add (x * *) search test
-<a href=#312 id=312 data-nosnippet>312</a>                </span>} <span class="kw">else if </span><span class="macro">target !</span>= any &amp;&amp; <span class="macro">source !</span>= any {
+<a href=#312 id=312 data-nosnippet>312</a>                </span>} <span class="kw">else if </span>target != any &amp;&amp; source != any {
 <a href=#313 id=313 data-nosnippet>313</a>                    <span class="kw">if </span>(source, target) == (link.source, link.target) {
 <a href=#314 id=314 data-nosnippet>314</a>                        handler(link)
 <a href=#315 id=315 data-nosnippet>315</a>                    } <span class="kw">else </span>{
@@ -423,7 +423,7 @@
 <a href=#423 id=423 data-nosnippet>423</a>                T::from_byte(<span class="number">1</span>)
 <a href=#424 id=424 data-nosnippet>424</a>            } <span class="kw">else </span>{
 <a href=#425 id=425 data-nosnippet>425</a>                <span class="kw">let </span>link = <span class="kw">unsafe </span>{ <span class="self">self</span>.get_link_unchecked(index) };
-<a href=#426 id=426 data-nosnippet>426</a>                <span class="kw">if </span><span class="macro">source !</span>= any &amp;&amp; <span class="macro">target !</span>= any {
+<a href=#426 id=426 data-nosnippet>426</a>                <span class="kw">if </span>source != any &amp;&amp; target != any {
 <a href=#427 id=427 data-nosnippet>427</a>                    <span class="kw">if </span>(link.source, link.target) == (source, target) {
 <a href=#428 id=428 data-nosnippet>428</a>                        T::from_byte(<span class="number">1</span>)
 <a href=#429 id=429 data-nosnippet>429</a>                    } <span class="kw">else </span>{
@@ -501,14 +501,14 @@
 <a href=#501 id=501 data-nosnippet>501</a>
 <a href=#502 id=502 data-nosnippet>502</a>        <span class="kw">let </span>link = <span class="self">self</span>.try_get_link(index)<span class="question-mark">?</span>;
 <a href=#503 id=503 data-nosnippet>503</a>
-<a href=#504 id=504 data-nosnippet>504</a>        <span class="kw">if </span>link.<span class="macro">source !</span>= T::from_byte(<span class="number">0</span>) {
+<a href=#504 id=504 data-nosnippet>504</a>        <span class="kw">if </span>link.source != T::from_byte(<span class="number">0</span>) {
 <a href=#505 id=505 data-nosnippet>505</a>            <span class="comment">// SAFETY: Here index detach from sources
 <a href=#506 id=506 data-nosnippet>506</a>            // by default source is zero
 <a href=#507 id=507 data-nosnippet>507</a>            </span><span class="kw">unsafe </span>{
 <a href=#508 id=508 data-nosnippet>508</a>                <span class="self">self</span>.detach_source(index);
 <a href=#509 id=509 data-nosnippet>509</a>            }
 <a href=#510 id=510 data-nosnippet>510</a>        }
-<a href=#511 id=511 data-nosnippet>511</a>        <span class="kw">if </span>link.<span class="macro">target !</span>= T::from_byte(<span class="number">0</span>) {
+<a href=#511 id=511 data-nosnippet>511</a>        <span class="kw">if </span>link.target != T::from_byte(<span class="number">0</span>) {
 <a href=#512 id=512 data-nosnippet>512</a>            <span class="comment">// SAFETY: Here index detach from targets
 <a href=#513 id=513 data-nosnippet>513</a>            // by default target is zero
 <a href=#514 id=514 data-nosnippet>514</a>            </span><span class="kw">unsafe </span>{
@@ -521,13 +521,13 @@
 <a href=#521 id=521 data-nosnippet>521</a>        place.target = target;
 <a href=#522 id=522 data-nosnippet>522</a>        <span class="kw">let </span>place = place.clone();
 <a href=#523 id=523 data-nosnippet>523</a>
-<a href=#524 id=524 data-nosnippet>524</a>        <span class="kw">if </span>place.<span class="macro">source !</span>= T::from_byte(<span class="number">0</span>) {
+<a href=#524 id=524 data-nosnippet>524</a>        <span class="kw">if </span>place.source != T::from_byte(<span class="number">0</span>) {
 <a href=#525 id=525 data-nosnippet>525</a>            <span class="comment">// SAFETY: Here index attach to sources
 <a href=#526 id=526 data-nosnippet>526</a>            </span><span class="kw">unsafe </span>{
 <a href=#527 id=527 data-nosnippet>527</a>                <span class="self">self</span>.attach_source(index);
 <a href=#528 id=528 data-nosnippet>528</a>            }
 <a href=#529 id=529 data-nosnippet>529</a>        }
-<a href=#530 id=530 data-nosnippet>530</a>        <span class="kw">if </span>place.<span class="macro">target !</span>= T::from_byte(<span class="number">0</span>) {
+<a href=#530 id=530 data-nosnippet>530</a>        <span class="kw">if </span>place.target != T::from_byte(<span class="number">0</span>) {
 <a href=#531 id=531 data-nosnippet>531</a>            <span class="comment">// SAFETY: Here index attach to targets
 <a href=#532 id=532 data-nosnippet>532</a>            </span><span class="kw">unsafe </span>{
 <a href=#533 id=533 data-nosnippet>533</a>                <span class="self">self</span>.attach_target(index);
