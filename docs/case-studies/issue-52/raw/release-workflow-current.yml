@@ -171,9 +171,6 @@ jobs:
       - name: Check file size limit
         run: rust-script scripts/check-file-size.rs
 
-      - name: Check documentation badges
-        run: rust-script scripts/check-readme-badges.rs
-
   # Test runs independently of changelog check
   # === TEST ===
   test:

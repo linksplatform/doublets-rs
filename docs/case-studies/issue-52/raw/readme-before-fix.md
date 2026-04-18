@@ -1,6 +1,7 @@
 # Doublets
 
-[![CI/CD Pipeline](https://github.com/linksplatform/doublets-rs/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/linksplatform/doublets-rs/actions/workflows/release.yml?query=branch%3Amain)
+[![CI](https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg)](https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain)
+[![Benchmark](https://github.com/linksplatform/doublets-rs/workflows/Benchmark/badge.svg)](https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ABenchmark+branch%3Amain)
 [![Crates.io](https://img.shields.io/crates/v/doublets.svg)](https://crates.io/crates/doublets)
 [![License](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://github.com/linksplatform/doublets-rs/blob/main/LICENSE)
 
