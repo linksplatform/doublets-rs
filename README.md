@@ -34,14 +34,11 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.1.0-pre"
+doublets = "0.3.0"
 ```
 
-**Note:** This crate requires nightly Rust due to usage of experimental features.
-
-```bash
-rustup default nightly
-```
+This crate builds on stable Rust. The minimum supported Rust version is 1.85,
+as configured by `doublets/Cargo.toml`.
 
 ## Example
 
@@ -200,10 +197,6 @@ doublets-rs/
 │   │       └── split/  # Split storage implementation
 │   └── benches/        # Performance benchmarks
 ├── doublets-ffi/       # C FFI bindings
-├── dev-deps/           # Platform dependencies
-│   ├── data-rs/        # Data primitives (LinkType, Flow, etc.)
-│   ├── mem-rs/         # Memory abstractions (RawMem, FileMapped)
-│   └── trees-rs/       # Tree structures (size-balanced trees)
 └── integration/        # Integration tests
 ```
 
@@ -246,9 +239,10 @@ cargo bench --all-features
 
 ## Dependencies
 
-- [platform-data](https://github.com/linksplatform/data-rs) - Core data types
-- [platform-mem](https://github.com/linksplatform/mem-rs) - Memory abstractions
-- [platform-trees](https://github.com/linksplatform/trees-rs) - Tree implementations
+- [platform-num](https://crates.io/crates/platform-num) - Link reference numeric traits
+- [platform-data](https://crates.io/crates/platform-data) - Core data types
+- [platform-mem](https://crates.io/crates/platform-mem) - Memory abstractions
+- [platform-trees](https://crates.io/crates/platform-trees) - Tree implementations
 
 ## Support
 

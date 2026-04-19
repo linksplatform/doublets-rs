@@ -20,10 +20,11 @@ Thank you for your interest in contributing! This document provides guidelines a
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
-   The project uses a specific nightly toolchain configured in `rust-toolchain.toml`:
+   The project uses the stable Rust toolchain configured in `rust-toolchain.toml`:
+
    ```toml
    [toolchain]
-   channel = "nightly-2022-08-22"
+   channel = "stable"
    ```
 
 3. **Install development tools**
@@ -262,7 +263,6 @@ Fragments are automatically collected into CHANGELOG.md during the release proce
 ├── changelog.d/          # Changelog fragments
 │   └── README.md         # Fragment instructions
 ├── ci/                   # CI scripts
-├── dev-deps/             # Development dependencies (git submodules)
 ├── doublets/             # Main doublets library
 │   ├── src/              # Source code
 │   ├── tests/            # Integration tests
