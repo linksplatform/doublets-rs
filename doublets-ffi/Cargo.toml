@@ -2,6 +2,15 @@
 name = "doublets-ffi"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "uselessgoddess",
+    "Linksplatform Team <linksplatformtechnologies@gmail.com>"
+]
+license = "Unlicense"
+repository = "https://github.com/linksplatform/doublets-rs"
+homepage = "https://github.com/linksplatform/doublets-rs"
+description = "FFI bindings for the doublets library"
+readme = "../README.md"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]

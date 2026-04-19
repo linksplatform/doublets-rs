@@ -1,15 +1,21 @@
-// Nightly features are only enabled when the "nightly" feature is active
-#![cfg_attr(feature = "nightly", feature(fn_traits))]
-#![cfg_attr(feature = "nightly", feature(generators))]
-#![cfg_attr(feature = "nightly", feature(try_trait_v2))]
-#![cfg_attr(feature = "nightly", feature(default_free_fn))]
-#![cfg_attr(feature = "nightly", feature(unboxed_closures))]
-#![cfg_attr(feature = "nightly", feature(nonnull_slice_from_raw_parts))]
-#![cfg_attr(feature = "nightly", feature(associated_type_defaults))]
-#![cfg_attr(feature = "nightly", feature(type_alias_impl_trait))]
-#![cfg_attr(feature = "nightly", feature(maybe_uninit_uninit_array))]
-#![cfg_attr(feature = "nightly", feature(allocator_api))]
-#![cfg_attr(feature = "nightly", feature(maybe_uninit_array_assume_init))]
+//! A doublets graph database library for working with associative link structures.
+//!
+//! Doublets stores data as a graph of typed links, each represented as a triple
+//! `(index, source, target)`. Two store implementations are provided:
+//!
+//! - [`unit::Store`] — a single-memory store for smaller graphs.
+//! - [`split::Store`] — a two-memory (data + index) store that separates link
+//!   data from tree-index metadata for larger graphs.
+//!
+//! # Quick start
+//!
+//! ```rust,ignore
+//! use doublets::{unit, Doublets, DoubletsExt};
+//! use mem::FileMapped;
+//!
+//! let store = unit::Store::<u64, _>::new(FileMapped::from_path("db.links")?)?;
+//! ```
+
 #![cfg_attr(not(test), forbid(clippy::unwrap_used))]
 #![warn(
     clippy::perf,
@@ -55,27 +61,28 @@
     nonstandard_style,
 )]
 // must be fixed later
-#![allow(clippy::needless_pass_by_value, clippy::comparison_chain)]
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::comparison_chain,
+    clippy::transmute_ptr_to_ptr,
+    clippy::ref_as_ptr,
+    clippy::borrow_as_ptr,
+    clippy::missing_const_for_fn,
+    clippy::needless_pass_by_ref_mut,
+    clippy::non_send_fields_in_send_ty,
+    clippy::too_many_lines,
+    clippy::redundant_pub_crate,
+    clippy::implied_bounds_in_impls,
+    clippy::only_used_in_recursion,
+    clippy::option_if_let_else,
+    clippy::assign_op_pattern,
+    dead_code
+)]
 
-// Full functionality with nightly features and platform dependencies  
-#[cfg(all(feature = "data", feature = "mem"))]
 pub mod data;
-
-#[cfg(all(feature = "data", feature = "mem"))]
 pub mod mem;
 
-#[cfg(all(feature = "data", feature = "mem"))]
 pub use self::mem::{parts, split, unit};
 
-#[cfg(all(feature = "data", feature = "mem"))]
-pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Handler, Link, Links};
-
-#[cfg(all(feature = "data", feature = "mem"))]
+pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
-
-// Stable Rust functionality - minimal but working
-#[cfg(not(all(feature = "data", feature = "mem")))]
-pub mod stable_lib;
-
-#[cfg(not(all(feature = "data", feature = "mem")))]
-pub use stable_lib::{StableDoublets, StableError, StableLink, StableMemoryStore};

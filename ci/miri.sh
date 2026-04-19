@@ -4,9 +4,11 @@ set -e
 MIRI_NIGHTLY=nightly-$(curl -s https://rust-lang.github.io/rustup-components-history/x86_64-unknown-linux-gnu/miri)
 echo "Installing latest nightly with Miri: $MIRI_NIGHTLY"
 rustup set profile minimal
-rustup default "$MIRI_NIGHTLY"
+rustup toolchain install "$MIRI_NIGHTLY" --component miri
 
-rustup component add miri
-cargo miri setup
+# Use +toolchain syntax to override rust-toolchain.toml which pins to an older nightly
+echo "Running Miri setup..."
+cargo +"$MIRI_NIGHTLY" miri setup
 
-MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo miri test --all-features --package doublets
+echo "Running Miri tests..."
+MIRIFLAGS="-Zmiri-disable-stacked-borrows" cargo +"$MIRI_NIGHTLY" miri test --all-features --package doublets

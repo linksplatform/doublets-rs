@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp::Ordering, mem::transmute, ptr::NonNull};
 
 use crate::{
     mem::{
@@ -7,18 +7,23 @@ use crate::{
             IndexPart, InternalSourcesLinkedList, InternalSourcesRecursionlessTree,
             InternalTargetsRecursionlessTree, UnusedLinks,
         },
-        LinksHeader, LinksTree, SplitList, SplitTree, SplitUpdateMem,
+        LinksHeader, SplitList, SplitTree, SplitUpdateMem,
     },
     Doublets, DoubletsExt, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, LinkType, LinksConstants, ToQuery};
-use mem::{RawMem, DEFAULT_PAGE_SIZE};
-use trees::RelativeCircularLinkedList;
+use data::{Flow, LinkReference, LinksConstants, ToQuery};
+use mem::RawMem;
 
+const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
+
+/// A split-memory doublets store that keeps link data and index metadata in separate regions.
+///
+/// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
+/// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
 pub struct Store<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
+    T: LinkReference,
+    MD: RawMem<Item = DataPart<T>>,
+    MI: RawMem<Item = IndexPart<T>>,
     IS: SplitTree<T> = InternalSourcesRecursionlessTree<T>,
     ES: SplitTree<T> = ExternalSourcesRecursionlessTree<T>,
     IT: SplitTree<T> = InternalTargetsRecursionlessTree<T>,
@@ -46,15 +51,15 @@ pub struct Store<
 }
 
 impl<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     const USE_LIST: bool = false;
     #[cfg(not(miri))]
@@ -63,6 +68,7 @@ impl<
     const SIZE_STEP: usize = 2_usize.pow(10);
 
     // TODO: create Options
+    /// Creates a split store with the given data memory, index memory, and `constants`.
     pub fn with_constants(
         data_mem: MD,
         index_mem: MI,
@@ -108,8 +114,9 @@ impl<
         Ok(new)
     }
 
+    /// Creates a split store using the given memories and default [`LinksConstants`].
     pub fn new(data_mem: MD, index_mem: MI) -> Result<Store<T, MD, MI>, LinksError<T>> {
-        Self::with_constants(data_mem, index_mem, default())
+        Self::with_constants(data_mem, index_mem, LinksConstants::default())
     }
 
     fn mut_from_mem<'a, U>(mut ptr: NonNull<[U]>, index: usize) -> Option<&'a mut U> {
@@ -146,27 +153,27 @@ impl<
         }
     }
 
+    /// Returns the raw data part (source/target) for the link at `index`.
     pub fn get_data_part(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::get_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
     unsafe fn get_data_unchecked(&self, index: T) -> &DataPart<T> {
-        Self::get_from_mem(self.data_ptr, index.as_usize()).unwrap_unchecked()
+        Self::get_from_mem(self.data_ptr, index.as_()).unwrap_unchecked()
     }
 
     fn mut_data_part(&mut self, index: T) -> &mut DataPart<T> {
-        Self::mut_from_mem(self.data_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::mut_from_mem(self.data_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
+    /// Returns the raw index part (tree metadata) for the link at `index`.
     pub fn get_index_part(&self, index: T) -> &IndexPart<T> {
-        Self::get_from_mem(self.index_ptr, index.as_usize())
+        Self::get_from_mem(self.index_ptr, index.as_())
             .expect("Index part should be in index memory")
     }
 
     fn mut_index_part(&mut self, index: T) -> &mut IndexPart<T> {
-        Self::mut_from_mem(self.index_ptr, index.as_usize())
+        Self::mut_from_mem(self.index_ptr, index.as_())
             .expect("Index part should be in index memory")
     }
 
@@ -281,29 +288,36 @@ impl<
     }
 
     unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
-        let data = NonNull::from(self.data_mem.alloc(DEFAULT_PAGE_SIZE)?);
-        let index = NonNull::from(self.index_mem.alloc(DEFAULT_PAGE_SIZE)?);
+        let data = NonNull::from(crate::mem::resize_mem(
+            &mut self.data_mem,
+            DEFAULT_PAGE_SIZE,
+        )?);
+        let index = NonNull::from(crate::mem::resize_mem(
+            &mut self.index_mem,
+            DEFAULT_PAGE_SIZE,
+        )?);
         self.update_mem(data, index);
 
         let header = self.get_header().clone();
-        let allocated = header.allocated.as_usize();
+        let allocated = header.allocated.as_();
 
         let mut data_capacity = allocated;
-        data_capacity = data_capacity.max(self.data_mem.allocated());
+        data_capacity = data_capacity.max(self.data_mem.allocated().len());
         data_capacity = data_capacity.max(self.data_step);
 
         let mut index_capacity = allocated;
-        index_capacity = index_capacity.max(self.index_mem.allocated());
+        index_capacity = index_capacity.max(self.index_mem.allocated().len());
         index_capacity = index_capacity.max(self.index_step);
 
         data_capacity = Self::align(data_capacity, self.data_step);
         index_capacity = Self::align(index_capacity, self.index_step);
 
-        let data = NonNull::from(self.data_mem.alloc(data_capacity)?);
-        let index = NonNull::from(self.index_mem.alloc(index_capacity)?);
+        let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, data_capacity)?);
+        let index = NonNull::from(crate::mem::resize_mem(&mut self.index_mem, index_capacity)?);
         self.update_mem(data, index);
 
-        self.mut_header().reserved = T::try_from(self.data_mem.allocated() - 1).expect("always ok");
+        self.mut_header().reserved =
+            T::try_from(self.data_mem.allocated().len() - 1).expect("always ok");
         Ok(())
     }
 
@@ -312,13 +326,14 @@ impl<
         header.allocated - header.free
     }
 
+    /// Returns `true` if the slot at `link` is in the free-list (deleted but not yet reused).
     pub fn is_unused(&self, link: T) -> bool {
         let header = self.get_header();
         if link <= header.allocated && header.first_free != link {
             // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == T::funty(0) && data.source != T::funty(0)
+            index.size_as_target == T::from_byte(0) && data.source != T::from_byte(0)
         } else {
             true
         }
@@ -326,10 +341,12 @@ impl<
 
     //fn is_non_
 
+    /// Returns `true` if `link` is a virtual (external/unused) reference.
     pub fn is_virtual(&self, link: T) -> bool {
         self.is_unused(link)
     }
 
+    /// Returns `true` if `link` is an allocated, non-deleted internal link.
     pub fn exists(&self, link: T) -> bool {
         let constants = self.constants();
         let header = self.get_header();
@@ -353,17 +370,22 @@ impl<
         let query = query.to_query();
 
         if query.is_empty() {
-            for index in T::funty(1)..=self.get_header().allocated {
+            let mut index = T::from_byte(1);
+            let allocated = self.get_header().allocated;
+            while index <= allocated {
                 if let Some(link) = self.get_link(index) {
-                    handler(link)?;
+                    if handler(link).is_break() {
+                        return Flow::Break;
+                    }
                 }
+                index = index + T::from_byte(1);
             }
             return Flow::Continue;
         }
 
         let constants = self.constants.clone();
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
         if query.len() == 1 {
             return if index == any {
                 self.try_each_by_core(handler, &[])
@@ -380,7 +402,12 @@ impl<
                 if value == any {
                     self.try_each_by_core(handler, &[])
                 } else {
-                    self.try_each_by_core(handler, &[index, value, any])?;
+                    if self
+                        .try_each_by_core(handler, &[index, value, any])
+                        .is_break()
+                    {
+                        return Flow::Break;
+                    }
                     self.try_each_by_core(handler, &[index, any, value])
                 }
             } else if let Some(link) = self.get_link(index) {
@@ -395,8 +422,8 @@ impl<
         }
         //
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
 
@@ -486,21 +513,23 @@ impl<
 
     fn resolve_danglind_internal(&mut self, index: T) {
         let any = self.constants.any;
-        for link in self
+        let links: Vec<_> = self
             .each_iter([any, index, any])
             .filter(|link| link.index != index)
-        {
+            .collect();
+        for link in links {
             unsafe {
                 self.detach_internal_source(index, link.index);
                 self.attach_external_source(link.index);
             }
         }
 
-        for link in self
+        let links: Vec<_> = self
             .each_iter([any, any, index])
             .filter(|link| link.index != index)
             .filter(|link| !link.is_full())
-        {
+            .collect();
+        for link in links {
             unsafe {
                 self.detach_internal_target(index, link.index);
                 self.attach_external_target(link.index);
@@ -510,21 +539,23 @@ impl<
 
     fn resolve_danglind_external(&mut self, free: T) {
         let any = self.constants().any;
-        for link in self
+        let links: Vec<_> = self
             .each_iter([any, free, any])
             .filter(|link| link.index != free)
-        {
+            .collect();
+        for link in links {
             unsafe {
                 self.detach_external_source(link.index);
                 self.attach_internal_source(free, link.index);
             }
         }
 
-        for link in self
+        let links: Vec<_> = self
             .each_iter([any, any, free])
             .filter(|link| link.index != free)
             .filter(|link| !link.is_full())
-        {
+            .collect();
+        for link in links {
             unsafe {
                 self.detach_external_target(link.index);
                 self.attach_internal_target(free, link.index);
@@ -534,15 +565,15 @@ impl<
 }
 
 impl<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -555,14 +586,14 @@ impl<
 
         let constants = self.constants();
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
         if query.len() == 1 {
             return if index == any {
                 self.total()
             } else if self.exists(index) {
-                T::funty(1)
+                T::from_byte(1)
             } else {
-                T::funty(0)
+                T::from_byte(0)
             };
         }
 
@@ -584,22 +615,22 @@ impl<
                         + self.internal_targets.count_usages(value)
                 }
             } else if !self.exists(index) {
-                T::funty(0)
+                T::from_byte(0)
             } else if value == any {
-                T::funty(1)
+                T::from_byte(1)
             } else {
                 let stored = self.get_data_part(index);
                 if (stored.source, stored.target) == (value, value) {
-                    T::funty(1)
+                    T::from_byte(1)
                 } else {
-                    T::funty(0)
+                    T::from_byte(0)
                 }
             };
         }
 
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
 
             let is_virtual_source = self.is_virtual(source);
             let is_virtual_target = self.is_virtual(target);
@@ -650,37 +681,37 @@ impl<
                         self.internal_sources.search(source, target)
                     };
                     return if link == constants.null {
-                        T::funty(0)
+                        T::from_byte(0)
                     } else {
-                        T::funty(1)
+                        T::from_byte(1)
                     };
                 }
             } else if !self.exists(index) {
-                T::funty(0)
+                T::from_byte(0)
             } else if (source, target) == (any, any) {
-                T::funty(1)
+                T::from_byte(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else if source == any {
                     if link.target == target {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else if target == any {
                     if link.source == source {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else {
-                    T::funty(0)
+                    T::from_byte(0)
                 }
             };
         }
@@ -702,24 +733,19 @@ impl<
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            if header.allocated >= header.reserved - T::funty(1) {
-                let data = NonNull::from(
-                    self.data_mem
-                        .alloc(self.data_mem.allocated() + self.data_step)?,
-                );
-                let index = NonNull::from(
-                    self.index_mem
-                        .alloc(self.index_mem.allocated() + self.index_step)?,
-                );
+            if header.allocated >= header.reserved - T::from_byte(1) {
+                let new_data_cap = self.data_mem.allocated().len() + self.data_step;
+                let new_index_cap = self.index_mem.allocated().len() + self.index_step;
+                let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, new_data_cap)?);
+                let index =
+                    NonNull::from(crate::mem::resize_mem(&mut self.index_mem, new_index_cap)?);
                 self.update_mem(data, index);
-                // let reserved = self.data_mem.allocated();
-                let reserved = self.index_mem.allocated();
+                let reserved = self.index_mem.allocated().len();
                 let header = self.mut_header();
-                // header.reserved = T::try_from(reserved / Self::DATA_SIZE).unwrap()
                 header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
-            header.allocated += T::funty(1);
+            header.allocated = header.allocated + T::from_byte(1);
             free = header.allocated;
         } else {
             self.unused.detach(free);
@@ -729,7 +755,7 @@ impl<
 
         Ok(handler(
             Link::nothing(),
-            Link::new(free, T::funty(0), T::funty(0)),
+            Link::new(free, T::from_byte(0), T::from_byte(0)),
         ))
     }
 
@@ -749,7 +775,7 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        if link.source != T::funty(0) {
+        if link.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if self.is_virtual(link.source) {
@@ -763,7 +789,7 @@ impl<
             }
         }
 
-        if link.target != T::funty(0) {
+        if link.target != T::from_byte(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if self.is_virtual(link.target) {
@@ -781,7 +807,7 @@ impl<
         place.target = new_target;
         let place = place.clone();
 
-        if place.source != T::funty(0) {
+        if place.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
             unsafe {
                 if virtual_source {
@@ -795,7 +821,7 @@ impl<
             }
         }
 
-        if place.target != T::funty(0) {
+        if place.target != T::from_byte(0) {
             // SAFETY: Here index attach to target
             unsafe {
                 if virtual_target {
@@ -819,7 +845,7 @@ impl<
 
         self.resolve_danglind_internal(index);
 
-        self.update(index, T::funty(0), T::funty(0))?;
+        self.update(index, T::from_byte(0), T::from_byte(0))?;
 
         // TODO: move to `delete_core`
         let header = self.get_header();
@@ -830,15 +856,15 @@ impl<
             Ordering::Equal => {
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - T::funty(1);
+                header.allocated = allocated - T::from_byte(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > T::funty(0) && self.is_unused(allocated)) {
+                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::funty(1);
+                    self.mut_header().allocated = allocated - T::from_byte(1);
                 }
             }
         }
@@ -850,15 +876,15 @@ impl<
 }
 
 impl<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         if self.exists(index) {
@@ -870,27 +896,27 @@ impl<
 }
 
 unsafe impl<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Sync for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Sync for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
 }
 
 unsafe impl<
-    T: LinkType,
-    MD: RawMem<DataPart<T>>,
-    MI: RawMem<IndexPart<T>>,
-    IS: SplitTree<T>,
-    ES: SplitTree<T>,
-    IT: SplitTree<T>,
-    ET: SplitTree<T>,
-    UL: SplitList<T>,
-> Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
 }

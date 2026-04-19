@@ -10,15 +10,21 @@ use crate::{
     },
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
-use data::{Flow, LinkType, LinksConstants, ToQuery};
+use data::{Flow, LinkReference, LinksConstants, ToQuery};
 use leak_slice::LeakSliceExt;
-use mem::{RawMem, DEFAULT_PAGE_SIZE};
+use mem::RawMem;
 
-use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
+use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 
+const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
+
+/// A single-memory doublets store backed by a size-balanced search tree.
+///
+/// All link data and tree-index metadata are stored in one contiguous `RawMem` region.
+/// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
 pub struct Store<
-    T: LinkType,
-    M: RawMem<LinkPart<T>>,
+    T: LinkReference,
+    M: RawMem<Item = LinkPart<T>>,
     TS: UnitTree<T> = LinksSourcesRecursionlessSizeBalancedTree<T>,
     TT: UnitTree<T> = LinksTargetsRecursionlessSizeBalancedTree<T>,
     TU: UnitList<T> = UnusedLinks<T>,
@@ -33,18 +39,25 @@ pub struct Store<
     unused: TU,
 }
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Store<T, M, TS, TT, TU>
+impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Store<T, M, TS, TT, TU>
 {
     #[cfg(not(miri))]
     const SIZE_STEP: usize = 2_usize.pow(20);
     #[cfg(miri)]
     const SIZE_STEP: usize = 2_usize.pow(10);
 
+    /// Creates a store using the given memory and default [`LinksConstants`].
     pub fn new(mem: M) -> Result<Store<T, M>, LinksError<T>> {
         Self::with_constants(mem, LinksConstants::new())
     }
 
+    /// Creates a store using the given memory and custom `constants`.
     pub fn with_constants(
         mem: M,
         constants: LinksConstants<T>,
@@ -79,15 +92,15 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
-        let mem = NonNull::from(self.mem.alloc(DEFAULT_PAGE_SIZE)?);
+        let mem = NonNull::from(crate::mem::resize_mem(&mut self.mem, DEFAULT_PAGE_SIZE)?);
         self.update_mem(mem);
 
         let header = self.get_header().clone();
-        let capacity = cmp::max(self.reserve_step, header.allocated.as_usize());
-        let mem = self.mem.alloc(capacity)?.leak();
+        let capacity = cmp::max(self.reserve_step, header.allocated.as_());
+        let mem = crate::mem::resize_mem(&mut self.mem, capacity)?.leak();
         self.update_mem(mem);
 
-        let reserved = self.mem.allocated();
+        let reserved = self.mem.allocated().len();
 
         let header = self.mut_header();
         header.reserved = T::try_from(reserved - 1).expect("always ok");
@@ -129,17 +142,15 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 
     fn get_link_part(&self, index: T) -> &LinkPart<T> {
-        Self::get_from_mem(self.mem_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::get_from_mem(self.mem_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
     unsafe fn get_link_part_unchecked(&self, index: T) -> &LinkPart<T> {
-        Self::get_from_mem(self.mem_ptr, index.as_usize()).unwrap_unchecked()
+        Self::get_from_mem(self.mem_ptr, index.as_()).unwrap_unchecked()
     }
 
     fn mut_link_part(&mut self, index: T) -> &mut LinkPart<T> {
-        Self::mut_from_mem(self.mem_ptr, index.as_usize())
-            .expect("Data part should be in data memory")
+        Self::mut_from_mem(self.mem_ptr, index.as_()).expect("Data part should be in data memory")
     }
 
     unsafe fn mut_source_root(&mut self) -> *mut T {
@@ -199,7 +210,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
             // If the link is unused (that is, it was created but deleted),
             // its search tree size is 0,
             // its source and target will be used to build a LinkedList from similar links
-            link.size_as_source == T::funty(0) && link.source != T::funty(0)
+            link.size_as_source == T::from_byte(0) && link.source != T::from_byte(0)
         } else {
             true
         }
@@ -232,16 +243,21 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         let constants = self.constants();
 
         if query.is_empty() {
-            for index in T::funty(1)..=self.get_header().allocated {
+            let mut index = T::from_byte(1);
+            let allocated = self.get_header().allocated;
+            while index <= allocated {
                 if let Some(link) = self.get_link(index) {
-                    handler(link)?;
+                    if handler(link).is_break() {
+                        return Flow::Break;
+                    }
                 }
+                index = index + T::from_byte(1);
             }
             return Flow::Continue;
         }
 
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
 
         if query.len() == 1 {
             return if index == any {
@@ -259,7 +275,9 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 if value == any {
                     self.each_core(handler, &[])
                 } else {
-                    self.each_core(handler, &[index, value, any])?;
+                    if self.each_core(handler, &[index, value, any]).is_break() {
+                        return Flow::Break;
+                    }
                     self.each_core(handler, &[index, any, value])
                 }
             } else if let Some(link) = self.get_link(index) {
@@ -274,8 +292,8 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         }
 
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
 
             return if index == any {
                 if (source, target) == (any, any) {
@@ -320,8 +338,13 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 }
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Links<T> for Store<T, M, TS, TT, TU>
+impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Links<T> for Store<T, M, TS, TT, TU>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -330,19 +353,19 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     fn count_links(&self, query: &[T]) -> T {
         if query.is_empty() {
             return self.get_total();
-        };
+        }
 
         let constants = self.constants();
         let any = constants.any;
-        let index = query[constants.index_part.as_usize()];
+        let index = query[constants.index_part.as_()];
 
         if query.len() == 1 {
             return if index == any {
                 self.get_total()
             } else if self.exists(index) {
-                T::funty(1)
+                T::from_byte(1)
             } else {
-                T::funty(0)
+                T::from_byte(0)
             };
         }
 
@@ -356,19 +379,19 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 }
             } else {
                 if !self.exists(index) {
-                    return T::funty(0);
+                    return T::from_byte(0);
                 }
                 if value == any {
-                    return T::funty(1);
+                    return T::from_byte(1);
                 }
 
                 return self.get_link(index).map_or_else(
-                    || T::funty(0),
+                    || T::from_byte(0),
                     |stored| {
                         if stored.source == value || stored.target == value {
-                            T::funty(1)
+                            T::from_byte(1)
                         } else {
-                            T::funty(0)
+                            T::from_byte(0)
                         }
                     },
                 );
@@ -376,8 +399,8 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         }
 
         if query.len() == 3 {
-            let source = query[constants.source_part.as_usize()];
-            let target = query[constants.target_part.as_usize()];
+            let source = query[constants.source_part.as_()];
+            let target = query[constants.target_part.as_()];
 
             return if index == any {
                 if (target, source) == (any, any) {
@@ -389,37 +412,37 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 } else {
                     let link = self.sources.search(source, target);
                     if link == constants.null {
-                        T::funty(0)
+                        T::from_byte(0)
                     } else {
-                        T::funty(1)
+                        T::from_byte(1)
                     }
                 }
             } else if !self.exists(index) {
-                T::funty(0)
+                T::from_byte(0)
             } else if (source, target) == (any, any) {
-                T::funty(1)
+                T::from_byte(1)
             } else {
                 let link = unsafe { self.get_link_unchecked(index) };
                 if source != any && target != any {
                     if (link.source, link.target) == (source, target) {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else if source == any {
                     if link.target == target {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else if target == any {
                     if link.source == source {
-                        T::funty(1)
+                        T::from_byte(1)
                     } else {
-                        T::funty(0)
+                        T::from_byte(0)
                     }
                 } else {
-                    T::funty(0)
+                    T::from_byte(0)
                 }
             };
         }
@@ -440,25 +463,23 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
                 return Err(LinksError::LimitReached(max_inner));
             }
 
-            if header.allocated >= header.reserved - T::funty(1) {
-                let mem = self
-                    .mem
-                    .alloc(self.mem.allocated() + self.reserve_step)?
-                    .leak();
+            if header.allocated >= header.reserved - T::from_byte(1) {
+                let new_cap = self.mem.allocated().len() + self.reserve_step;
+                let mem = crate::mem::resize_mem(&mut self.mem, new_cap)?.leak();
                 self.update_mem(mem);
-                let reserved = self.mem.allocated();
+                let reserved = self.mem.allocated().len();
                 let header = self.mut_header();
                 header.reserved = T::try_from(reserved).expect("always ok");
             }
             let header = self.mut_header();
-            header.allocated += T::funty(1);
+            header.allocated = header.allocated + T::from_byte(1);
             free = header.allocated;
         } else {
             self.unused.detach(free);
         }
         Ok(handler(
             Link::nothing(),
-            Link::new(free, T::funty(0), T::funty(0)),
+            Link::new(free, T::from_byte(0), T::from_byte(0)),
         ))
     }
 
@@ -480,14 +501,14 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 
         let link = self.try_get_link(index)?;
 
-        if link.source != T::funty(0) {
+        if link.source != T::from_byte(0) {
             // SAFETY: Here index detach from sources
             // by default source is zero
             unsafe {
                 self.detach_source(index);
             }
         }
-        if link.target != T::funty(0) {
+        if link.target != T::from_byte(0) {
             // SAFETY: Here index detach from targets
             // by default target is zero
             unsafe {
@@ -500,13 +521,13 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         place.target = target;
         let place = place.clone();
 
-        if place.source != T::funty(0) {
+        if place.source != T::from_byte(0) {
             // SAFETY: Here index attach to sources
             unsafe {
                 self.attach_source(index);
             }
         }
-        if place.target != T::funty(0) {
+        if place.target != T::from_byte(0) {
             // SAFETY: Here index attach to targets
             unsafe {
                 self.attach_target(index);
@@ -527,7 +548,7 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
         let index = query[0];
 
         let link = self.try_get_link(index)?;
-        self.update(index, T::funty(0), T::funty(0))?;
+        self.update(index, T::from_byte(0), T::from_byte(0))?;
 
         let header = self.get_header();
         match index.cmp(&header.allocated) {
@@ -535,15 +556,15 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
             Ordering::Equal => {
                 let allocated = self.get_header().allocated;
                 let header = self.mut_header();
-                header.allocated = allocated - T::funty(1);
+                header.allocated = allocated - T::from_byte(1);
 
                 loop {
                     let allocated = self.get_header().allocated;
-                    if !(allocated > T::funty(0) && self.is_unused(allocated)) {
+                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
                         break;
                     }
                     self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::funty(1);
+                    self.mut_header().allocated = allocated - T::from_byte(1);
                 }
             }
             // fixme: possible unreachable_unchecked
@@ -554,8 +575,13 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
     }
 }
 
-impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Doublets<T> for Store<T, M, TS, TT, TU>
+impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Doublets<T> for Store<T, M, TS, TT, TU>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         if self.exists(index) {
@@ -568,13 +594,23 @@ impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: 
 }
 
 // SAFETY: No read operations result in a write
-unsafe impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Sync for Store<T, M, TS, TT, TU>
+unsafe impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Sync for Store<T, M, TS, TT, TU>
 {
 }
 
 // SAFETY: All data is moved together with the `Store`
-unsafe impl<T: LinkType, M: RawMem<LinkPart<T>>, TS: UnitTree<T>, TT: UnitTree<T>, TU: UnitList<T>>
-    Send for Store<T, M, TS, TT, TU>
+unsafe impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > Send for Store<T, M, TS, TT, TU>
 {
 }
