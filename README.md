@@ -34,13 +34,16 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.1.0-pre"
+doublets = "0.3.0"
 ```
 
-**Note:** This crate requires nightly Rust due to usage of experimental features.
+Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
+stable channel, and the crate declares `rust-version = "1.85"` in
+`doublets/Cargo.toml`.
 
 ```bash
-rustup default nightly
+rustup toolchain install stable
+cargo +stable build
 ```
 
 ## Example

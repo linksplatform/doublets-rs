@@ -20,10 +20,18 @@ Thank you for your interest in contributing! This document provides guidelines a
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    ```
 
-   The project uses a specific nightly toolchain configured in `rust-toolchain.toml`:
+   The project uses the stable toolchain configured in `rust-toolchain.toml`:
+
    ```toml
    [toolchain]
-   channel = "nightly-2022-08-22"
+   channel = "stable"
+   ```
+
+   The `doublets` crate declares its minimum supported Rust version in
+   `doublets/Cargo.toml`:
+
+   ```toml
+   rust-version = "1.85"
    ```
 
 3. **Install development tools**
@@ -69,10 +77,14 @@ Thank you for your interest in contributing! This document provides guidelines a
    cargo clippy --all --tests --all-features
 
    # Check file sizes
-   node scripts/check-file-size.mjs
+   rust-script scripts/check-file-size.rs
+
+   # Check README badges and toolchain guidance
+   rust-script scripts/check-readme-badges.rs
+   rust-script scripts/check-toolchain-docs.rs
 
    # Run all checks together
-   cargo fmt --check && cargo clippy --all --tests --all-features && node scripts/check-file-size.mjs
+   cargo fmt --all -- --check && cargo clippy --all-targets --all-features && rust-script scripts/check-file-size.rs && rust-script scripts/check-readme-badges.rs && rust-script scripts/check-toolchain-docs.rs
    ```
 
 4. **Run tests**
