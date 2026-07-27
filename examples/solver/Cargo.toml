@@ -1,0 +1,9 @@
+[package]
+name = "solver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+doublets = { path = "../../doublets" }
+itertools = "0.10"
+tap = { version = "1.0.1" }
