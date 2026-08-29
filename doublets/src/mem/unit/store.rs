@@ -496,10 +496,10 @@ impl<
         let index = query[0];
         let source = change[1];
         let target = change[2];
-        let old_source = source;
-        let old_target = target;
 
         let link = self.try_get_link(index)?;
+        let old_source = link.source;
+        let old_target = link.target;
 
         if link.source != T::from_byte(0) {
             // SAFETY: Here index detach from sources
