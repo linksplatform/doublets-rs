@@ -80,6 +80,7 @@
 )]
 
 pub mod data;
+pub mod decorators;
 pub mod mem;
 
 pub use self::mem::{parts, split, unit};
