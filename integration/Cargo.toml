@@ -8,6 +8,11 @@ publish = false
 name = "test-mem"
 path = "src/bins/test-mem.rs"
 
+[[bin]]
+name = "fusion-probe"
+path = "src/bins/fusion-probe.rs"
+
 [dependencies]
 doublets = { path = "../doublets" }
+data = { package = "platform-data", version = "2.0.0" }
 mem = { package = "platform-mem", version = "0.3.0" }
