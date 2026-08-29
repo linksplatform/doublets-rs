@@ -19,20 +19,31 @@ use std::{
 /// Operations whose `bare_*` and `composed_*` bodies must be identical.
 const OPERATIONS: &[&str] = &["create", "count", "each"];
 
-/// Compiler flags the probe build must *not* inherit from whatever harness is running
-/// this test.
+/// Environment the probe build must *not* inherit from whatever harness is running this
+/// test.
 ///
-/// `cargo llvm-cov` exports `-C instrument-coverage` through `CARGO_ENCODED_RUSTFLAGS`,
-/// and a coverage counter is emitted per source region, so an inlined decorator layer
-/// still leaves a `lock incq` behind even though it produced no call. The probe wants a
-/// plain release build, so the flags are stripped rather than worked around.
-const INHERITED_FLAGS: &[&str] = &[
+/// The probe asserts something about codegen, so it needs a plain release build no matter
+/// how it was invoked. `cargo llvm-cov` in particular turns coverage on two different
+/// ways: through `CARGO_ENCODED_RUSTFLAGS`, and — since 0.9 — through a `RUSTC_WRAPPER`
+/// that injects `-C instrument-coverage` for workspace crates. Coverage emits a counter
+/// per source region, so an inlined decorator layer still leaves a `lock incq` behind
+/// even though it produced no call, and the comparison would fail for a reason that has
+/// nothing to do with fusion.
+const INHERITED_BUILD_ENV: &[&str] = &[
     "RUSTFLAGS",
     "CARGO_ENCODED_RUSTFLAGS",
     "RUSTDOCFLAGS",
     "CARGO_ENCODED_RUSTDOCFLAGS",
+    "RUSTC_WRAPPER",
+    "RUSTC_WORKSPACE_WRAPPER",
     "LLVM_PROFILE_FILE",
 ];
+
+/// Marks an instruction that only a coverage-instrumented build emits.
+///
+/// If one survives [`INHERITED_BUILD_ENV`], the disassembly cannot answer the question
+/// this test asks, so it skips instead of reporting a fusion failure it did not observe.
+const COVERAGE_COUNTER: &str = "incq ADDR(%rip)";
 
 macro_rules! skip {
     ($($arg:tt)*) => {{
@@ -71,8 +82,15 @@ fn a_decorator_stack_emits_the_same_code_as_the_bare_store() {
         ])
         .arg("--target-dir")
         .arg(&target_dir);
-    for variable in INHERITED_FLAGS {
+    for variable in INHERITED_BUILD_ENV {
         build.env_remove(variable);
+    }
+    // `cargo llvm-cov` drives its wrapper through private `__CARGO_LLVM_COV_*` variables
+    // whose names are explicitly unstable, so they are swept by prefix rather than listed.
+    for (name, _) in std::env::vars_os() {
+        if name.to_string_lossy().contains("LLVM_COV") {
+            build.env_remove(&name);
+        }
     }
     let build = build
         .output()
@@ -135,6 +153,13 @@ fn a_decorator_stack_emits_the_same_code_as_the_bare_store() {
 
         let bare = normalize(bare, &bare_name);
         let composed = normalize(composed, &composed_name);
+        if bare
+            .iter()
+            .chain(&composed)
+            .any(|i| i.contains(COVERAGE_COUNTER))
+        {
+            skip!("the probe was built with coverage instrumentation");
+        }
         assert_eq!(
             bare, composed,
             "the composed `{operation}` did not fuse into the bare one; \
