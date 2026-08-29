@@ -191,6 +191,46 @@ store.delete(index)?;                 // Delete link
 store.delete_all()?;                  // Delete all links
 ```
 
+### Decorators
+
+Optional policy layers, ported from `Platform.Data.Doublets`. Each one is a generic
+struct that owns the store below it, so a chosen stack is a single concrete type that the
+optimiser fuses into one `create` / `update` / `delete` / `each`:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, Resolve}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_uniqueness(Resolve)
+        .with_usages_validation();
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+
+    // Creating the same doublet twice returns the existing link instead of a duplicate.
+    assert_eq!(store.create_link(a, b)?, store.create_link(a, b)?);
+    Ok(())
+}
+```
+
+| Decorator | Builder method | Create | Update | Delete | Each |
+|---|---|:--:|:--:|:--:|:--:|
+| `UniquenessValidator` | `with_uniqueness(Validate)` | | ● | | |
+| `UniquenessResolver` | `with_uniqueness(Resolve)` | | ● | | |
+| `CascadeUniquenessAndUsagesResolver` | `with_uniqueness(CascadeResolve)` | | ● | ● | |
+| `UsagesValidator` | `with_usages_validation()` | | ● | ● | |
+| `CascadeUsagesResolver` | `with_cascade_usages_resolution()` | | | ● | |
+| `InnerReferenceExistenceValidator` | `with_inner_reference_existence_validation()` | | ● | ● | ● |
+| `ItselfConstantToSelfReferenceResolver` | `with_itself_constant_resolution()` | | ● | | ● |
+| `NullConstantToSelfReferenceResolver` | `with_null_constant_resolution()` | ● | ● | | |
+| `NonExistentDependenciesCreator` | `with_non_existent_dependencies_creation()` | | ● | | |
+| `NonNullContentsLinkDeletionResolver` | `with_non_null_contents_deletion_resolution()` | | | ● | |
+| `LoggingDecorator` | `with_logging(writer)` | ● | ● | ● | |
+| `NoExceptionsDecorator` | `with_no_exceptions()` | ● | ● | ● | ● |
+
+See `doublets/examples/uniqueness.rs` for a before/after comparison.
+
 ## Architecture
 
 ```
