@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["bare","composed_read","composed_write","doublets_fusion_bare_count","doublets_fusion_bare_create","doublets_fusion_bare_each","doublets_fusion_composed_count","doublets_fusion_composed_create","doublets_fusion_composed_each","main"],"macro":[["probe",1]],"type":["Bare","ComposedRead","ComposedWrite"]};
