@@ -19,6 +19,21 @@ use std::{
 /// Operations whose `bare_*` and `composed_*` bodies must be identical.
 const OPERATIONS: &[&str] = &["create", "count", "each"];
 
+/// Compiler flags the probe build must *not* inherit from whatever harness is running
+/// this test.
+///
+/// `cargo llvm-cov` exports `-C instrument-coverage` through `CARGO_ENCODED_RUSTFLAGS`,
+/// and a coverage counter is emitted per source region, so an inlined decorator layer
+/// still leaves a `lock incq` behind even though it produced no call. The probe wants a
+/// plain release build, so the flags are stripped rather than worked around.
+const INHERITED_FLAGS: &[&str] = &[
+    "RUSTFLAGS",
+    "CARGO_ENCODED_RUSTFLAGS",
+    "RUSTDOCFLAGS",
+    "CARGO_ENCODED_RUSTDOCFLAGS",
+    "LLVM_PROFILE_FILE",
+];
+
 macro_rules! skip {
     ($($arg:tt)*) => {{
         println!("note: fusion check skipped: {}", format_args!($($arg)*));
@@ -43,7 +58,8 @@ fn a_decorator_stack_emits_the_same_code_as_the_bare_store() {
     let target_dir = workspace.join("target").join("fusion-probe");
 
     let cargo = std::env::var_os("CARGO").map_or_else(|| PathBuf::from("cargo"), PathBuf::from);
-    let build = Command::new(cargo)
+    let mut build = Command::new(cargo);
+    build
         .current_dir(&workspace)
         .args([
             "build",
@@ -54,7 +70,11 @@ fn a_decorator_stack_emits_the_same_code_as_the_bare_store() {
             "fusion-probe",
         ])
         .arg("--target-dir")
-        .arg(&target_dir)
+        .arg(&target_dir);
+    for variable in INHERITED_FLAGS {
+        build.env_remove(variable);
+    }
+    let build = build
         .output()
         .expect("`cargo build` must be spawnable from a test");
 
