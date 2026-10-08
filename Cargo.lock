@@ -218,6 +218,7 @@ dependencies = [
  "smallvec",
  "static_assertions",
  "tap",
+ "tempfile",
  "thiserror",
  "tinyvec",
 ]

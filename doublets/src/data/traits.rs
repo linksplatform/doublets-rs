@@ -486,6 +486,9 @@ pub trait Doublets<T: LinkReference>: Links<T> {
     }
 
     /// Re-points all usages of `old` to `new`, calling `handler` for each update.
+    ///
+    /// A usage that references `old` as both source and target is updated once,
+    /// replacing both references together. The link at `old` itself is excluded.
     fn rebase_with<F>(&mut self, old: T, new: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -503,24 +506,29 @@ pub trait Doublets<T: LinkReference>: Links<T> {
 
         let usages: Vec<_> = self
             .each_iter([any, old, any])
-            .chain(self.each_iter([any, any, old]))
+            // Usages with `old` on both sides were already found by the source query.
+            .chain(
+                self.each_iter([any, any, old])
+                    .filter(|usage| usage.source != old),
+            )
             .filter(|usage| usage.index != old)
             .collect();
         for usage in usages {
-            if usage.source == old {
-                self.update_links(
-                    &[usage.index],
-                    &[usage.index, new, usage.target],
-                    &mut |before, after| handler.call(before, after),
-                )?;
-            }
-            if usage.target == old {
-                self.update_links(
-                    &[usage.index],
-                    &[usage.index, usage.source, new],
-                    &mut |before, after| handler.call(before, after),
-                )?;
-            }
+            let source = if usage.source == old {
+                new
+            } else {
+                usage.source
+            };
+            let target = if usage.target == old {
+                new
+            } else {
+                usage.target
+            };
+            self.update_links(
+                &[usage.index],
+                &[usage.index, source, target],
+                &mut |before, after| handler.call(before, after),
+            )?;
         }
         Ok(())
     }
