@@ -775,6 +775,12 @@ impl<
 
         let link = self.try_get_link(index)?;
 
+        // Detaching a self reference temporarily clears this link's target-tree
+        // size. is_unused uses that size, so classify destinations while the
+        // original indexes still describe the link as live.
+        let virtual_source = self.is_virtual(new_source);
+        let virtual_target = self.is_virtual(new_target);
+
         if link.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
             unsafe {
@@ -800,8 +806,6 @@ impl<
             }
         }
 
-        let virtual_source = self.is_virtual(new_source);
-        let virtual_target = self.is_virtual(new_target);
         let place = self.mut_data_part(index);
         place.source = new_source;
         place.target = new_target;

@@ -9,7 +9,7 @@ use super::{
     CascadeUniquenessAndUsagesResolver, CascadeUsagesResolver, InnerReferenceExistenceValidator,
     ItselfConstantToSelfReferenceResolver, LoggingDecorator, NoExceptionsDecorator,
     NonExistentDependenciesCreator, NonNullContentsLinkDeletionResolver,
-    NullConstantToSelfReferenceResolver, UsagesValidator,
+    NullConstantToSelfReferenceResolver, TransactionsDecorator, TransitionLog, UsagesValidator,
 };
 use crate::Doublets;
 
@@ -41,6 +41,14 @@ pub type AutomaticUniquenessAndUsagesResolution<T, L> = CascadeUniquenessAndUsag
 /// # }
 /// ```
 pub trait DecoratorsExt<T: LinkReference>: Doublets<T> + Sized {
+    /// Wraps the store in [`TransactionsDecorator`] and recovers its journal.
+    fn with_transactions<J: TransitionLog<T>>(
+        self,
+        journal: J,
+    ) -> Result<TransactionsDecorator<T, Self, J>, crate::Error<T>> {
+        TransactionsDecorator::new(self, journal)
+    }
+
     /// Applies a [`UniquenessPolicy`] — [`Validate`](super::Validate),
     /// [`Resolve`](super::Resolve) or [`CascadeResolve`](super::CascadeResolve).
     #[inline]

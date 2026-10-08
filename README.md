@@ -231,6 +231,49 @@ fn main() -> Result<(), doublets::Error<usize>> {
 
 See `doublets/examples/uniqueness.rs` for a before/after comparison.
 
+### Transactions
+
+`TransactionsDecorator` groups writes into a transaction with explicit commit or
+rollback. Dropping an unfinished handle restores the original graph:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, MemoryTransitionLog}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_transactions(MemoryTransitionLog::default())?;
+    let mut tx = store.begin_transaction()?;
+    let point = tx.create_point()?;
+    tx.commit()?;
+    assert!(store.exist(point));
+    Ok(())
+}
+```
+
+For durable recovery, use `FileTransitionLog::<usize>::open("db.transactions")`
+with your persistent raw store. Construction recovers the matching journal,
+undoing an interrupted transaction and replaying committed state even if the
+store did not flush. Each write records a `Transition` with its kind and before/
+after links; `Transition::apply` and `Transition::revert` work on raw stores.
+
+Because store callbacks run after mutation, begin and commit also persist complete
+graph snapshots. They use O(number of links) space, and journals grow without automatic
+retention. Restoration uses O(number of links + highest address) store operations,
+plus sorting and backend index costs. File records
+are checksummed and synchronized on each append; torn final records are discarded,
+while complete corruption and address narrowing are errors.
+
+The store and its journal must be exclusively owned and paired. Recovery requires
+a structurally readable store; it cannot repair a torn backend tree-index write.
+Use a handle for compound helpers and place policy decorators around that handle,
+so all policy writes are recorded and recovery can restore raw addresses. Nested
+transactions are rejected. A commit I/O error has an indeterminate outcome until
+recovery and blocks further writes. Drop-time rollback failures are available via
+`rollback_error()`. Diagnostics can be enabled with `set_tracing(true)`.
+
+Run `cargo run -p doublets --example transactions` for commit, policy composition
+and rollback in one example.
+
 ### Sequences and Unicode strings
 
 `doublets::sequences` provides the store-backed converter pipeline from
