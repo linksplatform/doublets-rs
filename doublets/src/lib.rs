@@ -82,8 +82,11 @@
 pub mod data;
 pub mod decorators;
 pub mod mem;
+pub mod sequences;
 
 pub use self::mem::{parts, split, unit};
 
-pub use self::data::{Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links};
+pub use self::data::{
+    CriterionMatcher, Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links, TargetMatcher,
+};
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
