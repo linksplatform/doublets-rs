@@ -45,3 +45,12 @@ workspace, documentation, release, packaging, example, and contribution checks.
 Each check writes its own log to that directory. The test suite also covers both
 store backends, policies around transaction handles, unwind rollback, injected
 journal/restoration failures, torn records, corruption, and address narrowing.
+
+CI run `37858156489` used Rust 1.99.0, while the initial local checks used 1.98.1.
+Its new `clippy::assert_is_empty` lint rejected existing assertions in
+`traits.rs` (lines 165, 355, 548, 985) and `query_tests.rs` (line 393). The failed
+lint-job log (`ci-logs/ci-cd-37858156489-lint.log`) records these errors at lines
+684, 699, 712, 725, and 740 respectively.
+Compare collections to an explicitly typed empty collection to retain the same
+checks and show their contents on failure. Apply this assertion style to the new
+recovery test as well, and verify with Rust 1.99.0.

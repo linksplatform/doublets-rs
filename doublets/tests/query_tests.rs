@@ -390,7 +390,7 @@ fn unit_each_two_element_any_value() -> Result<(), Error<usize>> {
     });
 
     // At minimum, the point 'a' should be found
-    assert!(!collected.is_empty());
+    assert_ne!(collected, Vec::<usize>::new());
 
     Ok(())
 }

@@ -99,7 +99,10 @@ fn an_entirely_torn_log_can_be_reopened_and_appended() {
     let path = dir.path().join("journal");
     fs::write(&path, b"incomplete first record").unwrap();
     let mut log = FileTransitionLog::<usize>::open(&path).unwrap();
-    assert!(log.read_entries().unwrap().is_empty());
+    assert_eq!(
+        log.read_entries().unwrap(),
+        Vec::<JournalEntry<usize>>::new()
+    );
     log.append(&JournalEntry::Begin {
         transaction_id: 1,
         snapshot: vec![],

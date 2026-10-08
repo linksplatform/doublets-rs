@@ -1,5 +1,5 @@
 use data::Flow;
-use doublets::{split, unit, Doublets, DoubletsExt, Error, Links};
+use doublets::{split, unit, Doublets, DoubletsExt, Error, Link, Links};
 use mem::Global;
 
 // Tests for Links trait methods
@@ -162,7 +162,7 @@ fn unit_usages() -> Result<(), Error<usize>> {
 
     // Point has no usages
     let usages = store.usages(a)?;
-    assert!(usages.is_empty());
+    assert_eq!(usages, Vec::<usize>::new());
 
     // Create links that use a
     let c = store.create_link(a, b)?;
@@ -352,7 +352,7 @@ fn unit_each_iter() -> Result<(), Error<usize>> {
     let links: Vec<_> = store.each_iter([any, a, any]).collect();
 
     // Links with source = a
-    assert!(!links.is_empty());
+    assert_ne!(links, Vec::<Link<usize>>::new());
     for link in &links {
         assert_eq!(link.source, a);
     }
@@ -545,7 +545,7 @@ fn unit_create_link_with() -> Result<(), Error<usize>> {
         Flow::Continue
     })?;
 
-    assert!(!created_links.is_empty());
+    assert_ne!(created_links, Vec::<Link<usize>>::new());
 
     Ok(())
 }
@@ -982,7 +982,7 @@ fn split_each_iter() -> Result<(), Error<usize>> {
     let any = Links::constants(&store).any;
     let links: Vec<_> = store.each_iter([any, a, any]).collect();
 
-    assert!(!links.is_empty());
+    assert_ne!(links, Vec::<Link<usize>>::new());
     for link in &links {
         assert_eq!(link.source, a);
     }
