@@ -277,7 +277,7 @@ fn walker_errors_terminate_and_do_not_affect_future_walks() {
         Err(SequenceError::Store(Error::NotExists(999)))
     ));
     assert_eq!(walker.walk(&store, a).unwrap(), [a]);
-    assert!(walker.walk(&store, 0).unwrap().is_empty());
+    assert_eq!(walker.walk(&store, 0).unwrap(), [] as [u32; 0]);
 }
 
 #[test]

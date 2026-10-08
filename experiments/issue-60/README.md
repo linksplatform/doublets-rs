@@ -54,3 +54,16 @@ incorrectly discard repeated subtrees. Traversal errors terminate the iterator,
 and each new walk owns an independent stack. Rust also rejects malformed
 sequence wrappers with a null root, out-of-range raw magnitudes and code-unit
 payloads instead of silently dropping or truncating content.
+
+CI investigation found a toolchain difference: local stable was Rust 1.98.1,
+while [run 37857084681](https://github.com/linksplatform/doublets-rs/actions/runs/37857084681)
+used 1.99.0. Its new `clippy::assert_is_empty` lint rejected existing assertions
+in `traits.rs` (lines 165, 355, 548, 985) and `query_tests.rs` (line 393).
+The downloaded job log is preserved locally at
+`ci-logs/lint-37857084681.log`, with the errors on lines 686–755; the full
+workflow log is `ci-logs/rust-ci-37857084681.log` (lines 2719–2791).
+
+Running strict Clippy with Rust 1.99.0 reproduced the error and also caught the
+new walker's empty-result assertion. All six assertions now compare against
+typed empty arrays, preserving their conditions and showing values on failure.
+Strict Clippy passes without suppressing the lint or changing CI policy.
