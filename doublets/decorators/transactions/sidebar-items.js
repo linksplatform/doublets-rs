@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["JournalEntry","TransitionKind"],"struct":["FileTransitionLog","MemoryTransitionLog","Transaction","TransactionsDecorator","Transition"],"trait":["TransitionLog"]};
