@@ -11,17 +11,23 @@ Run the automated regression suite with:
 cargo test -p doublets --test usages --all-features
 ```
 
-## Separate split-store update limitation
+## Split-store update probe
 
 The bounded `self-reference-probe.rs` uses at most four links. It also exposed a
-pre-existing problem outside the overlap fix: changing `(2: 2 2)` to `(2: 2 1)`
-after deleting a usage causes the split store's source index to report zero
+pre-existing problem on the original branch, outside the overlap fix: changing
+`(2: 2 2)` to `(2: 2 1)` after deleting a usage caused the split store's source
+index to report zero
 matches for `[any, 2, any]`, although link 2 still has source 2. Subsequent usage
-operations can panic. The unit store reports the expected source count of one.
+operations could panic. The unit store reported the expected source count of one.
+
+[PR #71](https://github.com/linksplatform/doublets-rs/pull/71) independently fixed
+this by classifying self-references before detaching
+the split-store indexes. Main, including that fix, was merged into this branch
+during validation. The probe now verifies the correct counts on both backends.
 
 The regression suite constructs each full or partial self-reference from a new
 uninitialized link so it tests self-exclusion independently of that update bug.
-The probe preserves the separate failing scenario for further investigation:
+The probe preserves that scenario for further verification:
 
 ```sh
 cargo build -p doublets
