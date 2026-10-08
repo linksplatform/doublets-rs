@@ -1,6 +1,8 @@
 #[cfg(feature = "rayon")]
 use rayon::prelude::*;
 
+use std::collections::HashSet;
+
 use crate::{Error, Fuse, Link};
 use data::{Flow, LinkReference, LinksConstants, ToQuery};
 
@@ -242,6 +244,7 @@ pub trait Doublets<T: LinkReference>: Links<T> {
     }
 
     /// Deletes all links matching `query`, calling `handler` for each deletion.
+    /// Duplicate matches are deleted once, in reverse order of their first occurrence.
     fn delete_query_with<F>(&mut self, query: impl ToQuery<T>, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -250,9 +253,12 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         let query = query.to_query();
         let len = self.count_by(query.to_query()).as_();
         let mut vec = Vec::with_capacity(len);
+        let mut seen = HashSet::with_capacity(len);
 
         self.each_by(query, |link| {
-            vec.push(link.index);
+            if seen.insert(link.index) {
+                vec.push(link.index);
+            }
             Flow::Continue
         });
 
@@ -263,7 +269,8 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         Ok(())
     }
 
-    /// Deletes all links that use `index` as a source or target, calling `handler` for each.
+    /// Deletes each other link that uses `index` as a source or target once,
+    /// calling `handler` for each deletion.
     fn delete_usages_with<F>(&mut self, index: T, handler: F) -> Result<(), Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -281,7 +288,7 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         });
 
         self.each_by([any, any, index], |link| {
-            if link.index != index {
+            if link.index != index && link.source != index {
                 to_delete.push(link.index);
             }
             Flow::Continue
@@ -411,7 +418,7 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         }
     }
 
-    /// Returns the number of other links that reference `index` as a source or target.
+    /// Returns the number of distinct other links that reference `index` as a source or target.
     fn count_usages(&self, index: T) -> Result<T, Error<T>>
     where
         Self: Sized,
@@ -420,20 +427,19 @@ pub trait Doublets<T: LinkReference>: Links<T> {
 
         let link = self.try_get_link(index)?;
 
-        let mut usage_source = self.count_by([any, index, any]);
-        if index == link.source {
-            usage_source = usage_source - T::from_byte(1);
+        let usage_source = self.count_by([any, index, any]);
+        let usage_target = self.count_by([any, any, index]);
+        let usage_both = self.count_by([any, index, index]);
+        // Remove the overlap before adding to avoid overflowing narrow address types.
+        let mut usages = usage_source + (usage_target - usage_both);
+        if index == link.source || index == link.target {
+            usages = usages - T::from_byte(1);
         }
 
-        let mut usage_target = self.count_by([any, any, index]);
-        if index == link.target {
-            usage_target = usage_target - T::from_byte(1);
-        }
-
-        Ok(usage_source + usage_target)
+        Ok(usages)
     }
 
-    /// Returns the indices of all links that reference `index` as a source or target.
+    /// Returns the indices of distinct other links that reference `index` as a source or target.
     fn usages(&self, index: T) -> Result<Vec<T>, Error<T>>
     where
         Self: Sized,
@@ -449,7 +455,7 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         });
 
         self.each_by([any, any, index], |link| {
-            if link.index != index {
+            if link.index != index && link.source != index {
                 usages.push(link.index);
             }
             Flow::Continue

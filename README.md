@@ -34,7 +34,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.6.0"
+doublets = "0.7.0"
 ```
 
 Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
