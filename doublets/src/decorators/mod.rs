@@ -1,4 +1,4 @@
-//! Zero-cost decorators that add policy to any [`Doublets`](crate::Doublets) store.
+//! Decorators that add policy and transactions to any [`Doublets`](crate::Doublets) store.
 //!
 //! This module is a port of the decorator layer of `Platform.Data.Doublets`. Each C#
 //! decorator has a counterpart here with the same logic, but composition is static: a
@@ -42,6 +42,10 @@
 //! | `NonNullContentsLinkDeletionResolver` | [`NonNullContentsLinkDeletionResolver`] | | | ● | |
 //! | `LoggingDecorator` | [`LoggingDecorator`] | ● | ● | ● | |
 //! | `NoExceptionsDecorator` | [`NoExceptionsDecorator`] | ● | ● | ● | ● |
+//! | `UInt64LinksTransactionsLayer` | [`TransactionsDecorator`] | ● | ● | ● | |
+//!
+//! Unlike the stateless policy wrappers, transactions keep a journal and graph
+//! snapshots. See [`transactions`] for their durability, ordering and cost.
 //!
 //! # Ordering
 //!
@@ -84,6 +88,7 @@ mod helpers;
 mod logging;
 mod no_exceptions;
 mod policy;
+pub mod transactions;
 mod uniqueness;
 mod usages;
 
@@ -94,5 +99,9 @@ pub use existence::{InnerReferenceExistenceValidator, NonExistentDependenciesCre
 pub use logging::LoggingDecorator;
 pub use no_exceptions::NoExceptionsDecorator;
 pub use policy::{CascadeResolve, Resolve, UniquenessPolicy, UsagesPolicy, Validate};
+pub use transactions::{
+    FileTransitionLog, JournalEntry, MemoryTransitionLog, Transaction, TransactionsDecorator,
+    Transition, TransitionKind, TransitionLog,
+};
 pub use uniqueness::{CascadeUniquenessAndUsagesResolver, UniquenessResolver, UniquenessValidator};
 pub use usages::{CascadeUsagesResolver, UsagesValidator};
