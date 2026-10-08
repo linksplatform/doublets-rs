@@ -162,7 +162,7 @@ fn unit_usages() -> Result<(), Error<usize>> {
 
     // Point has no usages
     let usages = store.usages(a)?;
-    assert_eq!(usages, Vec::<usize>::new());
+    assert_eq!(usages, [] as [usize; 0]);
 
     // Create links that use a
     let c = store.create_link(a, b)?;
@@ -352,7 +352,7 @@ fn unit_each_iter() -> Result<(), Error<usize>> {
     let links: Vec<_> = store.each_iter([any, a, any]).collect();
 
     // Links with source = a
-    assert_ne!(links, Vec::<Link<usize>>::new());
+    assert_ne!(links, [] as [Link<usize>; 0]);
     for link in &links {
         assert_eq!(link.source, a);
     }
@@ -545,7 +545,7 @@ fn unit_create_link_with() -> Result<(), Error<usize>> {
         Flow::Continue
     })?;
 
-    assert_ne!(created_links, Vec::<Link<usize>>::new());
+    assert_ne!(created_links, [] as [Link<usize>; 0]);
 
     Ok(())
 }
@@ -982,7 +982,7 @@ fn split_each_iter() -> Result<(), Error<usize>> {
     let any = Links::constants(&store).any;
     let links: Vec<_> = store.each_iter([any, a, any]).collect();
 
-    assert_ne!(links, Vec::<Link<usize>>::new());
+    assert_ne!(links, [] as [Link<usize>; 0]);
     for link in &links {
         assert_eq!(link.source, a);
     }

@@ -34,7 +34,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.5.0"
+doublets = "0.6.0"
 ```
 
 Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
@@ -273,6 +273,34 @@ recovery and blocks further writes. Drop-time rollback failures are available vi
 
 Run `cargo run -p doublets --example transactions` for commit, policy composition
 and rollback in one example.
+
+### Sequences and Unicode strings
+
+`doublets::sequences` provides the store-backed converter pipeline from
+`Platform.Data.Doublets.Sequences` 0.6.5. It is available with all feature
+configurations and adds no dependencies. Use `converters`, `walkers` and
+`unicode` submodules or import their types directly from `sequences`.
+
+The pipeline stores each UTF-16 code unit as `(raw number, symbol marker)`,
+pairs adjacent symbols into a balanced sequence, and wraps the root as
+`(root, sequence marker)`. The sequence marker represents the empty string.
+Supply your own marker addresses and enable external references when opening
+the store with `LinksConstants::external()`.
+
+See [`doublets/examples/unicode_strings.rs`](doublets/examples/unicode_strings.rs)
+for a complete encoding, decoding and caching example:
+
+```bash
+cargo run -p doublets --example unicode_strings
+```
+
+The character converters use `u16`, matching C# `char`. String conversion uses
+UTF-16, including surrogate pairs; `convert_utf16` methods also preserve lone
+surrogates that cannot form a Rust `String`. Numeric overflow, missing links,
+wrong markers and cyclic sequences return typed errors. The sequence walker
+offers both a lazy iterator and a collected result, preserves repeated subtrees,
+and uses a heap stack. Clear conversion caches when modifying or deleting their
+underlying links.
 
 ## Architecture
 
