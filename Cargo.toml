@@ -5,7 +5,10 @@ members = [
     "doublets",
 
     # internal
-    "integration"
+    "integration",
+    
+    # examples
+    "examples/solver"
 ]
 # in global rework
 exclude = [
