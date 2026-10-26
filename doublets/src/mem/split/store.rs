@@ -20,6 +20,9 @@ const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 ///
 /// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
 /// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
+/// References to absent IDs are indexed externally and migrate to internal indexes
+/// when those IDs are created. Set `DOUBLETS_TRACE_SPLIT_INDEX_MIGRATION` to log
+/// these migrations to stderr (disabled by default).
 pub struct Store<
     T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
@@ -537,29 +540,41 @@ impl<
         }
     }
 
-    fn resolve_danglind_external(&mut self, free: T) {
-        let any = self.constants().any;
-        let links: Vec<_> = self
-            .each_iter([any, free, any])
-            .filter(|link| link.index != free)
-            .collect();
+    fn resolve_dangling_external(&mut self, free: T) {
+        // `free` is already live. Normal queries now select its internal trees,
+        // but references written before allocation still live in the external
+        // trees. Collect from those trees before changing their structure.
+        let mut links = Vec::new();
+        self.external_sources.each_usages(free, &mut |link| {
+            links.push(link.index);
+            Flow::Continue
+        });
+        let sources = links.len();
         for link in links {
             unsafe {
-                self.detach_external_source(link.index);
-                self.attach_internal_source(free, link.index);
+                self.detach_external_source(link);
+                self.attach_internal_source(free, link);
             }
         }
 
-        let links: Vec<_> = self
-            .each_iter([any, any, free])
-            .filter(|link| link.index != free)
-            .filter(|link| !link.is_full())
-            .collect();
+        let mut links = Vec::new();
+        self.external_targets.each_usages(free, &mut |link| {
+            links.push(link.index);
+            Flow::Continue
+        });
+        let targets = links.len();
         for link in links {
             unsafe {
-                self.detach_external_target(link.index);
-                self.attach_internal_target(free, link.index);
+                self.detach_external_target(link);
+                self.attach_internal_target(free, link);
             }
+        }
+        debug_assert_eq!(self.external_sources.count_usages(free), T::from_byte(0));
+        debug_assert_eq!(self.external_targets.count_usages(free), T::from_byte(0));
+        if (sources != 0 || targets != 0)
+            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEX_MIGRATION").is_some()
+        {
+            eprintln!("[doublets split] ID {free}: migrated {sources} source and {targets} target usages to internal indexes");
         }
     }
 }
@@ -644,10 +659,10 @@ impl<
                     } else {
                         self.internal_targets.count_usages(target)
                     }
-                } else if is_virtual_source {
-                    self.external_sources.count_usages(source)
                 } else if target == any {
-                    if Self::USE_LIST {
+                    if is_virtual_source {
+                        self.external_sources.count_usages(source)
+                    } else if Self::USE_LIST {
                         self.sources_list.count_usages(source)
                     } else {
                         self.internal_sources.count_usages(source)
@@ -751,7 +766,7 @@ impl<
             self.unused.detach(free);
         }
 
-        self.resolve_danglind_external(free);
+        self.resolve_dangling_external(free);
 
         Ok(handler(
             Link::nothing(),
