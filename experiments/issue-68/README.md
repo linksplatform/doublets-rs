@@ -82,6 +82,8 @@ Its CI prohibits manually changing the package version in a normal PR.
 
 ```sh
 python3 experiments/issue-68/audit_dependencies.py --check
+# Optional fresh audit without modifying the saved snapshot:
+python3 experiments/issue-68/audit_dependencies.py --check-live
 bash experiments/issue-68/verify.sh
 # Linux: four real-size probes, each limited to 512 MiB virtual memory:
 bash experiments/issue-68/run-growth.sh
@@ -118,3 +120,9 @@ Both verification scripts completed successfully:
 The build/test commands ran sequentially with one Cargo job. The container's
 observed total memory peak was 2.22 GiB, below its 2.92 GiB limit. The real-size
 runtime probes had their own stricter 512 MiB virtual-memory limit.
+
+The first CI analysis reported CodeFactor B310 at `audit_dependencies.py:45`
+on commit `e4bb85d`; its annotation is saved in
+`ci-logs/codefactor-e4bb85d.json`. The audit now uses an HTTPS-only connection
+to crates.io. A fresh `--check-live` audit exercised that client for every
+declared crate and confirmed that all 60 declarations remain current.

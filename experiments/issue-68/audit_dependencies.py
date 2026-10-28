@@ -6,11 +6,11 @@ Includes excluded crates and embedded rust-script manifests.
 import concurrent.futures
 import argparse
 from datetime import datetime, timezone
+import http.client
 import json
 from pathlib import Path
 import re
 import tomllib
-import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -38,12 +38,16 @@ def declarations():
 
 
 def fetch(name):
-    request = urllib.request.Request(
-        f'https://crates.io/api/v1/crates/{name}',
-        headers={'User-Agent': 'doublets-rs-issue-68-dependency-audit'},
-    )
-    with urllib.request.urlopen(request) as response:
+    connection = http.client.HTTPSConnection('crates.io')
+    try:
+        connection.request('GET', f'/api/v1/crates/{name}',
+                           headers={'User-Agent': 'doublets-rs-issue-68-dependency-audit'})
+        response = connection.getresponse()
+        if response.status != 200:
+            raise RuntimeError(f'crates.io returned {response.status} for {name}')
         data = json.load(response)
+    finally:
+        connection.close()
     stable = [v for v in data['versions'] if not v['yanked'] and '-' not in v['num']]
     latest = max(stable, key=lambda v: tuple(map(int, v['num'].split('.'))))
     return name, {'version': latest['num'], 'rust_version': latest['rust_version'],
@@ -52,22 +56,28 @@ def fetch(name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--check', action='store_true',
+    checks = parser.add_mutually_exclusive_group()
+    checks.add_argument('--check', action='store_true',
                         help='check declarations against the saved release snapshot without network access')
+    checks.add_argument('--check-live', action='store_true',
+                        help='check declarations against current crates.io releases without changing the snapshot')
     args = parser.parse_args()
     declared = list(declarations())
     output = ROOT / 'experiments/issue-68/dependencies.json'
     if args.check:
         releases = json.loads(output.read_text())['releases']
+    else:
+        names = sorted({spec.get('package', name) for _, _, name, spec in declared})
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+            releases = dict(pool.map(fetch, names))
+    if args.check or args.check_live:
         for file, _, name, spec in declared:
             latest = releases[spec.get('package', name)]['version']
             if spec['version'] != latest:
                 raise SystemExit(f'{file}: {name} requires {spec["version"]}, expected {latest}')
-        print(f'All {len(declared)} dependency declarations match the stable release snapshot')
+        source = 'current stable releases' if args.check_live else 'the stable release snapshot'
+        print(f'All {len(declared)} dependency declarations match {source}')
         raise SystemExit(0)
-    names = sorted({spec.get('package', name) for _, _, name, spec in declared})
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        releases = dict(pool.map(fetch, names))
     snapshot = {'audited_at': datetime.now(timezone.utc).isoformat(),
                 'releases': dict(sorted(releases.items())), 'declarations': [
         {'file': file, 'section': section, 'alias': name,
