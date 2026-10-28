@@ -22,7 +22,10 @@ fn run(name: &str, mut store: impl Doublets<usize>) {
 }
 
 fn main() {
-    run("unit", unit::Store::<usize, _>::new(Global::new()).unwrap());
+    run(
+        "united",
+        unit::Store::<usize, _>::new(Global::new()).unwrap(),
+    );
     run(
         "split",
         split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap(),

@@ -1,0 +1,12 @@
+united, external range=False, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-list, external range=False, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-tree, external range=False, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+united, external range=False, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-list, external range=False, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-tree, external range=False, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+united, external range=True, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-list, external range=True, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-tree, external range=True, (2: 2 3): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+united, external range=True, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-list, external range=True, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed
+split-tree, external range=True, (2: 3 2): exact query -> [2] before and after creating ID 3; wildcard/count checks passed

@@ -95,7 +95,7 @@ fn unit_forward_references_control() {
 }
 
 #[test]
-fn multiple_forward_usages_migrate_both_indexes() {
+fn multiple_forward_usages_populate_both_internal_indexes() {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
     for _ in 0..8 {
         store.create_point().unwrap();
@@ -116,7 +116,7 @@ fn multiple_forward_usages_migrate_both_indexes() {
     assert_indexes(&store);
     store.update(9, 9, 8).unwrap();
     assert_indexes(&store);
-    // Detaching a migrated node must use the same tree that now serves reads.
+    // Detaching a reindexed node must use the same tree that now serves reads.
     store.update(1, 2, 9).unwrap();
     store.delete(3).unwrap();
     assert_indexes(&store);
@@ -176,7 +176,7 @@ fn references_survive_free_list_reuse() {
 }
 
 #[test]
-fn migration_preserves_creation_callback_and_read_break() {
+fn reindexing_preserves_creation_callback_and_read_break() {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
     store.create_link(3, 1).unwrap();
     store.create_link(2, 3).unwrap();

@@ -20,9 +20,10 @@ const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 ///
 /// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
 /// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
-/// References to absent IDs are indexed externally and migrate to internal indexes
-/// when those IDs are created. Set `DOUBLETS_TRACE_SPLIT_INDEX_MIGRATION` to log
-/// these migrations to stderr (disabled by default).
+/// References to absent IDs use external indexes. Creating those IDs moves the
+/// entries to internal indexes within this store; link data stays the same.
+/// Set `DOUBLETS_TRACE_SPLIT_INDEXES` to log this reindexing to stderr
+/// (disabled by default).
 pub struct Store<
     T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
@@ -572,9 +573,9 @@ impl<
         debug_assert_eq!(self.external_sources.count_usages(free), T::from_byte(0));
         debug_assert_eq!(self.external_targets.count_usages(free), T::from_byte(0));
         if (sources != 0 || targets != 0)
-            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEX_MIGRATION").is_some()
+            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEXES").is_some()
         {
-            eprintln!("[doublets split] ID {free}: migrated {sources} source and {targets} target usages to internal indexes");
+            eprintln!("[doublets split] ID {free}: moved {sources} source and {targets} target entries from external to internal indexes");
         }
     }
 }
