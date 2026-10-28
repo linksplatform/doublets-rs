@@ -145,7 +145,7 @@
 <a href=#145 id=145 data-nosnippet>145</a>    <span class="kw">fn </span>count_usages(<span class="kw-2">&amp;</span><span class="self">self</span>, link: T) -&gt; T {
 <a href=#146 id=146 data-nosnippet>146</a>        <span class="kw">unsafe </span>{
 <a href=#147 id=147 data-nosnippet>147</a>            <span class="kw">let </span><span class="kw-2">mut </span>root = <span class="self">self</span>.get_tree_root();
-<a href=#148 id=148 data-nosnippet>148</a>            <span class="kw">let </span>total = <span class="self">self</span>.get_size(root);
+<a href=#148 id=148 data-nosnippet>148</a>            <span class="kw">let </span>total = <span class="self">self</span>.get_size_or_zero(root);
 <a href=#149 id=149 data-nosnippet>149</a>            <span class="kw">let </span><span class="kw-2">mut </span>total_right_ignore = T::from_byte(<span class="number">0</span>);
 <a href=#150 id=150 data-nosnippet>150</a>            <span class="kw">while </span>root != T::from_byte(<span class="number">0</span>) {
 <a href=#151 id=151 data-nosnippet>151</a>                <span class="kw">let </span>base = <span class="self">self</span>.get_base_part(root);
