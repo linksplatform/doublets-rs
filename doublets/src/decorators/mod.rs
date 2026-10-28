@@ -54,9 +54,12 @@
 //! statically composed stack has no such back-reference: a decorator only knows the
 //! layers below it, so recursive calls re-enter at the layer that made them.
 //!
-//! For a stack whose outermost layer is the one doing the recursion the two are the same,
-//! which is the case for every stack C# itself builds. Otherwise, put a decorator whose
-//! behaviour the cascade must observe *below* the decorator that cascades.
+//! Put a decorator whose behaviour the cascade must observe *below* the decorator that
+//! cascades. The automatic uniqueness and usages resolution stack keeps C#'s order,
+//! with [`CascadeUsagesResolver`] below [`NonNullContentsLinkDeletionResolver`]. To
+//! preserve its callbacks without a facade back-reference, the cascade explicitly resets
+//! each usage to `(null, null)` before recursing into its usages, then deletes it after
+//! those usages are gone. The outer reset layer handles the originally requested link.
 //!
 //! # Deviations from C\#
 //!
