@@ -68,7 +68,7 @@ decorator_struct! {
     /// the top of the stack. Each usage is explicitly reset to `(null, null)` before
     /// recursing, preserving the reset callbacks of the automatic resolution stack.
     /// Place this decorator above any other layers whose behaviour the cascade must observe.
-    /// The requested link itself is reset only when the stack includes
+    /// The initial reset of the requested link is left to
     /// [`NonNullContentsLinkDeletionResolver`](super::NonNullContentsLinkDeletionResolver).
     CascadeUsagesResolver
 }
