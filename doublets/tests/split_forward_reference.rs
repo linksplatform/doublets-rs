@@ -175,6 +175,35 @@ fn references_survive_free_list_reuse() {
     );
 }
 
+fn empty_indexes_with_free_links(mut store: impl Doublets<usize>) {
+    for _ in 0..4 {
+        store.create().unwrap();
+    }
+    store.delete(1).unwrap();
+    store.delete(2).unwrap();
+    let any = store.constants().any;
+    for query in [[any, 99, any], [any, any, 99]] {
+        assert_eq!(store.count_by(query), 0, "query {query:?}");
+        let mut found = Vec::new();
+        store.each_by(query, |link| {
+            found.push(link.index);
+            Flow::Continue
+        });
+        assert_eq!(found, []);
+    }
+    assert_eq!(store.create().unwrap(), 2);
+    assert_eq!(store.create().unwrap(), 1);
+    assert_indexes(&store);
+}
+
+#[test]
+fn empty_indexes_ignore_free_list_header() {
+    empty_indexes_with_free_links(
+        split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap(),
+    );
+    empty_indexes_with_free_links(unit::Store::<usize, _>::new(Global::new()).unwrap());
+}
+
 #[test]
 fn reindexing_preserves_creation_callback_and_read_break() {
     let mut store = split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap();
@@ -208,27 +237,40 @@ fn reindexing_preserves_creation_callback_and_read_break() {
 }
 
 fn random_changes(mut store: impl Doublets<usize>, seed: u64) {
-    use rand::{rngs::StdRng, Rng, SeedableRng};
+    use rand::{rngs::StdRng, RngExt, SeedableRng};
     use std::collections::BTreeMap;
 
     let mut random = StdRng::seed_from_u64(seed);
     let mut model = BTreeMap::new();
+    let trace = std::env::var_os("DOUBLETS_TRACE_RANDOM_CHANGES").is_some();
     // Fixed seeds, at most 24 live links, and 256 operations keep this bounded.
     for step in 0..256 {
-        let operation = random.gen_range(0..4);
+        let operation = random.random_range(0..4);
         if model.is_empty() || (operation == 0 && model.len() < 24) {
+            if trace {
+                eprintln!("seed {seed}, step {step}: create; model {model:?}");
+            }
             let index = store.create().unwrap();
             model.insert(index, (0, 0));
         } else {
-            let index = *model.keys().nth(random.gen_range(0..model.len())).unwrap();
+            let index = *model
+                .keys()
+                .nth(random.random_range(0..model.len()))
+                .unwrap();
             if operation == 1 {
+                if trace {
+                    eprintln!("seed {seed}, step {step}: delete {index}");
+                }
                 store.delete(index).unwrap();
                 model.remove(&index);
             } else {
-                let pair = (random.gen_range(1..=32), random.gen_range(1..=32));
+                let pair = (random.random_range(1..=32), random.random_range(1..=32));
                 // Raw stores require unique pairs; uniqueness policy is optional.
                 if model.values().any(|&value| value == pair) {
                     continue;
+                }
+                if trace {
+                    eprintln!("seed {seed}, step {step}: update {index} -> {pair:?}");
                 }
                 store.update(index, pair.0, pair.1).unwrap();
                 model.insert(index, pair);

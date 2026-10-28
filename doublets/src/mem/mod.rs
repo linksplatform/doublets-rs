@@ -13,6 +13,9 @@ pub mod split;
 mod traits;
 pub mod unit;
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(feature = "mem")]
 pub use ::mem::*;
 
@@ -32,11 +35,10 @@ where
 {
     let current = m.allocated().len();
     if new_cap > current {
-        m.grow_filled(new_cap - current, M::Item::default())
+        // RawMem growth returns the added region; stores need the entire allocation.
+        m.grow_filled(new_cap - current, M::Item::default())?;
     } else if new_cap < current {
         m.shrink(current - new_cap)?;
-        Ok(m.allocated_mut())
-    } else {
-        Ok(m.allocated_mut())
     }
+    Ok(m.allocated_mut())
 }

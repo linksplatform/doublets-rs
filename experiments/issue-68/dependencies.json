@@ -1,0 +1,652 @@
+{
+  "audited_at": "2026-10-28T11:58:00+00:00",
+  "releases": {
+    "cfg-if": {
+      "version": "1.0.5",
+      "rust_version": "1.32",
+      "source": "https://crates.io/crates/cfg-if/1.0.5"
+    },
+    "chrono": {
+      "version": "0.4.45",
+      "rust_version": "1.62.0",
+      "source": "https://crates.io/crates/chrono/0.4.45"
+    },
+    "criterion": {
+      "version": "0.8.2",
+      "rust_version": "1.86",
+      "source": "https://crates.io/crates/criterion/0.8.2"
+    },
+    "darling": {
+      "version": "0.24.1",
+      "rust_version": "1.88.0",
+      "source": "https://crates.io/crates/darling/0.24.1"
+    },
+    "doublets": {
+      "version": "0.9.0",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/doublets/0.9.0"
+    },
+    "leak_slice": {
+      "version": "0.2.0",
+      "rust_version": null,
+      "source": "https://crates.io/crates/leak_slice/0.2.0"
+    },
+    "libc": {
+      "version": "0.2.191",
+      "rust_version": "1.65",
+      "source": "https://crates.io/crates/libc/0.2.191"
+    },
+    "log": {
+      "version": "0.4.34",
+      "rust_version": "1.71.0",
+      "source": "https://crates.io/crates/log/0.4.34"
+    },
+    "mimalloc": {
+      "version": "0.1.52",
+      "rust_version": null,
+      "source": "https://crates.io/crates/mimalloc/0.1.52"
+    },
+    "num-traits": {
+      "version": "0.2.19",
+      "rust_version": "1.60",
+      "source": "https://crates.io/crates/num-traits/0.2.19"
+    },
+    "platform-data": {
+      "version": "2.0.0",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/platform-data/2.0.0"
+    },
+    "platform-mem": {
+      "version": "0.4.0",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/platform-mem/0.4.0"
+    },
+    "platform-num": {
+      "version": "0.8.0",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/platform-num/0.8.0"
+    },
+    "platform-trees": {
+      "version": "0.3.4",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/platform-trees/0.3.4"
+    },
+    "proc-macro2": {
+      "version": "1.0.107",
+      "rust_version": "1.71",
+      "source": "https://crates.io/crates/proc-macro2/1.0.107"
+    },
+    "quote": {
+      "version": "1.0.47",
+      "rust_version": "1.71",
+      "source": "https://crates.io/crates/quote/1.0.47"
+    },
+    "rand": {
+      "version": "0.10.3",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/rand/0.10.3"
+    },
+    "rayon": {
+      "version": "1.12.0",
+      "rust_version": "1.80",
+      "source": "https://crates.io/crates/rayon/1.12.0"
+    },
+    "regex": {
+      "version": "1.13.1",
+      "rust_version": "1.65",
+      "source": "https://crates.io/crates/regex/1.13.1"
+    },
+    "serde": {
+      "version": "1.0.229",
+      "rust_version": "1.56",
+      "source": "https://crates.io/crates/serde/1.0.229"
+    },
+    "serde_json": {
+      "version": "1.0.154",
+      "rust_version": "1.71",
+      "source": "https://crates.io/crates/serde_json/1.0.154"
+    },
+    "smallvec": {
+      "version": "1.16.4",
+      "rust_version": null,
+      "source": "https://crates.io/crates/smallvec/1.16.4"
+    },
+    "static_assertions": {
+      "version": "1.1.0",
+      "rust_version": null,
+      "source": "https://crates.io/crates/static_assertions/1.1.0"
+    },
+    "syn": {
+      "version": "3.0.9",
+      "rust_version": "1.71",
+      "source": "https://crates.io/crates/syn/3.0.9"
+    },
+    "tap": {
+      "version": "1.0.1",
+      "rust_version": null,
+      "source": "https://crates.io/crates/tap/1.0.1"
+    },
+    "tempfile": {
+      "version": "3.27.0",
+      "rust_version": "1.63",
+      "source": "https://crates.io/crates/tempfile/3.27.0"
+    },
+    "thiserror": {
+      "version": "2.0.21",
+      "rust_version": "1.77",
+      "source": "https://crates.io/crates/thiserror/2.0.21"
+    },
+    "tinyvec": {
+      "version": "1.13.3",
+      "rust_version": null,
+      "source": "https://crates.io/crates/tinyvec/1.13.3"
+    },
+    "tracing": {
+      "version": "0.1.44",
+      "rust_version": "1.65.0",
+      "source": "https://crates.io/crates/tracing/0.1.44"
+    },
+    "tracing-log": {
+      "version": "0.2.0",
+      "rust_version": "1.56.0",
+      "source": "https://crates.io/crates/tracing-log/0.2.0"
+    },
+    "tracing-subscriber": {
+      "version": "0.3.23",
+      "rust_version": "1.65.0",
+      "source": "https://crates.io/crates/tracing-subscriber/0.3.23"
+    },
+    "ureq": {
+      "version": "3.5.0",
+      "rust_version": "1.85",
+      "source": "https://crates.io/crates/ureq/3.5.0"
+    },
+    "walkdir": {
+      "version": "2.5.0",
+      "rust_version": null,
+      "source": "https://crates.io/crates/walkdir/2.5.0"
+    }
+  },
+  "declarations": [
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "tap",
+      "crate": "tap",
+      "requirement": "1",
+      "latest_stable": "1.0.1"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "cfg-if",
+      "crate": "cfg-if",
+      "requirement": "1",
+      "latest_stable": "1.0.5"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "thiserror",
+      "crate": "thiserror",
+      "requirement": "2",
+      "latest_stable": "2.0.21"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "leak_slice",
+      "crate": "leak_slice",
+      "requirement": "0.2",
+      "latest_stable": "0.2.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "num",
+      "crate": "platform-num",
+      "requirement": "0.8.0",
+      "latest_stable": "0.8.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "data",
+      "crate": "platform-data",
+      "requirement": "2.0.0",
+      "latest_stable": "2.0.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "mem",
+      "crate": "platform-mem",
+      "requirement": "0.3.0",
+      "latest_stable": "0.4.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "trees",
+      "crate": "platform-trees",
+      "requirement": "0.3.4",
+      "latest_stable": "0.3.4"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "smallvec",
+      "crate": "smallvec",
+      "requirement": "1",
+      "latest_stable": "1.16.4"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dependencies",
+      "alias": "rayon",
+      "crate": "rayon",
+      "requirement": "1",
+      "latest_stable": "1.12.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "tap",
+      "crate": "tap",
+      "requirement": "1",
+      "latest_stable": "1.0.1"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "rand",
+      "crate": "rand",
+      "requirement": "0.8",
+      "latest_stable": "0.10.3"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "criterion",
+      "crate": "criterion",
+      "requirement": "0.5",
+      "latest_stable": "0.8.2"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "mimalloc",
+      "crate": "mimalloc",
+      "requirement": "0.1",
+      "latest_stable": "0.1.52"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "tinyvec",
+      "crate": "tinyvec",
+      "requirement": "1",
+      "latest_stable": "1.13.3"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "smallvec",
+      "crate": "smallvec",
+      "requirement": "1",
+      "latest_stable": "1.16.4"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "static_assertions",
+      "crate": "static_assertions",
+      "requirement": "1",
+      "latest_stable": "1.1.0"
+    },
+    {
+      "file": "doublets/Cargo.toml",
+      "section": "dev-dependencies",
+      "alias": "tempfile",
+      "crate": "tempfile",
+      "requirement": "3",
+      "latest_stable": "3.27.0"
+    },
+    {
+      "file": "doublets-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "num-traits",
+      "crate": "num-traits",
+      "requirement": "0.2.14",
+      "latest_stable": "0.2.19"
+    },
+    {
+      "file": "doublets-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "doublets",
+      "crate": "doublets",
+      "requirement": "0.1.0-alpha.17",
+      "latest_stable": "0.9.0"
+    },
+    {
+      "file": "doublets-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "data",
+      "crate": "platform-data",
+      "requirement": "0.1.0-alpha.0",
+      "latest_stable": "2.0.0"
+    },
+    {
+      "file": "doublets-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "num",
+      "crate": "platform-num",
+      "requirement": "0.1.0-alpha.0",
+      "latest_stable": "0.8.0"
+    },
+    {
+      "file": "doublets-ffi/Cargo.toml",
+      "section": "dependencies",
+      "alias": "log",
+      "crate": "log",
+      "requirement": "0.4.14",
+      "latest_stable": "0.4.34"
+    },
+    {
+      "file": "doublets-ffi/Cargo.toml",
+      "section": "dependencies",
+      "alias": "libc",
+      "crate": "libc",
+      "requirement": "0.2.100",
+      "latest_stable": "0.2.191"
+    },
+    {
+      "file": "doublets-ffi/Cargo.toml",
+      "section": "dependencies",
+      "alias": "tracing-subscriber",
+      "crate": "tracing-subscriber",
+      "requirement": "0.3.3",
+      "latest_stable": "0.3.23"
+    },
+    {
+      "file": "doublets-ffi/Cargo.toml",
+      "section": "dependencies",
+      "alias": "tracing-log",
+      "crate": "tracing-log",
+      "requirement": "0.1.2",
+      "latest_stable": "0.2.0"
+    },
+    {
+      "file": "doublets-ffi/Cargo.toml",
+      "section": "dependencies",
+      "alias": "tracing",
+      "crate": "tracing",
+      "requirement": "0.1.29",
+      "latest_stable": "0.1.44"
+    },
+    {
+      "file": "doublets-ffi/env-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "syn",
+      "crate": "syn",
+      "requirement": "1.0.86",
+      "latest_stable": "3.0.9"
+    },
+    {
+      "file": "doublets-ffi/env-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "proc-macro2",
+      "crate": "proc-macro2",
+      "requirement": "1.0.36",
+      "latest_stable": "1.0.107"
+    },
+    {
+      "file": "doublets-ffi/env-decorators/Cargo.toml",
+      "section": "dependencies",
+      "alias": "quote",
+      "crate": "quote",
+      "requirement": "1.0.15",
+      "latest_stable": "1.0.47"
+    },
+    {
+      "file": "doublets-ffi/ffi-attributes/Cargo.toml",
+      "section": "dependencies",
+      "alias": "syn",
+      "crate": "syn",
+      "requirement": "1.0.80",
+      "latest_stable": "3.0.9"
+    },
+    {
+      "file": "doublets-ffi/ffi-attributes/Cargo.toml",
+      "section": "dependencies",
+      "alias": "proc-macro2",
+      "crate": "proc-macro2",
+      "requirement": "1.0.30",
+      "latest_stable": "1.0.107"
+    },
+    {
+      "file": "doublets-ffi/ffi-attributes/Cargo.toml",
+      "section": "dependencies",
+      "alias": "darling",
+      "crate": "darling",
+      "requirement": "0.13.0",
+      "latest_stable": "0.24.1"
+    },
+    {
+      "file": "doublets-ffi/ffi-attributes/Cargo.toml",
+      "section": "dependencies",
+      "alias": "quote",
+      "crate": "quote",
+      "requirement": "1.0.10",
+      "latest_stable": "1.0.47"
+    },
+    {
+      "file": "doublets-ffi/ffi-attributes/Cargo.toml",
+      "section": "dependencies",
+      "alias": "serde",
+      "crate": "serde",
+      "requirement": "1.0.130",
+      "latest_stable": "1.0.229"
+    },
+    {
+      "file": "integration/Cargo.toml",
+      "section": "dependencies",
+      "alias": "data",
+      "crate": "platform-data",
+      "requirement": "2.0.0",
+      "latest_stable": "2.0.0"
+    },
+    {
+      "file": "integration/Cargo.toml",
+      "section": "dependencies",
+      "alias": "mem",
+      "crate": "platform-mem",
+      "requirement": "0.3.0",
+      "latest_stable": "0.4.0"
+    },
+    {
+      "file": "scripts/bump-version.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/check-changelog-fragment.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/check-file-size.rs",
+      "section": "script",
+      "alias": "walkdir",
+      "crate": "walkdir",
+      "requirement": "2",
+      "latest_stable": "2.5.0"
+    },
+    {
+      "file": "scripts/check-release-needed.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/check-release-needed.rs",
+      "section": "script",
+      "alias": "ureq",
+      "crate": "ureq",
+      "requirement": "2",
+      "latest_stable": "3.5.0"
+    },
+    {
+      "file": "scripts/check-release-needed.rs",
+      "section": "script",
+      "alias": "serde",
+      "crate": "serde",
+      "requirement": "1",
+      "latest_stable": "1.0.229"
+    },
+    {
+      "file": "scripts/check-release-needed.rs",
+      "section": "script",
+      "alias": "serde_json",
+      "crate": "serde_json",
+      "requirement": "1",
+      "latest_stable": "1.0.154"
+    },
+    {
+      "file": "scripts/check-version-modification.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/collect-changelog.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/collect-changelog.rs",
+      "section": "script",
+      "alias": "chrono",
+      "crate": "chrono",
+      "requirement": "0.4",
+      "latest_stable": "0.4.45"
+    },
+    {
+      "file": "scripts/create-changelog-fragment.rs",
+      "section": "script",
+      "alias": "chrono",
+      "crate": "chrono",
+      "requirement": "0.4",
+      "latest_stable": "0.4.45"
+    },
+    {
+      "file": "scripts/create-github-release.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/create-github-release.rs",
+      "section": "script",
+      "alias": "serde",
+      "crate": "serde",
+      "requirement": "1",
+      "latest_stable": "1.0.229"
+    },
+    {
+      "file": "scripts/create-github-release.rs",
+      "section": "script",
+      "alias": "serde_json",
+      "crate": "serde_json",
+      "requirement": "1",
+      "latest_stable": "1.0.154"
+    },
+    {
+      "file": "scripts/detect-code-changes.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/get-bump-type.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/get-version.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/publish-crate.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/version-and-commit.rs",
+      "section": "script",
+      "alias": "regex",
+      "crate": "regex",
+      "requirement": "1",
+      "latest_stable": "1.13.1"
+    },
+    {
+      "file": "scripts/version-and-commit.rs",
+      "section": "script",
+      "alias": "chrono",
+      "crate": "chrono",
+      "requirement": "0.4",
+      "latest_stable": "0.4.45"
+    },
+    {
+      "file": "scripts/version-and-commit.rs",
+      "section": "script",
+      "alias": "ureq",
+      "crate": "ureq",
+      "requirement": "2",
+      "latest_stable": "3.5.0"
+    },
+    {
+      "file": "scripts/version-and-commit.rs",
+      "section": "script",
+      "alias": "serde",
+      "crate": "serde",
+      "requirement": "1",
+      "latest_stable": "1.0.229"
+    },
+    {
+      "file": "scripts/version-and-commit.rs",
+      "section": "script",
+      "alias": "serde_json",
+      "crate": "serde_json",
+      "requirement": "1",
+      "latest_stable": "1.0.154"
+    }
+  ]
+}

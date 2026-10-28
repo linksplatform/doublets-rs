@@ -18,6 +18,10 @@ use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;
+
 /// A single-memory doublets store backed by a size-balanced search tree.
 ///
 /// All link data and tree-index metadata are stored in one contiguous `RawMem` region.

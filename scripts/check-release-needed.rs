@@ -27,10 +27,10 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! regex = "1"
-//! ureq = "2"
-//! serde = { version = "1", features = ["derive"] }
-//! serde_json = "1"
+//! regex = "1.13.1"
+//! ureq = "3.5.0"
+//! serde = { version = "1.0.229", features = ["derive"] }
+//! serde_json = "1.0.154"
 //! ```
 
 use std::env;
@@ -202,12 +202,12 @@ fn check_version_on_crates_io(crate_name: &str, version: &str) -> bool {
     let url = format!("https://crates.io/api/v1/crates/{}/{}", crate_name, version);
 
     match ureq::get(&url)
-        .set("User-Agent", "rust-script-check-release")
+        .header("User-Agent", "rust-script-check-release")
         .call()
     {
-        Ok(response) => {
+        Ok(mut response) => {
             if response.status() == 200 {
-                if let Ok(body) = response.into_string() {
+                if let Ok(body) = response.body_mut().read_to_string() {
                     if let Ok(data) = serde_json::from_str::<CratesIoVersion>(&body) {
                         return data.version.is_some();
                     }
@@ -215,7 +215,7 @@ fn check_version_on_crates_io(crate_name: &str, version: &str) -> bool {
             }
             false
         }
-        Err(ureq::Error::Status(404, _)) => {
+        Err(ureq::Error::StatusCode(404)) => {
             false
         }
         Err(e) => {
@@ -241,12 +241,12 @@ fn get_max_published_version(crate_name: &str) -> Option<String> {
     let url = format!("https://crates.io/api/v1/crates/{}", crate_name);
 
     match ureq::get(&url)
-        .set("User-Agent", "rust-script-check-release")
+        .header("User-Agent", "rust-script-check-release")
         .call()
     {
-        Ok(response) => {
+        Ok(mut response) => {
             if response.status() == 200 {
-                if let Ok(body) = response.into_string() {
+                if let Ok(body) = response.body_mut().read_to_string() {
                     if let Ok(data) = serde_json::from_str::<CratesIoCrate>(&body) {
                         if let Some(versions) = data.versions {
                             let mut max_version: Option<(u32, u32, u32, String)> = None;
@@ -274,7 +274,7 @@ fn get_max_published_version(crate_name: &str) -> Option<String> {
             }
             None
         }
-        Err(ureq::Error::Status(404, _)) => None,
+        Err(ureq::Error::StatusCode(404)) => None,
         Err(e) => {
             eprintln!("Warning: Could not query crates.io for versions: {}", e);
             None

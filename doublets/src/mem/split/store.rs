@@ -16,6 +16,10 @@ use mem::RawMem;
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;
+
 /// A split-memory doublets store that keeps link data and index metadata in separate regions.
 ///
 /// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
