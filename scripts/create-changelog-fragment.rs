@@ -8,7 +8,7 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! chrono = "0.4"
+//! chrono = "0.4.45"
 //! ```
 
 use std::env;

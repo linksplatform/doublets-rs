@@ -12,8 +12,8 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! regex = "1"
-//! chrono = "0.4"
+//! regex = "1.13.1"
+//! chrono = "0.4.45"
 //! ```
 
 use std::env;

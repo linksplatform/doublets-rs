@@ -144,7 +144,7 @@ impl<T: LinkReference> LinksTree<T> for ExternalTargetsRecursionlessTree<T> {
     fn count_usages(&self, link: T) -> T {
         unsafe {
             let mut root = self.get_tree_root();
-            let total = self.get_size(root);
+            let total = self.get_size_or_zero(root);
             let mut total_right_ignore = T::from_byte(0);
             while root != T::from_byte(0) {
                 let base = self.get_base_part(root);
