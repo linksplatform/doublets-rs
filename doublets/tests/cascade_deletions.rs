@@ -164,6 +164,34 @@ fn automatic_resolution_skips_an_already_reset_root(
     Ok(())
 }
 
+fn standalone_cascade_resets_nested_usages(store: impl Doublets<u32>) -> Result<(), Error<u32>> {
+    let mut store = store.with_cascade_usages_resolution();
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+    let ab = store.create_link(a, b)?;
+    let nested = store.create_link(ab, ab)?;
+    let mut seen = Vec::new();
+
+    store.delete_with(a, |before, after| {
+        seen.push((before, after));
+        Flow::Continue
+    })?;
+
+    assert_eq!(
+        seen,
+        [
+            (Link::new(ab, a, b), Link::new(ab, 0, 0)),
+            (Link::new(nested, ab, ab), Link::new(nested, 0, 0)),
+            (Link::new(nested, 0, 0), Link::nothing()),
+            (Link::new(ab, 0, 0), Link::nothing()),
+            // Without an outer reset decorator the requested root keeps its contents.
+            (Link::point(a), Link::nothing()),
+        ]
+    );
+    assert_eq!(store.iter().collect::<Vec<_>>(), [Link::point(b)]);
+    Ok(())
+}
+
 macro_rules! test_both_stores {
     ($($test:ident),+ $(,)?) => {
         $(
@@ -190,4 +218,5 @@ test_both_stores!(
     automatic_resolution_terminates_on_cycles,
     automatic_resolution_deletes_shared_usages_once,
     automatic_resolution_skips_an_already_reset_root,
+    standalone_cascade_resets_nested_usages,
 );
