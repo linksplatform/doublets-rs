@@ -81,7 +81,8 @@ impl<
         > {
             mem,
             mem_ptr: dangling_mem,
-            reserve_step: Self::SIZE_STEP,
+            // The header stores capacity in T, including for the u8/u16 C exports.
+            reserve_step: Self::SIZE_STEP.min(T::MAX.as_()),
             constants,
             sources,
             targets,
@@ -96,7 +97,8 @@ impl<
     }
 
     unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
-        let mem = NonNull::from(crate::mem::resize_mem(&mut self.mem, DEFAULT_PAGE_SIZE)?);
+        let initial_capacity = DEFAULT_PAGE_SIZE.min(self.reserve_step);
+        let mem = NonNull::from(crate::mem::resize_mem(&mut self.mem, initial_capacity)?);
         self.update_mem(mem);
 
         let header = self.get_header().clone();
