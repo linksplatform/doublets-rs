@@ -6,7 +6,7 @@ thread_local! {
 }
 
 macro_rules! ffi_round_trip {
-    ($test:ident, $ty:ty, $new:ident, $drop:ident, $constants:ident, $create:ident,
+    ($test:ident, $ty:ty, $new:ident, $new_with_constants:ident, $drop:ident, $constants:ident, $create:ident,
      $smart_create:ident, $smart_update:ident, $each:ident, $count:ident, $update:ident, $delete:ident) => {
         #[test]
         fn $test() {
@@ -57,7 +57,7 @@ macro_rules! ffi_round_trip {
                 );
                 assert_eq!($count(handle, std::ptr::null(), 0), 2);
                 $drop(handle);
-                let reopened = $new(path.as_ptr());
+                let reopened = $new_with_constants(path.as_ptr(), constants);
                 assert!(!reopened.is_null());
                 assert_eq!($count(reopened, std::ptr::null(), 0), 2);
                 $drop(reopened);
@@ -70,6 +70,7 @@ ffi_round_trip!(
     byte_round_trip,
     u8,
     ByteLinks_New,
+    ByteLinks_NewWithConstants,
     ByteLinks_Drop,
     ByteLinks_GetConstants,
     ByteLinks_Create,
@@ -84,6 +85,7 @@ ffi_round_trip!(
     u16_round_trip,
     u16,
     UInt16Links_New,
+    UInt16Links_NewWithConstants,
     UInt16Links_Drop,
     UInt16Links_GetConstants,
     UInt16Links_Create,
@@ -98,6 +100,7 @@ ffi_round_trip!(
     u32_round_trip,
     u32,
     UInt32Links_New,
+    UInt32Links_NewWithConstants,
     UInt32Links_Drop,
     UInt32Links_GetConstants,
     UInt32Links_Create,
@@ -112,6 +115,7 @@ ffi_round_trip!(
     u64_round_trip,
     u64,
     UInt64Links_New,
+    UInt64Links_NewWithConstants,
     UInt64Links_Drop,
     UInt64Links_GetConstants,
     UInt64Links_Create,

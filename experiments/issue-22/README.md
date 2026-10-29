@@ -27,7 +27,7 @@ packages fail. Saved compiler output is in `before/`:
 The initial allocation now fits the index type; the regression fills the complete
 u8 address range and checks `LimitReached`. FFI handles use matching
 `Box::into_raw`/`Box::from_raw` operations on a concrete store. FFI regressions
-exercise CRUD, callback continuation/breaks, disposal, and file reopening for
+exercise both constructors, CRUD, callback continuation/breaks, disposal, and file reopening for
 u8/u16/u32/u64, plus constants conversion, invalid paths, and the existing logger.
 The compatibility package re-exports all six original names from the tested
 current decorator implementations, removing the obsolete duplicate modules.

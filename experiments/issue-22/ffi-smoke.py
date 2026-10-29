@@ -27,6 +27,8 @@ for prefix, integer in [('Byte', c.c_uint8), ('UInt16', c.c_uint16),
     callback = c.CFUNCTYPE(integer, Link, Link)
     new = getattr(library, prefix + 'Links_New')
     new.argtypes, new.restype = [c.c_char_p], c.c_void_p
+    new_with_constants = getattr(library, prefix + 'Links_NewWithConstants')
+    new_with_constants.argtypes, new_with_constants.restype = [c.c_char_p, Constants], c.c_void_p
     drop = getattr(library, prefix + 'Links_Drop')
     drop.argtypes, drop.restype = [c.c_void_p], None
     get_constants = getattr(library, prefix + 'Links_GetConstants')
@@ -61,7 +63,7 @@ for prefix, integer in [('Byte', c.c_uint8), ('UInt16', c.c_uint16),
             assert count(handle, None, 0) == 0
         finally:
             drop(handle)
-        handle = new(path)
+        handle = new_with_constants(path, constants)
         assert handle, prefix
         try:
             assert count(handle, None, 0) == 0
