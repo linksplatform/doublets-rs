@@ -59,9 +59,7 @@ checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
 name = "doublets"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80aab7d2d20053b61340f77a6a4ff741d2ea893871599004a0c6e87a1dab5597"
+version = "0.13.0"
 dependencies = [
  "cfg-if",
  "leak_slice",
@@ -80,9 +78,6 @@ name = "doublets-decorators"
 version = "0.1.0-alpha.3"
 dependencies = [
  "doublets",
- "num-traits",
- "platform-data",
- "platform-num",
 ]
 
 [[package]]
@@ -173,9 +168,9 @@ dependencies = [
 
 [[package]]
 name = "platform-mem"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f27cff7c92440ac926c8c91ea3151db6e52a262f602d0c157f254e422fc15b12"
+checksum = "b0d53b63c04591c28fa7c495a797c2c37801a008eeecd2e072908c30013fa915"
 dependencies = [
  "allocator-api2",
  "memmap2",

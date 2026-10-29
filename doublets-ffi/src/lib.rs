@@ -1,22 +1,10 @@
-#![feature(try_blocks)]
-#![feature(box_syntax)]
-#![feature(try_trait_v2)]
-
-use std::{
-    error::Error,
-    ffi::CStr,
-    fmt::Display,
-    fs::File,
-    mem,
-    ops::{RangeInclusive, Try},
-    ptr::{drop_in_place, null_mut},
-};
+use std::{error::Error, ffi::CStr, fmt::Display, fs::File, ops::RangeInclusive, ptr::null_mut};
 
 use doublets::{
     data::{
         query,
         Flow::{Break, Continue},
-        LinkType, LinksConstants, Query, ToQuery,
+        LinkReference, LinksConstants, Query, ToQuery,
     },
     mem::FileMapped,
     Link, Links,
@@ -37,7 +25,7 @@ fn result_into_log<R, E: Display>(result: Result<R, E>, default: R) -> R {
     })
 }
 
-unsafe fn query_from_raw<'a, T: LinkType>(query: *const T, len: usize) -> Query<'a, T> {
+unsafe fn query_from_raw<'a, T: LinkReference>(query: *const T, len: usize) -> Query<'a, T> {
     // it not require `#[cfg(debug_assertions)]`,
     // because it is used in debug log mode only (llvm optimization:))
     if query.is_null() && len != 0 {
@@ -61,10 +49,10 @@ unsafe fn unnull_or_error<'a, P, R>(ptr: *mut P) -> &'a mut R {
     }
 }
 
-// TODO: remove ::mem:: in doublets crate
 type UnitedLinks<T> = unit::Store<T, FileMapped<parts::LinkPart<T>>>;
 
-type WrappedLinks<T> = Box<dyn Doublets<T>>;
+// The opaque C handle owns one concrete store allocated by Box::into_raw.
+type WrappedLinks<T> = UnitedLinks<T>;
 
 type EachCallback<T> = extern "C" fn(Link<T>) -> T;
 
@@ -72,10 +60,10 @@ type CUDCallback<T> = extern "C" fn(Link<T>, Link<T>) -> T;
 
 #[derive(Eq, PartialEq)]
 #[repr(C)]
-pub struct Range<T: LinkType>(pub T, pub T);
+pub struct Range<T: LinkReference>(pub T, pub T);
 
 #[repr(C)]
-pub struct Constants<T: LinkType> {
+pub struct Constants<T: LinkReference> {
     pub index_part: T,
     pub source_part: T,
     pub target_part: T,
@@ -91,7 +79,7 @@ pub struct Constants<T: LinkType> {
     pub _opt_marker: bool,
 }
 
-impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
+impl<T: LinkReference> From<LinksConstants<T>> for Constants<T> {
     fn from(c: LinksConstants<T>) -> Self {
         Self {
             index_part: c.index_part,
@@ -109,7 +97,7 @@ impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
             external_range: c
                 .clone()
                 .external_range
-                .map_or(Range(T::funty(0), T::funty(0)), |r| {
+                .map_or(Range(T::from_byte(0), T::from_byte(0)), |r| {
                     Range(*r.start(), *r.end())
                 }),
             _opt_marker: c.external_range.is_some(),
@@ -118,7 +106,7 @@ impl<T: LinkType> From<LinksConstants<T>> for Constants<T> {
 }
 
 #[allow(clippy::from_over_into)]
-impl<T: LinkType> Into<LinksConstants<T>> for Constants<T> {
+impl<T: LinkReference> Into<LinksConstants<T>> for Constants<T> {
     fn into(self) -> LinksConstants<T> {
         LinksConstants {
             index_part: self.index_part,
@@ -152,7 +140,7 @@ impl<T: LinkType> Into<LinksConstants<T>> for Constants<T> {
     convention = "csharp",
     name = "*Links_New"
 )]
-unsafe fn new_united_links<T: LinkType>(path: *const c_char) -> *mut c_void {
+unsafe fn new_united_links<T: LinkReference>(path: *const c_char) -> *mut c_void {
     new_with_constants_united_links::<T>(path, LinksConstants::external().into())
 }
 
@@ -164,24 +152,22 @@ unsafe fn new_united_links<T: LinkType>(path: *const c_char) -> *mut c_void {
     convention = "csharp",
     name = "*Links_NewWithConstants"
 )]
-unsafe fn new_with_constants_united_links<T: LinkType>(
+unsafe fn new_with_constants_united_links<T: LinkReference>(
     path: *const c_char,
     constants: Constants<T>,
 ) -> *mut c_void {
-    let result: Result<_, Box<dyn Error>> = try {
+    let result: Result<_, Box<dyn Error>> = (|| {
         let path = CStr::from_ptr(path).to_str()?;
         let file = File::options()
             .create(true)
+            .truncate(false)
             .read(true)
             .write(true)
             .open(path)?;
         let mem = FileMapped::new(file)?;
-        let mut links: Box<dyn Doublets<T>> =
-            box UnitedLinks::<T>::with_constants(mem, constants.into())?;
-        let ptr = links.as_mut() as *mut _ as *mut c_void;
-        mem::forget(links);
-        ptr
-    };
+        let links = UnitedLinks::<T>::with_constants(mem, constants.into())?;
+        Ok(Box::into_raw(Box::new(links)).cast::<c_void>())
+    })();
     result_into_log(result, null_mut())
 }
 
@@ -193,9 +179,12 @@ unsafe fn new_with_constants_united_links<T: LinkType>(
     convention = "csharp",
     name = "*Links_Drop"
 )]
-unsafe fn drop_united_links<T: LinkType>(this: *mut c_void) {
-    let links: &mut WrappedLinks<T> = unnull_or_error(this);
-    drop_in_place(links);
+unsafe fn drop_united_links<T: LinkReference>(this: *mut c_void) {
+    if !this.is_null() {
+        // SAFETY: this is the pointer returned by new_with_constants_united_links,
+        // with the same integer specialization, and ownership returns exactly once.
+        drop(Box::from_raw(this.cast::<WrappedLinks<T>>()));
+    }
 }
 
 #[ffi::specialize_for(
@@ -206,7 +195,7 @@ unsafe fn drop_united_links<T: LinkType>(this: *mut c_void) {
     convention = "csharp",
     name = "*Links_GetConstants"
 )]
-unsafe fn get_constants_united_links<T: LinkType>(this: *mut c_void) -> Constants<T> {
+unsafe fn get_constants_united_links<T: LinkReference>(this: *mut c_void) -> Constants<T> {
     let links: &mut WrappedLinks<T> = unnull_or_error(this);
     links.constants().clone().into()
 }
@@ -219,7 +208,7 @@ unsafe fn get_constants_united_links<T: LinkType>(this: *mut c_void) -> Constant
     convention = "csharp",
     name = "*Links_Create"
 )]
-unsafe fn create_united<T: LinkType>(
+unsafe fn create_united<T: LinkReference>(
     this: *mut c_void,
     query: *const T,
     len: usize,
@@ -232,21 +221,15 @@ unsafe fn create_united<T: LinkType>(
         let query = query_from_raw(query, len);
         let handler = |before: Link<_>, after: Link<_>| {
             if callback(before, after) == continue_ {
-                Break
-            } else {
                 Continue
+            } else {
+                Break
             }
         };
         links.create_by_with(query, handler)
     };
     result_into_log(
-        result.map(|flow| {
-            if flow.branch().is_continue() {
-                continue_
-            } else {
-                break_
-            }
-        }),
+        result.map(|flow| if !flow.is_break() { continue_ } else { break_ }),
         links.constants().error,
     )
 }
@@ -259,7 +242,7 @@ unsafe fn create_united<T: LinkType>(
     convention = "csharp",
     name = "*Links_SmartCreate"
 )]
-unsafe fn smart_create_united<T: LinkType>(this: *mut c_void) -> T {
+unsafe fn smart_create_united<T: LinkReference>(this: *mut c_void) -> T {
     let links: &mut WrappedLinks<T> = unnull_or_error(this);
     let result = links.create();
     result_into_log(result, links.constants().error)
@@ -273,7 +256,12 @@ unsafe fn smart_create_united<T: LinkType>(this: *mut c_void) -> T {
     convention = "csharp",
     name = "*Links_SmartUpdate"
 )]
-unsafe fn smart_update_united<T: LinkType>(this: *mut c_void, index: T, source: T, target: T) -> T {
+unsafe fn smart_update_united<T: LinkReference>(
+    this: *mut c_void,
+    index: T,
+    source: T,
+    target: T,
+) -> T {
     let links: &mut WrappedLinks<T> = unnull_or_error(this);
     let result = links.update(index, source, target);
     result_into_log(result, links.constants().error)
@@ -287,7 +275,7 @@ unsafe fn smart_update_united<T: LinkType>(this: *mut c_void, index: T, source: 
     convention = "csharp",
     name = "*Links_Each"
 )]
-unsafe fn each_united<T: LinkType>(
+unsafe fn each_united<T: LinkReference>(
     this: *mut c_void,
     query: *const T,
     len: usize,
@@ -318,7 +306,7 @@ unsafe fn each_united<T: LinkType>(
     convention = "csharp",
     name = "*Links_Count"
 )]
-unsafe fn count_united<T: LinkType>(this: *mut c_void, query: *const T, len: usize) -> T {
+unsafe fn count_united<T: LinkReference>(this: *mut c_void, query: *const T, len: usize) -> T {
     let links: &mut WrappedLinks<T> = unnull_or_error(this);
     let query = query_from_raw(query, len);
     links.count_by(query)
@@ -332,7 +320,7 @@ unsafe fn count_united<T: LinkType>(this: *mut c_void, query: *const T, len: usi
     convention = "csharp",
     name = "*Links_Update"
 )]
-unsafe fn update_united<T: LinkType>(
+unsafe fn update_united<T: LinkReference>(
     this: *mut c_void,
     restrictions: *const T,
     len_r: usize,
@@ -356,13 +344,7 @@ unsafe fn update_united<T: LinkType>(
         links.update_by_with(restrictions, substitutuion, handler)
     };
     result_into_log(
-        result.map(|flow| {
-            if flow.branch().is_continue() {
-                continue_
-            } else {
-                break_
-            }
-        }),
+        result.map(|flow| if !flow.is_break() { continue_ } else { break_ }),
         links.constants().error,
     )
 }
@@ -375,7 +357,7 @@ unsafe fn update_united<T: LinkType>(
     convention = "csharp",
     name = "*Links_Delete"
 )]
-unsafe fn delete_united<T: LinkType>(
+unsafe fn delete_united<T: LinkReference>(
     this: *mut c_void,
     query: *const T,
     len: usize,
@@ -396,13 +378,7 @@ unsafe fn delete_united<T: LinkType>(
         links.delete_by_with(query, handler)
     };
     result_into_log(
-        result.map(|flow| {
-            if flow.branch().is_continue() {
-                continue_
-            } else {
-                break_
-            }
-        }),
+        result.map(|flow| if !flow.is_break() { continue_ } else { break_ }),
         links.constants().error,
     )
 }
@@ -451,18 +427,5 @@ pub extern "C" fn init_fmt_logger() {
     setup_shared_logger(logger);
 }
 
-mod tests {
-    #[test]
-    fn error_log() {
-        use crate::{build_shared_logger, setup_shared_logger};
-        use log::{debug, error, info, trace, warn};
-
-        let logger = build_shared_logger();
-        setup_shared_logger(logger);
-        trace!("trace");
-        debug!("debug");
-        info!("info");
-        warn!("warn");
-        error!("error");
-    }
-}
+#[cfg(test)]
+mod tests;

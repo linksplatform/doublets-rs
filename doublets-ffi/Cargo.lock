@@ -68,7 +68,7 @@ dependencies = [
 
 [[package]]
 name = "doublets"
-version = "0.9.0"
+version = "0.13.0"
 dependencies = [
  "cfg-if",
  "leak_slice",
@@ -89,6 +89,7 @@ dependencies = [
  "ffi-attributes",
  "libc",
  "log",
+ "tempfile",
  "tracing",
  "tracing-log",
  "tracing-subscriber",
