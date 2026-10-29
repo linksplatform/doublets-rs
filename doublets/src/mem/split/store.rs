@@ -338,10 +338,14 @@ impl<
     pub fn is_unused(&self, link: T) -> bool {
         let header = self.get_header();
         if link <= header.allocated && header.first_free != link {
-            // TODO: May be this check is not needed
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            index.size_as_target == T::from_byte(0) && data.source != T::from_byte(0)
+            // Free-list slots have no endpoint-tree entries; their data holds
+            // circular-list pointers. A live (source, null) link has no target
+            // entry either, but is still present in its source tree.
+            index.size_as_source == T::from_byte(0)
+                && index.size_as_target == T::from_byte(0)
+                && data.source != T::from_byte(0)
         } else {
             true
         }
@@ -795,8 +799,8 @@ impl<
 
         let link = self.try_get_link(index)?;
 
-        // Detaching a self reference temporarily clears this link's target-tree
-        // size. is_unused uses that size, so classify destinations while the
+        // Detaching a self reference temporarily clears this link's tree
+        // sizes. is_unused uses those sizes, so classify destinations while the
         // original indexes still describe the link as live.
         let virtual_source = self.is_virtual(new_source);
         let virtual_target = self.is_virtual(new_target);
