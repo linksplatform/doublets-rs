@@ -27,19 +27,27 @@ fn csharp_convention(s: String) -> String {
     .to_string()
 }
 
-#[derive(FromMeta, PartialEq, Eq, Debug)]
-#[allow(non_camel_case_types)]
-enum Conventions {
-    csharp,
+// darling generates an explicit field initializer for the repeated `types` field.
+#[allow(clippy::redundant_field_names)]
+mod metadata {
+    use darling::FromMeta;
+
+    #[derive(FromMeta, PartialEq, Eq, Debug)]
+    #[allow(non_camel_case_types)]
+    pub(super) enum Conventions {
+        csharp,
+    }
+
+    #[derive(FromMeta)]
+    pub(super) struct MacroArgs {
+        pub(super) convention: Conventions,
+        #[darling(multiple)]
+        pub(super) types: Vec<String>,
+        pub(super) name: String,
+    }
 }
 
-#[derive(FromMeta)]
-struct MacroArgs {
-    convention: Conventions,
-    #[darling(multiple)]
-    types: Vec<String>,
-    name: String,
-}
+use metadata::{Conventions, MacroArgs};
 
 fn ty_from_to(ty: Type, from: &str, to: &str) -> Type {
     match ty {
@@ -157,7 +165,7 @@ pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
                 panic!("function with `self` is not supported")
             }
             FnArg::Typed(pat_type) => {
-                pat_type.ty = Box::new(ty_from_to(*(pat_type.ty).clone(), &generic_name, &ty));
+                *pat_type.ty = ty_from_to(*(pat_type.ty).clone(), &generic_name, &ty);
             }
         });
 

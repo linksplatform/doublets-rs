@@ -2,6 +2,7 @@
 name = "doublets-ffi"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.88"
 authors = [
     "uselessgoddess",
     "Linksplatform Team <linksplatformtechnologies@gmail.com>"
@@ -16,7 +17,7 @@ readme = "../README.md"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-log = "0.4.34"
+log = { version = "0.4.34", features = ["std"] }
 libc = "0.2.191"
 tracing-subscriber = "0.3.23"
 tracing-log = "0.2.0"
@@ -25,5 +26,5 @@ doublets = { path = "../doublets" }
 ffi-attributes = { path = "ffi-attributes" }
 env-decorators = { path = "env-decorators" }
 
-[package.log]
-features = ["release_max_level_error"]
+[dev-dependencies]
+tempfile = "3.27.0"

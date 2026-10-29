@@ -9,7 +9,6 @@ Thank you for your interest in contributing! This document provides guidelines a
    ```bash
    git clone https://github.com/YOUR-USERNAME/doublets-rs.git
    cd doublets-rs
-   git submodule update --init --recursive
    ```
 
 2. **Install Rust**
@@ -102,6 +101,17 @@ Thank you for your interest in contributing! This document provides guidelines a
    # Run a specific test
    cargo test test_name
    ```
+
+   Also verify packages that are built independently of the main workspace:
+
+   ```bash
+   bash experiments/issue-22/check-packages.sh
+   cargo +stable test --manifest-path doublets-decorators/Cargo.toml --locked
+   cargo +stable test --manifest-path doublets-ffi/Cargo.toml --locked
+   ```
+
+   Use the latest stable toolchain for development and FFI builds. Some test and
+   procedural macro dependencies require newer Rust than the core library's MSRV.
 
 5. **Add a changelog fragment**
 
@@ -279,8 +289,8 @@ Fragments are automatically collected into CHANGELOG.md during the release proce
 │   ├── src/              # Source code
 │   ├── tests/            # Integration tests
 │   └── benches/          # Benchmarks
-├── doublets-decorators/  # Decorator patterns (in rework)
-├── doublets-ffi/         # FFI bindings
+├── doublets-decorators/  # Compatibility exports for the current decorators
+├── doublets-ffi/         # Stable Rust FFI bindings and procedural macros
 ├── integration/          # Integration tests
 ├── scripts/              # Utility scripts
 ├── .gitignore            # Git ignore patterns

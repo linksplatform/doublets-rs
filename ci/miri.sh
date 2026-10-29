@@ -6,7 +6,7 @@ echo "Installing latest nightly with Miri: $MIRI_NIGHTLY"
 rustup set profile minimal
 rustup toolchain install "$MIRI_NIGHTLY" --component miri
 
-# Use +toolchain syntax to override rust-toolchain.toml which pins to an older nightly
+# Use +toolchain syntax to override rust-toolchain.toml which selects stable Rust
 echo "Running Miri setup..."
 cargo +"$MIRI_NIGHTLY" miri setup
 

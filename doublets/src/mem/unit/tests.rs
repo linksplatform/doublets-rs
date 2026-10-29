@@ -33,3 +33,13 @@ fn file_mapped_initial_capacity_and_repeated_growth_preserve_links() {
     let store = Store::<usize, _>::new(FileMapped::from_path(&path).unwrap()).unwrap();
     check_links(&store, 50);
 }
+
+#[test]
+fn byte_store_can_allocate_its_full_address_range() {
+    let mut store = Store::<u8, _>::new(Global::new()).unwrap();
+    let limit = *store.constants().internal_range.end();
+    for index in 1..=limit {
+        assert_eq!(store.create_point().unwrap(), index);
+    }
+    assert!(matches!(store.create(), Err(LinksError::LimitReached(value)) if value == limit));
+}

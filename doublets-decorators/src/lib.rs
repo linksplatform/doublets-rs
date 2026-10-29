@@ -1,17 +1,11 @@
-#![feature(try_trait_v2)]
-#![feature(default_free_fn)]
+//! Compatibility names for the stable decorators in [`doublets::decorators`].
+//!
+//! Existing callers can retain the six original type names and `new(store)`
+//! constructors. Each export uses the current implementation and callback API:
+//! callbacks return [`doublets::data::Flow`] instead of the unstable `Try` trait.
 
-pub use cascade_unique_resolver::CascadeUniqueResolver;
-pub use cascade_usages_resolver::CascadeUsagesResolver;
-pub use non_null_deletion_resolver::NonNullDeletionResolver;
-pub use unique_resolver::UniqueResolver;
-pub use unique_validator::UniqueValidator;
-pub use usages_validator::UsagesValidator;
-
-//mod ilinks_decorator;
-mod cascade_unique_resolver;
-mod cascade_usages_resolver;
-mod non_null_deletion_resolver;
-mod unique_resolver;
-mod unique_validator;
-mod usages_validator;
+pub use doublets::decorators::{
+    CascadeUniquenessAndUsagesResolver as CascadeUniqueResolver, CascadeUsagesResolver,
+    NonNullContentsLinkDeletionResolver as NonNullDeletionResolver,
+    UniquenessResolver as UniqueResolver, UniquenessValidator as UniqueValidator, UsagesValidator,
+};

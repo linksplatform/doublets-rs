@@ -4,23 +4,24 @@
 
 ### Basic build library
 
-Install [rustup](https://rustup.rs/) and setup Rust language tools.
+Install [rustup](https://rustup.rs/) and the latest stable Rust toolchain.
+The FFI crate and its procedural macro dependencies require Rust 1.88 or newer.
 
 on linux:
 ```shell
-rustup toolchain install nightly
+rustup toolchain install stable
 ```
 on windows:
 ```shell
-rustup toolchain install nightly-[gnu|msvc]
+rustup toolchain install stable # choose a GNU or MSVC host with rustup
 ```
 
 Run cargo build in this folder:
 ```shell
-cargo +nightly build --release
+cargo +stable build --release --locked
 ```
 
-Great! Your libray is located in the `target/release` folder.
+Your library is located in the `target/release` folder.
 
 ### Advanced build library
 You can configure your build in the __`Cargo.toml`__ file:
@@ -40,13 +41,11 @@ What is it?\
 [More options](https://doc.rust-lang.org/cargo/reference/profiles.html)
 
 Also you can configure log level.\
-Try replace
+In the `[dependencies]` section, replace the `log` dependency with a release cap:
 ```toml
-[package.log]
-features = ["release_max_level_error"]
+log = { version = "0.4.34", features = ["std", "release_max_level_error"] }
 ```
-To
+Or use an info cap:
 ```toml
-[package.log]
-features = ["release_max_level_info"]
+log = { version = "0.4.34", features = ["std", "release_max_level_info"] }
 ```
