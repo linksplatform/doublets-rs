@@ -198,8 +198,8 @@ pub trait Doublets<T: LinkReference>: Links<T> {
         Self: Sized,
     {
         let mut result = T::from_byte(0);
-        self.delete_by_with(query, |_before, after| {
-            result = after.index;
+        self.delete_by_with(query, |before, _after| {
+            result = before.index;
             Flow::Continue
         })
         .map(|_| result)
@@ -553,7 +553,7 @@ pub trait Doublets<T: LinkReference>: Links<T> {
             Ok(new)
         } else {
             self.rebase(old, new)?;
-            self.delete(old)
+            self.delete(old).map(|_| new)
         }
     }
 }
