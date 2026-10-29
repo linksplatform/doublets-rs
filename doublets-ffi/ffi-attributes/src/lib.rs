@@ -1,15 +1,13 @@
-#![feature(box_syntax)]
-
 use proc_macro::TokenStream;
 
-use darling::FromMeta;
+use darling::{ast::NestedMeta, FromMeta};
 use quote::{quote, ToTokens};
 
-use syn::{parse::Parser, punctuated::Punctuated};
+use syn::punctuated::Punctuated;
 
 use syn::{
-    parse_macro_input, AttributeArgs, FnArg, GenericArgument, GenericParam, Ident, ItemFn,
-    PathArguments, ReturnType, Type,
+    parse_macro_input, FnArg, GenericArgument, GenericParam, Ident, ItemFn, PathArguments,
+    ReturnType, Type,
 };
 
 fn csharp_convention(s: String) -> String {
@@ -88,7 +86,10 @@ fn ty_from_to(ty: Type, from: &str, to: &str) -> Type {
 
 #[proc_macro_attribute]
 pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as AttributeArgs);
+    let attr_args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(args) => args,
+        Err(error) => return error.into_compile_error().into(),
+    };
     let input = parse_macro_input!(input as ItemFn);
     let input_clone: ItemFn = input.clone();
     let ident = input.sig.ident;
@@ -136,9 +137,6 @@ pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
                 '*',
                 match &args.convention {
                     Conventions::csharp => csharp_convention(ty.clone()),
-                    _ => {
-                        panic!("unknown convention")
-                    }
                 }
                 .as_str(),
             )
@@ -159,7 +157,7 @@ pub fn specialize_for(args: TokenStream, input: TokenStream) -> TokenStream {
                 panic!("function with `self` is not supported")
             }
             FnArg::Typed(pat_type) => {
-                pat_type.ty = box ty_from_to(*(pat_type.ty).clone(), &generic_name, &ty);
+                pat_type.ty = Box::new(ty_from_to(*(pat_type.ty).clone(), &generic_name, &ty));
             }
         });
 

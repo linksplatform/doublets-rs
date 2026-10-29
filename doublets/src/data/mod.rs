@@ -8,12 +8,14 @@ mod doublet;
 mod error;
 mod handler;
 mod link;
+mod matcher;
 mod traits;
 
 pub use doublet::Doublet;
 pub use error::Error;
 pub use handler::Fuse;
 pub use link::Link;
+pub use matcher::{CriterionMatcher, TargetMatcher};
 pub use traits::{Doublets, DoubletsExt, Links, ReadHandler, WriteHandler};
 
 #[cfg(feature = "data")]

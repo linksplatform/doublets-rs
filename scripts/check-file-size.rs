@@ -6,7 +6,7 @@
 //!
 //! ```cargo
 //! [dependencies]
-//! walkdir = "2"
+//! walkdir = "2.5.0"
 //! ```
 
 use std::fs;

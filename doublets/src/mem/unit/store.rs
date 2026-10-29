@@ -18,6 +18,10 @@ use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;
+
 /// A single-memory doublets store backed by a size-balanced search tree.
 ///
 /// All link data and tree-index metadata are stored in one contiguous `RawMem` region.
@@ -496,10 +500,10 @@ impl<
         let index = query[0];
         let source = change[1];
         let target = change[2];
-        let old_source = source;
-        let old_target = target;
 
         let link = self.try_get_link(index)?;
+        let old_source = link.source;
+        let old_target = link.target;
 
         if link.source != T::from_byte(0) {
             // SAFETY: Here index detach from sources

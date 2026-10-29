@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 
 use data::{Flow, Hybrid, LinkReference};
 use doublets::{Doublets, Link};
@@ -128,8 +128,8 @@ pub fn test_random_creations_and_deletions<T: LinkReference>(
             let create_point: bool = rand::random();
             if count >= 2 && create_point {
                 let address = 1..=count;
-                let source = rand::thread_rng().gen_range(address.clone());
-                let target = rand::thread_rng().gen_range(address);
+                let source = rand::rng().random_range(address.clone());
+                let target = rand::rng().random_range(address);
                 let result = store
                     .get_or_create(T::try_from(source).unwrap(), T::try_from(target).unwrap())
                     .unwrap()

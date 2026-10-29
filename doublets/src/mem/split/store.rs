@@ -16,10 +16,18 @@ use mem::RawMem;
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+#[cfg(test)]
+#[path = "tests.rs"]
+mod tests;
+
 /// A split-memory doublets store that keeps link data and index metadata in separate regions.
 ///
 /// `MD` holds the raw `(source, target)` data; `MI` holds the tree-index structures.
 /// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
+/// References to absent IDs use external indexes. Creating those IDs moves the
+/// entries to internal indexes within this store; link data stays the same.
+/// Set `DOUBLETS_TRACE_SPLIT_INDEXES` to log this reindexing to stderr
+/// (disabled by default).
 pub struct Store<
     T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
@@ -537,29 +545,41 @@ impl<
         }
     }
 
-    fn resolve_danglind_external(&mut self, free: T) {
-        let any = self.constants().any;
-        let links: Vec<_> = self
-            .each_iter([any, free, any])
-            .filter(|link| link.index != free)
-            .collect();
+    fn resolve_dangling_external(&mut self, free: T) {
+        // `free` is already live. Normal queries now select its internal trees,
+        // but references written before allocation still live in the external
+        // trees. Collect from those trees before changing their structure.
+        let mut links = Vec::new();
+        self.external_sources.each_usages(free, &mut |link| {
+            links.push(link.index);
+            Flow::Continue
+        });
+        let sources = links.len();
         for link in links {
             unsafe {
-                self.detach_external_source(link.index);
-                self.attach_internal_source(free, link.index);
+                self.detach_external_source(link);
+                self.attach_internal_source(free, link);
             }
         }
 
-        let links: Vec<_> = self
-            .each_iter([any, any, free])
-            .filter(|link| link.index != free)
-            .filter(|link| !link.is_full())
-            .collect();
+        let mut links = Vec::new();
+        self.external_targets.each_usages(free, &mut |link| {
+            links.push(link.index);
+            Flow::Continue
+        });
+        let targets = links.len();
         for link in links {
             unsafe {
-                self.detach_external_target(link.index);
-                self.attach_internal_target(free, link.index);
+                self.detach_external_target(link);
+                self.attach_internal_target(free, link);
             }
+        }
+        debug_assert_eq!(self.external_sources.count_usages(free), T::from_byte(0));
+        debug_assert_eq!(self.external_targets.count_usages(free), T::from_byte(0));
+        if (sources != 0 || targets != 0)
+            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEXES").is_some()
+        {
+            eprintln!("[doublets split] ID {free}: moved {sources} source and {targets} target entries from external to internal indexes");
         }
     }
 }
@@ -644,10 +664,10 @@ impl<
                     } else {
                         self.internal_targets.count_usages(target)
                     }
-                } else if is_virtual_source {
-                    self.external_sources.count_usages(source)
                 } else if target == any {
-                    if Self::USE_LIST {
+                    if is_virtual_source {
+                        self.external_sources.count_usages(source)
+                    } else if Self::USE_LIST {
                         self.sources_list.count_usages(source)
                     } else {
                         self.internal_sources.count_usages(source)
@@ -751,7 +771,7 @@ impl<
             self.unused.detach(free);
         }
 
-        self.resolve_danglind_external(free);
+        self.resolve_dangling_external(free);
 
         Ok(handler(
             Link::nothing(),
@@ -774,6 +794,12 @@ impl<
         let new_target = change[2];
 
         let link = self.try_get_link(index)?;
+
+        // Detaching a self reference temporarily clears this link's target-tree
+        // size. is_unused uses that size, so classify destinations while the
+        // original indexes still describe the link as live.
+        let virtual_source = self.is_virtual(new_source);
+        let virtual_target = self.is_virtual(new_target);
 
         if link.source != T::from_byte(0) {
             // SAFETY: Here index attach to source
@@ -800,8 +826,6 @@ impl<
             }
         }
 
-        let virtual_source = self.is_virtual(new_source);
-        let virtual_target = self.is_virtual(new_target);
         let place = self.mut_data_part(index);
         place.source = new_source;
         place.target = new_target;

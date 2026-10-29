@@ -34,11 +34,17 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.3.0"
+doublets = "0.12.0"
 ```
 
-This crate builds on stable Rust. The minimum supported Rust version is 1.85,
-as configured by `doublets/Cargo.toml`.
+Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
+stable channel, and the crate declares `rust-version = "1.85"` in
+`doublets/Cargo.toml`.
+
+```bash
+rustup toolchain install stable
+cargo +stable build
+```
 
 ## Example
 
@@ -185,6 +191,117 @@ store.delete(index)?;                 // Delete link
 store.delete_all()?;                  // Delete all links
 ```
 
+### Decorators
+
+Optional policy layers, ported from `Platform.Data.Doublets`. Each one is a generic
+struct that owns the store below it, so a chosen stack is a single concrete type that the
+optimiser fuses into one `create` / `update` / `delete` / `each`:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, Resolve}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_uniqueness(Resolve)
+        .with_usages_validation();
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+
+    // Creating the same doublet twice returns the existing link instead of a duplicate.
+    assert_eq!(store.create_link(a, b)?, store.create_link(a, b)?);
+    Ok(())
+}
+```
+
+| Decorator | Builder method | Create | Update | Delete | Each |
+|---|---|:--:|:--:|:--:|:--:|
+| `UniquenessValidator` | `with_uniqueness(Validate)` | | ● | | |
+| `UniquenessResolver` | `with_uniqueness(Resolve)` | | ● | | |
+| `CascadeUniquenessAndUsagesResolver` | `with_uniqueness(CascadeResolve)` | | ● | ● | |
+| `UsagesValidator` | `with_usages_validation()` | | ● | ● | |
+| `CascadeUsagesResolver` | `with_cascade_usages_resolution()` | | | ● | |
+| `InnerReferenceExistenceValidator` | `with_inner_reference_existence_validation()` | | ● | ● | ● |
+| `ItselfConstantToSelfReferenceResolver` | `with_itself_constant_resolution()` | | ● | | ● |
+| `NullConstantToSelfReferenceResolver` | `with_null_constant_resolution()` | ● | ● | | |
+| `NonExistentDependenciesCreator` | `with_non_existent_dependencies_creation()` | | ● | | |
+| `NonNullContentsLinkDeletionResolver` | `with_non_null_contents_deletion_resolution()` | | | ● | |
+| `LoggingDecorator` | `with_logging(writer)` | ● | ● | ● | |
+| `NoExceptionsDecorator` | `with_no_exceptions()` | ● | ● | ● | ● |
+
+See `doublets/examples/uniqueness.rs` for a before/after comparison.
+
+### Transactions
+
+`TransactionsDecorator` groups writes into a transaction with explicit commit or
+rollback. Dropping an unfinished handle restores the original graph:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, MemoryTransitionLog}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_transactions(MemoryTransitionLog::default())?;
+    let mut tx = store.begin_transaction()?;
+    let point = tx.create_point()?;
+    tx.commit()?;
+    assert!(store.exist(point));
+    Ok(())
+}
+```
+
+For durable recovery, use `FileTransitionLog::<usize>::open("db.transactions")`
+with your persistent raw store. Construction recovers the matching journal,
+undoing an interrupted transaction and replaying committed state even if the
+store did not flush. Each write records a `Transition` with its kind and before/
+after links; `Transition::apply` and `Transition::revert` work on raw stores.
+
+Because store callbacks run after mutation, begin and commit also persist complete
+graph snapshots. They use O(number of links) space, and journals grow without automatic
+retention. Restoration uses O(number of links + highest address) store operations,
+plus sorting and backend index costs. File records
+are checksummed and synchronized on each append; torn final records are discarded,
+while complete corruption and address narrowing are errors.
+
+The store and its journal must be exclusively owned and paired. Recovery requires
+a structurally readable store; it cannot repair a torn backend tree-index write.
+Use a handle for compound helpers and place policy decorators around that handle,
+so all policy writes are recorded and recovery can restore raw addresses. Nested
+transactions are rejected. A commit I/O error has an indeterminate outcome until
+recovery and blocks further writes. Drop-time rollback failures are available via
+`rollback_error()`. Diagnostics can be enabled with `set_tracing(true)`.
+
+Run `cargo run -p doublets --example transactions` for commit, policy composition
+and rollback in one example.
+
+### Sequences and Unicode strings
+
+`doublets::sequences` provides the store-backed converter pipeline from
+`Platform.Data.Doublets.Sequences` 0.6.5. It is available with all feature
+configurations and adds no dependencies. Use `converters`, `walkers` and
+`unicode` submodules or import their types directly from `sequences`.
+
+The pipeline stores each UTF-16 code unit as `(raw number, symbol marker)`,
+pairs adjacent symbols into a balanced sequence, and wraps the root as
+`(root, sequence marker)`. The sequence marker represents the empty string.
+Supply your own marker addresses and enable external references when opening
+the store with `LinksConstants::external()`.
+
+See [`doublets/examples/unicode_strings.rs`](doublets/examples/unicode_strings.rs)
+for a complete encoding, decoding and caching example:
+
+```bash
+cargo run -p doublets --example unicode_strings
+```
+
+The character converters use `u16`, matching C# `char`. String conversion uses
+UTF-16, including surrogate pairs; `convert_utf16` methods also preserve lone
+surrogates that cannot form a Rust `String`. Numeric overflow, missing links,
+wrong markers and cyclic sequences return typed errors. The sequence walker
+offers both a lazy iterator and a collected result, preserves repeated subtrees,
+and uses a heap stack. Clear conversion caches when modifying or deleting their
+underlying links.
+
 ## Architecture
 
 ```
@@ -197,6 +314,10 @@ doublets-rs/
 │   │       └── split/  # Split storage implementation
 │   └── benches/        # Performance benchmarks
 ├── doublets-ffi/       # C FFI bindings
+├── dev-deps/           # Platform dependencies
+│   ├── data-rs/        # Data primitives (LinkType, Flow, etc.)
+│   ├── mem-rs/         # Memory abstractions (RawMem, FileMapped)
+│   └── trees-rs/       # Tree structures (size-balanced trees)
 └── integration/        # Integration tests
 ```
 
@@ -239,10 +360,9 @@ cargo bench --all-features
 
 ## Dependencies
 
-- [platform-num](https://crates.io/crates/platform-num) - Link reference numeric traits
-- [platform-data](https://crates.io/crates/platform-data) - Core data types
-- [platform-mem](https://crates.io/crates/platform-mem) - Memory abstractions
-- [platform-trees](https://crates.io/crates/platform-trees) - Tree implementations
+- [platform-data](https://github.com/linksplatform/data-rs) - Core data types
+- [platform-mem](https://github.com/linksplatform/mem-rs) - Memory abstractions
+- [platform-trees](https://github.com/linksplatform/trees-rs) - Tree implementations
 
 ## Support
 
