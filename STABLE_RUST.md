@@ -13,10 +13,9 @@ requires Rust 1.88 or newer).
 
 - The main workspace contains `doublets` and `integration`. Full storage,
   decorators, sequences, and transactions are available on stable Rust.
-- `doublets-decorators` remains a standalone compatibility package. Its six
-  original exports reuse `doublets::decorators` from this checkout, retaining
-  their names and `new(store)` constructors. Callbacks use the stable `Flow`
-  API instead of the unstable `Try` trait.
+- Decorators are part of `doublets::decorators`, available without optional
+  features. They provide `new(store)` constructors and the `DecoratorsExt`
+  builder; callbacks use the stable `Flow` API.
 - `doublets-ffi` and its `env-decorators` and `ffi-attributes` procedural macros
   also build on stable. The C exports retain their names and integer widths.
 - Platform dependencies (`platform-num`, `platform-data`, `platform-mem`, and
@@ -32,14 +31,14 @@ rustup component add rustfmt clippy
 cargo +stable test --workspace --all-features --locked
 cargo +stable test --workspace --doc --locked
 bash experiments/issue-22/check-packages.sh
-cargo +stable test --manifest-path doublets-decorators/Cargo.toml --locked
+cargo +stable test -p doublets --test decorator_consolidation --no-default-features --locked
 cargo +stable test --manifest-path doublets-ffi/Cargo.toml --locked
 ```
 
 The package check explicitly selects stable and unsets `RUSTC_BOOTSTRAP`. It
-compiles all targets and all features of all six package manifests, including
+compiles all targets and all features of all five package manifests, including
 those excluded from the main workspace. The CI test matrix runs it on Linux,
-macOS, and Windows along with the compatibility and FFI regressions.
+macOS, and Windows along with the decorator and FFI regressions.
 
 ## Optional Miri checks
 
@@ -47,5 +46,6 @@ macOS, and Windows along with the compatibility and FFI regressions.
 It is an optional diagnostic tool, independent of normal builds, tests, and
 releases. The ordinary Travis test entry also uses stable Rust.
 
-The main workspace migration landed in PR 48. PR 26 completes the standalone
-packages and keeps their dependencies covered by stable CI.
+The main workspace migration landed in PR 48. PR 26 completed the standalone
+package migration. Decorator coverage now lives in the main library; CI also
+checks the standalone FFI packages and their dependencies.

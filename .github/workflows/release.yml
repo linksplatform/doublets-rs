@@ -232,11 +232,8 @@ jobs:
         shell: bash
         run: bash experiments/issue-22/check-packages.sh
 
-      - name: Test stable compatibility packages
-        shell: bash
-        run: |
-          cargo test --manifest-path doublets-decorators/Cargo.toml --all-features --locked
-          cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
+      - name: Test FFI bindings
+        run: cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
 
       - name: Test C library ABI
         if: matrix.os == 'ubuntu-latest'
@@ -246,6 +243,9 @@ jobs:
 
       - name: Check core without default features
         run: cargo check -p doublets --no-default-features --locked
+
+      - name: Test decorators without default features
+        run: cargo test -p doublets --test decorator_consolidation --no-default-features --locked
 
   # Generate and upload code coverage using cargo-llvm-cov
   # === CODE COVERAGE ===

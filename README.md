@@ -193,6 +193,10 @@ store.delete_all()?;                  // Delete all links
 
 ### Decorators
 
+Decorators are included in `doublets::decorators` and need no optional feature
+flags or additional dependency. Use the builder below or each type's `new(store)`
+constructor.
+
 Optional policy layers, ported from `Platform.Data.Doublets`. Each one is a generic
 struct that owns the store below it, so a chosen stack is a single concrete type that the
 optimiser fuses into one `create` / `update` / `delete` / `each`:
@@ -230,6 +234,16 @@ fn main() -> Result<(), doublets::Error<usize>> {
 | `NoExceptionsDecorator` | `with_no_exceptions()` | ● | ● | ● | ● |
 
 See `doublets/examples/uniqueness.rs` for a before/after comparison.
+
+The former `doublets-decorators` compatibility package has been removed. Import
+its implementations directly from `doublets::decorators`: `UniqueValidator` becomes
+`UniquenessValidator`, `UniqueResolver` becomes `UniquenessResolver`,
+`CascadeUniqueResolver` becomes `CascadeUniquenessAndUsagesResolver`, and
+`NonNullDeletionResolver` becomes `NonNullContentsLinkDeletionResolver`.
+`UsagesValidator` and `CascadeUsagesResolver` keep their names. All six retain
+their constructors, composition, and `Flow` callback behavior. If you relied on
+the old package enabling `full` transitively, enable `full` on your `doublets`
+dependency to retain those optional optimizations.
 
 ### Transactions
 

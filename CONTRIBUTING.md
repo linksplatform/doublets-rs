@@ -106,7 +106,6 @@ Thank you for your interest in contributing! This document provides guidelines a
 
    ```bash
    bash experiments/issue-22/check-packages.sh
-   cargo +stable test --manifest-path doublets-decorators/Cargo.toml --locked
    cargo +stable test --manifest-path doublets-ffi/Cargo.toml --locked
    ```
 
@@ -287,9 +286,9 @@ Fragments are automatically collected into CHANGELOG.md during the release proce
 ├── dev-deps/             # Development dependencies (git submodules)
 ├── doublets/             # Main doublets library
 │   ├── src/              # Source code
+│   │   └── decorators/   # Policy wrappers and transactions
 │   ├── tests/            # Integration tests
 │   └── benches/          # Benchmarks
-├── doublets-decorators/  # Compatibility exports for the current decorators
 ├── doublets-ffi/         # Stable Rust FFI bindings and procedural macros
 ├── integration/          # Integration tests
 ├── scripts/              # Utility scripts

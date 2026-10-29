@@ -62,10 +62,13 @@ been adapted. Procedural macro integration tests cover the generated exports
 and default environment configuration. CI compiles the embedded release
 scripts as test executables, avoiding release/publish side effects.
 
-The excluded `doublets-decorators` and `doublets-ffi` crates remain excluded as
-in the original workspace; their dependency declarations and resolutions are
-updated as well. This issue does not restore the legacy APIs currently under
-rework. Their two standalone procedural macro packages are tested directly.
+At the time of this audit, the excluded `doublets-decorators` and `doublets-ffi`
+packages also received dependency updates. PR 26 subsequently restored stable
+builds for those packages. Issue 83 removed the redundant decorator package;
+decorators are maintained in `doublets::decorators`. The saved dependency JSON
+retains the original audit declarations as historical evidence. Current checks
+discover only maintained manifests, including the standalone FFI and its two
+procedural macro packages.
 The main library retains its Rust 1.85 requirement; current development tools
 use stable Rust (criterion requires 1.86; darling requires 1.88).
 

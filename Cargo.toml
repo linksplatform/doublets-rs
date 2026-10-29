@@ -7,8 +7,7 @@ members = [
     # internal
     "integration"
 ]
-# in global rework
+# FFI bindings are built independently.
 exclude = [
-    "doublets-decorators",
     "doublets-ffi",
 ]
