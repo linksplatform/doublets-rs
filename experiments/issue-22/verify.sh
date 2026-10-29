@@ -7,7 +7,7 @@ unset RUSTC_BOOTSTRAP
 export CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0
 export CARGO_TARGET_DIR="$(pwd -W 2>/dev/null || pwd)/target"
 export RUSTFLAGS=-Dwarnings
-log_dir=target/issue-22-logs
+log_dir=${ISSUE22_LOG_DIR:-target/issue-22-logs}
 mkdir -p "$log_dir"
 run() {
     local name=$1
@@ -27,7 +27,7 @@ run no-default-features cargo check -p doublets --no-default-features --locked
 run release cargo build --workspace --release --locked --verbose
 run documentation cargo doc --workspace --no-deps --all-features --locked
 run package cargo package -p doublets --list --allow-dirty --locked
-for package in doublets-decorators doublets-ffi doublets-ffi/env-decorators doublets-ffi/ffi-attributes; do
+for package in doublets-ffi doublets-ffi/env-decorators doublets-ffi/ffi-attributes; do
     name=${package//\//-}
     run "$name-tests" cargo test --manifest-path "$package/Cargo.toml" --all-features --locked -- --test-threads=1
     run "$name-format" cargo fmt --manifest-path "$package/Cargo.toml" -- --check
@@ -51,5 +51,5 @@ for script in scripts/*.rs; do
     fi
 done
 run changelog env GITHUB_BASE_REF=main rust-script scripts/check-changelog-fragment.rs
-run version env GITHUB_EVENT_NAME=pull_request GITHUB_HEAD_REF=issue-22-52cb3422 GITHUB_BASE_REF=main rust-script scripts/check-version-modification.rs
+run version env GITHUB_EVENT_NAME=pull_request GITHUB_HEAD_REF="$(git branch --show-current)" GITHUB_BASE_REF=main rust-script scripts/check-version-modification.rs
 run diff git diff --check origin/main

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compile every maintained manifest on stable, including excluded compatibility crates.
+# Compile every maintained manifest on stable, including the standalone FFI packages.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 export RUSTUP_TOOLCHAIN=stable

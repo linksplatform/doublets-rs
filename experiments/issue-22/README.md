@@ -5,11 +5,18 @@ comment) and all PR 26 conversation comments, review comments, and reviews on
 October 29, 2026. There are no required sub-issues. The latest maintainer comment
 requires conflict resolution and a stable Rust audit across all dependencies.
 
+The findings and counts below describe the completed migration at that time.
+Issue 83 subsequently consolidated all decorators in `doublets::decorators` and
+moved their compatibility scenarios to `doublets/tests/decorator_consolidation.rs`.
+The verification scripts now use the five remaining package manifests and run
+decorator tests as part of the workspace suite. The saved `before/` logs remain
+historical evidence.
+
 ## Reproduction and root causes
 
 Before implementation, run `bash experiments/issue-22/check-packages.sh` on the
-merged baseline. The workspace and procedural macros build, but both excluded
-packages fail. Saved compiler output is in `before/`:
+pre-migration baseline. The workspace and procedural macros built, but both excluded
+packages failed. Saved compiler output is in `before/`:
 
 - `decorators.log`: E0554 (nightly feature gates), E0635 (`default_free_fn`),
   unstable `Try` use, and outdated `Doublets`/`LinkType` APIs. The package also
