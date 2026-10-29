@@ -244,8 +244,8 @@ jobs:
       - name: Check core without default features
         run: cargo check -p doublets --no-default-features --locked
 
-      - name: Test decorators without default features
-        run: cargo test -p doublets --test decorator_consolidation --no-default-features --locked
+      - name: Test decorators and release without default features
+        run: cargo test -p doublets --test decorator_consolidation --test release --no-default-features --locked
 
   # Generate and upload code coverage using cargo-llvm-cov
   # === CODE COVERAGE ===

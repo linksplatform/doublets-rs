@@ -5,10 +5,12 @@
 //! - [`split`] — separate data and index memory regions.
 
 pub use header::LinksHeader;
+pub use release::Release;
 pub use traits::{
     LinksList, LinksTree, SplitList, SplitTree, SplitUpdateMem, UnitTree, UnitUpdateMem,
 };
 mod header;
+mod release;
 pub mod split;
 mod traits;
 pub mod unit;

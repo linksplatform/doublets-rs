@@ -28,6 +28,8 @@ mod tests;
 /// entries to internal indexes within this store; link data stays the same.
 /// Set `DOUBLETS_TRACE_SPLIT_INDEXES` to log this reindexing to stderr
 /// (disabled by default).
+/// `delete*` methods use a resetting convenience adapter. For release without
+/// automatic reset, use [`crate::mem::Release`] or [`crate::decorators::CheckedRelease`].
 pub struct Store<
     T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
@@ -56,6 +58,8 @@ pub struct Store<
 
     sources_list: InternalSourcesLinkedList<T>,
     unused: UL,
+    #[cfg(test)]
+    update_calls: usize,
 }
 
 impl<
@@ -113,6 +117,8 @@ impl<
             external_targets,
             sources_list,
             unused,
+            #[cfg(test)]
+            update_calls: 0,
         };
 
         // SAFETY: Without this, the code will become unsafe
@@ -523,12 +529,13 @@ impl<
         todo!()
     }
 
-    fn resolve_danglind_internal(&mut self, index: T) {
+    fn resolve_dangling_internal(&mut self, index: T) {
         let any = self.constants.any;
         let links: Vec<_> = self
             .each_iter([any, index, any])
             .filter(|link| link.index != index)
             .collect();
+        let sources = links.len();
         for link in links {
             unsafe {
                 self.detach_internal_source(index, link.index);
@@ -541,11 +548,17 @@ impl<
             .filter(|link| link.index != index)
             .filter(|link| !link.is_full())
             .collect();
+        let targets = links.len();
         for link in links {
             unsafe {
                 self.detach_internal_target(index, link.index);
                 self.attach_external_target(link.index);
             }
+        }
+        if (sources != 0 || targets != 0)
+            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEXES").is_some()
+        {
+            eprintln!("[doublets split] ID {index}: moved {sources} source and {targets} target entries from internal to external indexes");
         }
     }
 
@@ -793,6 +806,10 @@ impl<
         change: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
+        #[cfg(test)]
+        {
+            self.update_calls += 1;
+        }
         let index = query[0];
         let new_source = change[1];
         let new_target = change[2];
@@ -868,38 +885,7 @@ impl<
         query: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
-        let index = query[0];
-        let link = self.try_get_link(index)?;
-
-        self.resolve_danglind_internal(index);
-
-        self.update(index, T::from_byte(0), T::from_byte(0))?;
-
-        // TODO: move to `delete_core`
-        let header = self.get_header();
-
-        match index.cmp(&header.allocated) {
-            Ordering::Less => self.unused.attach_as_first(index),
-            Ordering::Greater => unreachable!(),
-            Ordering::Equal => {
-                let allocated = self.get_header().allocated;
-                let header = self.mut_header();
-                header.allocated = allocated - T::from_byte(1);
-
-                loop {
-                    let allocated = self.get_header().allocated;
-                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
-                        break;
-                    }
-                    self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::from_byte(1);
-                }
-            }
-        }
-        Ok(handler(
-            Link::new(index, link.source, link.target),
-            Link::nothing(),
-        ))
+        crate::decorators::delete_with_reset(self, query, handler)
     }
 }
 
@@ -947,4 +933,46 @@ unsafe impl<
         UL: SplitList<T>,
     > Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
+}
+
+impl<
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > crate::mem::Release<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+{
+    #[inline]
+    unsafe fn release_unchecked(&mut self, index: T, handler: WriteHandler<'_, T>) -> Flow {
+        self.resolve_dangling_internal(index);
+
+        let header = self.get_header();
+
+        match index.cmp(&header.allocated) {
+            Ordering::Less => self.unused.attach_as_first(index),
+            Ordering::Greater => unreachable!(),
+            Ordering::Equal => {
+                let allocated = self.get_header().allocated;
+                let header = self.mut_header();
+                header.allocated = allocated - T::from_byte(1);
+
+                loop {
+                    let allocated = self.get_header().allocated;
+                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
+                        break;
+                    }
+                    self.unused.detach(allocated);
+                    self.mut_header().allocated = allocated - T::from_byte(1);
+                }
+            }
+        }
+        handler(
+            Link::new(index, T::from_byte(0), T::from_byte(0)),
+            Link::nothing(),
+        )
+    }
 }

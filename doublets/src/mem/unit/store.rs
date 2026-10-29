@@ -26,6 +26,8 @@ mod tests;
 ///
 /// All link data and tree-index metadata are stored in one contiguous `RawMem` region.
 /// Use [`Store::new`] for default constants or [`Store::with_constants`] for custom ones.
+/// `delete*` methods use a resetting convenience adapter. For release without
+/// automatic reset, use [`crate::mem::Release`] or [`crate::decorators::CheckedRelease`].
 pub struct Store<
     T: LinkReference,
     M: RawMem<Item = LinkPart<T>>,
@@ -41,6 +43,8 @@ pub struct Store<
     sources: TS,
     targets: TT,
     unused: TU,
+    #[cfg(test)]
+    update_calls: usize,
 }
 
 impl<
@@ -87,6 +91,8 @@ impl<
             sources,
             targets,
             unused,
+            #[cfg(test)]
+            update_calls: 0,
         };
 
         // SAFETY: Without this, the code will become unsafe
@@ -499,6 +505,10 @@ impl<
         change: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
+        #[cfg(test)]
+        {
+            self.update_calls += 1;
+        }
         let index = query[0];
         let source = change[1];
         let target = change[2];
@@ -551,33 +561,7 @@ impl<
         query: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
-        let index = query[0];
-
-        let link = self.try_get_link(index)?;
-        self.update(index, T::from_byte(0), T::from_byte(0))?;
-
-        let header = self.get_header();
-        match index.cmp(&header.allocated) {
-            Ordering::Less => self.unused.attach_as_first(index),
-            Ordering::Equal => {
-                let allocated = self.get_header().allocated;
-                let header = self.mut_header();
-                header.allocated = allocated - T::from_byte(1);
-
-                loop {
-                    let allocated = self.get_header().allocated;
-                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
-                        break;
-                    }
-                    self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::from_byte(1);
-                }
-            }
-            // fixme: possible unreachable_unchecked
-            Ordering::Greater => unreachable!(),
-        }
-
-        Ok(handler(link, Link::nothing()))
+        crate::decorators::delete_with_reset(self, query, handler)
     }
 }
 
@@ -619,4 +603,41 @@ unsafe impl<
         TU: UnitList<T>,
     > Send for Store<T, M, TS, TT, TU>
 {
+}
+
+impl<
+        T: LinkReference,
+        M: RawMem<Item = LinkPart<T>>,
+        TS: UnitTree<T>,
+        TT: UnitTree<T>,
+        TU: UnitList<T>,
+    > crate::mem::Release<T> for Store<T, M, TS, TT, TU>
+{
+    #[inline]
+    unsafe fn release_unchecked(&mut self, index: T, handler: WriteHandler<'_, T>) -> Flow {
+        let header = self.get_header();
+        match index.cmp(&header.allocated) {
+            Ordering::Less => self.unused.attach_as_first(index),
+            Ordering::Equal => {
+                let allocated = self.get_header().allocated;
+                let header = self.mut_header();
+                header.allocated = allocated - T::from_byte(1);
+
+                loop {
+                    let allocated = self.get_header().allocated;
+                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
+                        break;
+                    }
+                    self.unused.detach(allocated);
+                    self.mut_header().allocated = allocated - T::from_byte(1);
+                }
+            }
+            Ordering::Greater => unreachable!(),
+        }
+
+        handler(
+            Link::new(index, T::from_byte(0), T::from_byte(0)),
+            Link::nothing(),
+        )
+    }
 }
