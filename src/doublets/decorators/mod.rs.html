@@ -54,55 +54,58 @@
 <a href=#54 id=54 data-nosnippet>54</a>//! statically composed stack has no such back-reference: a decorator only knows the
 <a href=#55 id=55 data-nosnippet>55</a>//! layers below it, so recursive calls re-enter at the layer that made them.
 <a href=#56 id=56 data-nosnippet>56</a>//!
-<a href=#57 id=57 data-nosnippet>57</a>//! For a stack whose outermost layer is the one doing the recursion the two are the same,
-<a href=#58 id=58 data-nosnippet>58</a>//! which is the case for every stack C# itself builds. Otherwise, put a decorator whose
-<a href=#59 id=59 data-nosnippet>59</a>//! behaviour the cascade must observe *below* the decorator that cascades.
-<a href=#60 id=60 data-nosnippet>60</a>//!
-<a href=#61 id=61 data-nosnippet>61</a>//! # Deviations from C\#
-<a href=#62 id=62 data-nosnippet>62</a>//!
-<a href=#63 id=63 data-nosnippet>63</a>//! Each is documented on the item it affects; in summary:
-<a href=#64 id=64 data-nosnippet>64</a>//!
-<a href=#65 id=65 data-nosnippet>65</a>//! - [`UniquenessResolver`] reports the surviving link to the handler, so
-<a href=#66 id=66 data-nosnippet>66</a>//!   [`create_link`](crate::Doublets::create_link) returns a valid address instead of the
-<a href=#67 id=67 data-nosnippet>67</a>//!   address of the link it just deleted.
-<a href=#68 id=68 data-nosnippet>68</a>//! - [`CascadeUsagesResolver`] tracks the links it has already visited, so a reference
-<a href=#69 id=69 data-nosnippet>69</a>//!   cycle terminates instead of overflowing the stack.
-<a href=#70 id=70 data-nosnippet>70</a>//! - `MergeUsages` re-points sources and targets correctly; the C# version writes null
-<a href=#71 id=71 data-nosnippet>71</a>//!   targets because of a `params` constructor mix-up.
-<a href=#72 id=72 data-nosnippet>72</a>//! - `EnsureCreated` actually calls the creator in its loop; the C# loop never terminates.
-<a href=#73 id=73 data-nosnippet>73</a>//! - [`InnerReferenceExistenceValidator::try_each_links`] exists because
-<a href=#74 id=74 data-nosnippet>74</a>//!   [`Links::each_links`](crate::Links::each_links) has no error channel.
-<a href=#75 id=75 data-nosnippet>75</a>//! - [`NoExceptionsDecorator`] maps `Err(_)` to [`Flow::Break`](data::Flow::Break), the
-<a href=#76 id=76 data-nosnippet>76</a>//!   closest thing Rust's [`Flow`](data::Flow) has to C#'s `Error` constant. It does not
-<a href=#77 id=77 data-nosnippet>77</a>//!   catch panics.
-<a href=#78 id=78 data-nosnippet>78</a>//! - [`LoggingDecorator`] surfaces the first I/O error from the log writer instead of
-<a href=#79 id=79 data-nosnippet>79</a>//!   discarding it.
-<a href=#80 id=80 data-nosnippet>80</a>
-<a href=#81 id=81 data-nosnippet>81</a></span><span class="kw">mod </span>macros;
-<a href=#82 id=82 data-nosnippet>82</a>
-<a href=#83 id=83 data-nosnippet>83</a><span class="kw">mod </span>builder;
-<a href=#84 id=84 data-nosnippet>84</a><span class="kw">mod </span>constants;
-<a href=#85 id=85 data-nosnippet>85</a><span class="kw">mod </span>deletion;
-<a href=#86 id=86 data-nosnippet>86</a><span class="kw">mod </span>existence;
-<a href=#87 id=87 data-nosnippet>87</a><span class="kw">mod </span>helpers;
-<a href=#88 id=88 data-nosnippet>88</a><span class="kw">mod </span>logging;
-<a href=#89 id=89 data-nosnippet>89</a><span class="kw">mod </span>no_exceptions;
-<a href=#90 id=90 data-nosnippet>90</a><span class="kw">mod </span>policy;
-<a href=#91 id=91 data-nosnippet>91</a><span class="kw">pub mod </span>transactions;
-<a href=#92 id=92 data-nosnippet>92</a><span class="kw">mod </span>uniqueness;
-<a href=#93 id=93 data-nosnippet>93</a><span class="kw">mod </span>usages;
-<a href=#94 id=94 data-nosnippet>94</a>
-<a href=#95 id=95 data-nosnippet>95</a><span class="kw">pub use </span>builder::{AutomaticUniquenessAndUsagesResolution, DecoratorsExt};
-<a href=#96 id=96 data-nosnippet>96</a><span class="kw">pub use </span>constants::{ItselfConstantToSelfReferenceResolver, NullConstantToSelfReferenceResolver};
-<a href=#97 id=97 data-nosnippet>97</a><span class="kw">pub use </span>deletion::NonNullContentsLinkDeletionResolver;
-<a href=#98 id=98 data-nosnippet>98</a><span class="kw">pub use </span>existence::{InnerReferenceExistenceValidator, NonExistentDependenciesCreator};
-<a href=#99 id=99 data-nosnippet>99</a><span class="kw">pub use </span>logging::LoggingDecorator;
-<a href=#100 id=100 data-nosnippet>100</a><span class="kw">pub use </span>no_exceptions::NoExceptionsDecorator;
-<a href=#101 id=101 data-nosnippet>101</a><span class="kw">pub use </span>policy::{CascadeResolve, Resolve, UniquenessPolicy, UsagesPolicy, Validate};
-<a href=#102 id=102 data-nosnippet>102</a><span class="kw">pub use </span>transactions::{
-<a href=#103 id=103 data-nosnippet>103</a>    FileTransitionLog, JournalEntry, MemoryTransitionLog, Transaction, TransactionsDecorator,
-<a href=#104 id=104 data-nosnippet>104</a>    Transition, TransitionKind, TransitionLog,
-<a href=#105 id=105 data-nosnippet>105</a>};
-<a href=#106 id=106 data-nosnippet>106</a><span class="kw">pub use </span>uniqueness::{CascadeUniquenessAndUsagesResolver, UniquenessResolver, UniquenessValidator};
-<a href=#107 id=107 data-nosnippet>107</a><span class="kw">pub use </span>usages::{CascadeUsagesResolver, UsagesValidator};
+<a href=#57 id=57 data-nosnippet>57</a>//! Put a decorator whose behaviour the cascade must observe *below* the decorator that
+<a href=#58 id=58 data-nosnippet>58</a>//! cascades. The automatic uniqueness and usages resolution stack keeps C#'s order,
+<a href=#59 id=59 data-nosnippet>59</a>//! with [`CascadeUsagesResolver`] below [`NonNullContentsLinkDeletionResolver`]. To
+<a href=#60 id=60 data-nosnippet>60</a>//! preserve its callbacks without a facade back-reference, the cascade explicitly resets
+<a href=#61 id=61 data-nosnippet>61</a>//! each usage to `(null, null)` before recursing into its usages, then deletes it after
+<a href=#62 id=62 data-nosnippet>62</a>//! those usages are gone. The outer reset layer handles the originally requested link.
+<a href=#63 id=63 data-nosnippet>63</a>//!
+<a href=#64 id=64 data-nosnippet>64</a>//! # Deviations from C\#
+<a href=#65 id=65 data-nosnippet>65</a>//!
+<a href=#66 id=66 data-nosnippet>66</a>//! Each is documented on the item it affects; in summary:
+<a href=#67 id=67 data-nosnippet>67</a>//!
+<a href=#68 id=68 data-nosnippet>68</a>//! - [`UniquenessResolver`] reports the surviving link to the handler, so
+<a href=#69 id=69 data-nosnippet>69</a>//!   [`create_link`](crate::Doublets::create_link) returns a valid address instead of the
+<a href=#70 id=70 data-nosnippet>70</a>//!   address of the link it just deleted.
+<a href=#71 id=71 data-nosnippet>71</a>//! - [`CascadeUsagesResolver`] tracks the links it has already visited, so a reference
+<a href=#72 id=72 data-nosnippet>72</a>//!   cycle terminates instead of overflowing the stack.
+<a href=#73 id=73 data-nosnippet>73</a>//! - `MergeUsages` re-points sources and targets correctly; the C# version writes null
+<a href=#74 id=74 data-nosnippet>74</a>//!   targets because of a `params` constructor mix-up.
+<a href=#75 id=75 data-nosnippet>75</a>//! - `EnsureCreated` actually calls the creator in its loop; the C# loop never terminates.
+<a href=#76 id=76 data-nosnippet>76</a>//! - [`InnerReferenceExistenceValidator::try_each_links`] exists because
+<a href=#77 id=77 data-nosnippet>77</a>//!   [`Links::each_links`](crate::Links::each_links) has no error channel.
+<a href=#78 id=78 data-nosnippet>78</a>//! - [`NoExceptionsDecorator`] maps `Err(_)` to [`Flow::Break`](data::Flow::Break), the
+<a href=#79 id=79 data-nosnippet>79</a>//!   closest thing Rust's [`Flow`](data::Flow) has to C#'s `Error` constant. It does not
+<a href=#80 id=80 data-nosnippet>80</a>//!   catch panics.
+<a href=#81 id=81 data-nosnippet>81</a>//! - [`LoggingDecorator`] surfaces the first I/O error from the log writer instead of
+<a href=#82 id=82 data-nosnippet>82</a>//!   discarding it.
+<a href=#83 id=83 data-nosnippet>83</a>
+<a href=#84 id=84 data-nosnippet>84</a></span><span class="kw">mod </span>macros;
+<a href=#85 id=85 data-nosnippet>85</a>
+<a href=#86 id=86 data-nosnippet>86</a><span class="kw">mod </span>builder;
+<a href=#87 id=87 data-nosnippet>87</a><span class="kw">mod </span>constants;
+<a href=#88 id=88 data-nosnippet>88</a><span class="kw">mod </span>deletion;
+<a href=#89 id=89 data-nosnippet>89</a><span class="kw">mod </span>existence;
+<a href=#90 id=90 data-nosnippet>90</a><span class="kw">mod </span>helpers;
+<a href=#91 id=91 data-nosnippet>91</a><span class="kw">mod </span>logging;
+<a href=#92 id=92 data-nosnippet>92</a><span class="kw">mod </span>no_exceptions;
+<a href=#93 id=93 data-nosnippet>93</a><span class="kw">mod </span>policy;
+<a href=#94 id=94 data-nosnippet>94</a><span class="kw">pub mod </span>transactions;
+<a href=#95 id=95 data-nosnippet>95</a><span class="kw">mod </span>uniqueness;
+<a href=#96 id=96 data-nosnippet>96</a><span class="kw">mod </span>usages;
+<a href=#97 id=97 data-nosnippet>97</a>
+<a href=#98 id=98 data-nosnippet>98</a><span class="kw">pub use </span>builder::{AutomaticUniquenessAndUsagesResolution, DecoratorsExt};
+<a href=#99 id=99 data-nosnippet>99</a><span class="kw">pub use </span>constants::{ItselfConstantToSelfReferenceResolver, NullConstantToSelfReferenceResolver};
+<a href=#100 id=100 data-nosnippet>100</a><span class="kw">pub use </span>deletion::NonNullContentsLinkDeletionResolver;
+<a href=#101 id=101 data-nosnippet>101</a><span class="kw">pub use </span>existence::{InnerReferenceExistenceValidator, NonExistentDependenciesCreator};
+<a href=#102 id=102 data-nosnippet>102</a><span class="kw">pub use </span>logging::LoggingDecorator;
+<a href=#103 id=103 data-nosnippet>103</a><span class="kw">pub use </span>no_exceptions::NoExceptionsDecorator;
+<a href=#104 id=104 data-nosnippet>104</a><span class="kw">pub use </span>policy::{CascadeResolve, Resolve, UniquenessPolicy, UsagesPolicy, Validate};
+<a href=#105 id=105 data-nosnippet>105</a><span class="kw">pub use </span>transactions::{
+<a href=#106 id=106 data-nosnippet>106</a>    FileTransitionLog, JournalEntry, MemoryTransitionLog, Transaction, TransactionsDecorator,
+<a href=#107 id=107 data-nosnippet>107</a>    Transition, TransitionKind, TransitionLog,
+<a href=#108 id=108 data-nosnippet>108</a>};
+<a href=#109 id=109 data-nosnippet>109</a><span class="kw">pub use </span>uniqueness::{CascadeUniquenessAndUsagesResolver, UniquenessResolver, UniquenessValidator};
+<a href=#110 id=110 data-nosnippet>110</a><span class="kw">pub use </span>usages::{CascadeUsagesResolver, UsagesValidator};
 </code></pre></div></section></main></body></html>
