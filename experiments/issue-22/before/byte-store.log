@@ -1,0 +1,77 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /tmp/gh-issue-solver-1793262556873/doublets/Cargo.toml
+workspace: /tmp/gh-issue-solver-1793262556873/Cargo.toml
+   Compiling serde_core v1.0.229
+   Compiling crossbeam-utils v0.8.23
+   Compiling rand_core v0.10.1
+   Compiling crossbeam-epoch v0.9.21
+   Compiling zerocopy v0.8.63
+   Compiling either v1.19.0
+   Compiling serde v1.0.229
+   Compiling half v2.7.1
+   Compiling crossbeam-deque v0.8.8
+   Compiling zmij v1.0.23
+   Compiling getrandom v0.4.3
+   Compiling clap_lex v1.1.1
+   Compiling anstyle v1.0.14
+   Compiling itoa v1.0.18
+   Compiling plotters-backend v0.3.7
+   Compiling memchr v2.8.3
+   Compiling regex-syntax v0.8.11
+   Compiling ciborium-io v0.2.2
+   Compiling ciborium-ll v0.2.2
+   Compiling regex-automata v0.4.18
+   Compiling serde_json v1.0.154
+   Compiling plotters-svg v0.3.7
+   Compiling clap_builder v4.6.7
+   Compiling thiserror v2.0.21
+   Compiling rayon-core v1.13.0
+   Compiling itertools v0.13.0
+   Compiling once_cell v1.21.4
+   Compiling same-file v1.0.6
+   Compiling cpufeatures v0.3.1
+   Compiling cast v0.3.0
+   Compiling criterion-plot v0.8.2
+   Compiling chacha20 v0.10.2
+   Compiling walkdir v2.5.0
+   Compiling tempfile v3.27.0
+   Compiling rayon v1.12.0
+   Compiling alloca v0.4.0
+   Compiling libmimalloc-sys v0.1.49
+   Compiling clap v4.6.7
+   Compiling plotters v0.3.7
+   Compiling tinytemplate v1.2.1
+   Compiling regex v1.13.1
+   Compiling ciborium v0.2.2
+   Compiling page_size v0.6.0
+   Compiling oorandom v11.1.5
+   Compiling anes v0.1.6
+   Compiling platform-mem v0.4.0
+   Compiling criterion v0.8.2
+   Compiling platform-data v2.0.0
+   Compiling mimalloc v0.1.52
+   Compiling rand v0.10.3
+   Compiling static_assertions v1.1.0
+   Compiling tinyvec v1.13.3
+   Compiling doublets v0.12.0 (/tmp/gh-issue-solver-1793262556873/doublets)
+    Finished `test` profile [unoptimized] target(s) in 51.50s
+     Running unittests src/lib.rs (target/debug/deps/doublets-04c72dcbf27ce8a7)
+
+running 1 test
+test mem::unit::store::tests::byte_store_can_allocate_its_full_address_range ... FAILED
+
+failures:
+
+---- mem::unit::store::tests::byte_store_can_allocate_its_full_address_range stdout ----
+
+thread 'mem::unit::store::tests::byte_store_can_allocate_its_full_address_range' (7074) panicked at doublets/src/mem/unit/store.rs:110:53:
+always ok: TryFromIntError(PosOverflow)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    mem::unit::store::tests::byte_store_can_allocate_its_full_address_range
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `-p doublets --lib`

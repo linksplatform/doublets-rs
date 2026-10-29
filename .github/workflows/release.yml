@@ -193,6 +193,7 @@ jobs:
   # Test runs independently of changelog check
   # === TEST ===
   test:
+    timeout-minutes: 30
     name: Test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     needs: [detect-changes, changelog]
@@ -226,6 +227,25 @@ jobs:
 
       - name: Run doc tests
         run: cargo test --doc --verbose
+
+      - name: Check every package on stable Rust
+        shell: bash
+        run: bash experiments/issue-22/check-packages.sh
+
+      - name: Test stable compatibility packages
+        shell: bash
+        run: |
+          cargo test --manifest-path doublets-decorators/Cargo.toml --all-features --locked
+          cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
+
+      - name: Test C library ABI
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo build --manifest-path doublets-ffi/Cargo.toml --release --target-dir target --locked
+          python3 experiments/issue-22/ffi-smoke.py target/release/libdoublets_ffi.so
+
+      - name: Check core without default features
+        run: cargo check -p doublets --no-default-features --locked
 
   # Generate and upload code coverage using cargo-llvm-cov
   # === CODE COVERAGE ===
