@@ -230,15 +230,17 @@ pub trait Doublets<T: LinkReference>: Links<T> {
     /// Returns the link at `index`, or `None` if it does not exist.
     fn get_link(&self, index: T) -> Option<Link<T>>;
 
-    /// Deletes all links in the store.
+    /// Deletes all links in reverse enumeration order.
+    /// Links already removed by cascading deletions are skipped.
     fn delete_all(&mut self) -> Result<(), Error<T>>
     where
         Self: Sized,
     {
-        let mut count = self.count();
-        while count != T::from_byte(0) {
-            self.delete(count)?;
-            count = self.count();
+        let indices: Vec<_> = self.each_iter([]).map(|link| link.index).collect();
+        for index in indices.into_iter().rev() {
+            if self.exist(index) {
+                self.delete(index)?;
+            }
         }
         Ok(())
     }
