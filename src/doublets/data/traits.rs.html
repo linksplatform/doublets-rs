@@ -198,8 +198,8 @@
 <a href=#198 id=198 data-nosnippet>198</a>        </span><span class="self">Self</span>: Sized,
 <a href=#199 id=199 data-nosnippet>199</a>    {
 <a href=#200 id=200 data-nosnippet>200</a>        <span class="kw">let </span><span class="kw-2">mut </span>result = T::from_byte(<span class="number">0</span>);
-<a href=#201 id=201 data-nosnippet>201</a>        <span class="self">self</span>.delete_by_with(query, |_before, after| {
-<a href=#202 id=202 data-nosnippet>202</a>            result = after.index;
+<a href=#201 id=201 data-nosnippet>201</a>        <span class="self">self</span>.delete_by_with(query, |before, _after| {
+<a href=#202 id=202 data-nosnippet>202</a>            result = before.index;
 <a href=#203 id=203 data-nosnippet>203</a>            Flow::Continue
 <a href=#204 id=204 data-nosnippet>204</a>        })
 <a href=#205 id=205 data-nosnippet>205</a>        .map(|<span class="kw">_</span>| result)
@@ -553,7 +553,7 @@
 <a href=#553 id=553 data-nosnippet>553</a>            <span class="prelude-val">Ok</span>(new)
 <a href=#554 id=554 data-nosnippet>554</a>        } <span class="kw">else </span>{
 <a href=#555 id=555 data-nosnippet>555</a>            <span class="self">self</span>.rebase(old, new)<span class="question-mark">?</span>;
-<a href=#556 id=556 data-nosnippet>556</a>            <span class="self">self</span>.delete(old)
+<a href=#556 id=556 data-nosnippet>556</a>            <span class="self">self</span>.delete(old).map(|<span class="kw">_</span>| new)
 <a href=#557 id=557 data-nosnippet>557</a>        }
 <a href=#558 id=558 data-nosnippet>558</a>    }
 <a href=#559 id=559 data-nosnippet>559</a>}
