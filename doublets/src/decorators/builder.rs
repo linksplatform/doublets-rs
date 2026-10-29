@@ -125,6 +125,8 @@ pub trait DecoratorsExt<T: LinkReference>: Doublets<T> + Sized {
     /// `ILinksExtensions.DecorateWithAutomaticUniquenessAndUsagesResolution`:
     /// [`CascadeUsagesResolver`] innermost, then [`NonNullContentsLinkDeletionResolver`],
     /// then [`CascadeUniquenessAndUsagesResolver`] outermost.
+    /// The cascade explicitly resets each nested usage before descending, so handlers
+    /// observe resets before the corresponding deletions, as with C#'s facade recursion.
     #[inline]
     fn with_automatic_uniqueness_and_usages_resolution(
         self,

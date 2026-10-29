@@ -65,8 +65,11 @@ decorator_struct! {
     /// so a reference cycle (`a` → `b` → `a`) makes it recurse until the stack overflows.
     /// This port threads a visited set through the cascade, so cyclic graphs terminate.
     /// The price is that the nested deletions run from this layer inwards rather than from
-    /// the top of the stack; place this decorator above the layers whose behaviour the
-    /// cascade must observe.
+    /// the top of the stack. Each usage is explicitly reset to `(null, null)` before
+    /// recursing, preserving the reset callbacks of the automatic resolution stack.
+    /// Place this decorator above any other layers whose behaviour the cascade must observe.
+    /// The initial reset of the requested link is left to
+    /// [`NonNullContentsLinkDeletionResolver`](super::NonNullContentsLinkDeletionResolver).
     CascadeUsagesResolver
 }
 
@@ -87,6 +90,9 @@ impl<T: LinkReference, L: Doublets<T>> CascadeUsagesResolver<T, L> {
             if usage.index == index || !self.links.exist(usage.index) {
                 continue;
             }
+            // C# re-enters the facade's non-null contents deletion resolver here.
+            // Static recursion bypasses that outer layer, so perform its reset explicitly.
+            helpers::enforce_reset_values(&mut self.links, usage.index, handler)?;
             self.cascade(usage.index, visited, handler)?;
         }
         self.links.delete_links(&[index], handler)
