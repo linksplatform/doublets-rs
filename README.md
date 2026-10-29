@@ -34,7 +34,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-doublets = "0.12.0"
+doublets = "0.13.0"
 ```
 
 Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
@@ -314,10 +314,6 @@ doublets-rs/
 │   │       └── split/  # Split storage implementation
 │   └── benches/        # Performance benchmarks
 ├── doublets-ffi/       # C FFI bindings
-├── dev-deps/           # Platform dependencies
-│   ├── data-rs/        # Data primitives (LinkType, Flow, etc.)
-│   ├── mem-rs/         # Memory abstractions (RawMem, FileMapped)
-│   └── trees-rs/       # Tree structures (size-balanced trees)
 └── integration/        # Integration tests
 ```
 
@@ -360,9 +356,10 @@ cargo bench --all-features
 
 ## Dependencies
 
-- [platform-data](https://github.com/linksplatform/data-rs) - Core data types
-- [platform-mem](https://github.com/linksplatform/mem-rs) - Memory abstractions
-- [platform-trees](https://github.com/linksplatform/trees-rs) - Tree implementations
+- [platform-num](https://crates.io/crates/platform-num) - Link reference numeric traits
+- [platform-data](https://crates.io/crates/platform-data) - Core data types
+- [platform-mem](https://crates.io/crates/platform-mem) - Memory abstractions
+- [platform-trees](https://crates.io/crates/platform-trees) - Tree implementations
 
 ## Support
 

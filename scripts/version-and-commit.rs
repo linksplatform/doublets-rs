@@ -220,6 +220,62 @@ fn update_cargo_toml(cargo_toml_path: &str, new_version: &str) -> Result<(), Str
     Ok(())
 }
 
+// Path dependencies share the released package's version even in excluded packages.
+// Keep their locked graphs usable after the release commit without updating registry crates.
+fn replace_local_lock_version(content: &str, crate_name: &str, new_version: &str) -> String {
+    let name = format!("name = \"{}\"", crate_name);
+    let version = Regex::new(r#"(?m)^version\s*=\s*"[^"]+""#).unwrap();
+    content.split("[[package]]").map(|package| {
+        let is_local = package.lines().any(|line| line == name)
+            && !package.lines().any(|line| line.starts_with("source ="));
+        if is_local {
+            version.replace(package, format!("version = \"{}\"", new_version)).into_owned()
+        } else {
+            package.to_string()
+        }
+    }).collect::<Vec<_>>().join("[[package]]")
+}
+
+fn replace_readme_dependency(content: &str, crate_name: &str, new_version: &str) -> String {
+    let dependency = Regex::new(&format!(
+        r#"(?m)^({}\s*=\s*")[^"]+(")"#,
+        regex::escape(crate_name),
+    )).unwrap();
+    dependency.replace_all(content, format!("${{1}}{}${{2}}", new_version)).into_owned()
+}
+
+fn sync_readme_version(rust_root: &str, crate_name: &str, new_version: &str) -> Result<(), String> {
+    let path = Path::new(rust_root).join("README.md");
+    if !path.exists() {
+        return Ok(());
+    }
+    let content = fs::read_to_string(&path).map_err(|e| format!("Failed to read README: {}", e))?;
+    let updated = replace_readme_dependency(&content, crate_name, new_version);
+    if updated != content {
+        fs::write(&path, updated).map_err(|e| format!("Failed to write README: {}", e))?;
+        exec("git", &["add", path.to_str().ok_or("Invalid README path")?])?;
+    }
+    Ok(())
+}
+
+fn sync_local_lock_versions(rust_root: &str, crate_name: &str, new_version: &str) -> Result<(), String> {
+    let tracked = exec("git", &["ls-files", "-z", "--", "Cargo.lock", "*/Cargo.lock"])?;
+    for file in tracked.split('\0').filter(|file| !file.is_empty()) {
+        if rust_root != "." && !Path::new(file).starts_with(rust_root) {
+            continue;
+        }
+        let content = fs::read_to_string(file)
+            .map_err(|e| format!("Failed to read {}: {}", file, e))?;
+        let updated = replace_local_lock_version(&content, crate_name, new_version);
+        if updated != content {
+            fs::write(file, updated).map_err(|e| format!("Failed to write {}: {}", file, e))?;
+            exec("git", &["add", file])?;
+            println!("Updated local {} version in {}", crate_name, file);
+        }
+    }
+    Ok(())
+}
+
 #[derive(Deserialize)]
 struct CratesIoCrate {
     versions: Option<Vec<CratesIoVersionEntry>>,
@@ -506,6 +562,16 @@ fn main() {
         exit(1);
     }
 
+    if let Err(e) = sync_local_lock_versions(&rust_root, &crate_name, &new_version) {
+        eprintln!("Error synchronizing release lockfiles: {}", e);
+        exit(1);
+    }
+
+    if let Err(e) = sync_readme_version(&rust_root, &crate_name, &new_version) {
+        eprintln!("Error synchronizing release README: {}", e);
+        exit(1);
+    }
+
     // Collect changelog fragments
     collect_changelog(&changelog_dir, &changelog_file, &new_version);
 
@@ -593,4 +659,38 @@ fn main() {
 
     set_output("version_committed", "true");
     set_output("new_version", &new_version);
+}
+
+#[cfg(test)]
+mod lockfile_tests {
+    use super::{replace_local_lock_version, replace_readme_dependency};
+
+    #[test]
+    fn updates_only_the_released_crates_installation_snippet() {
+        let original = "doublets = \"0.12.0\"\nother = \"0.12.0\"\nRust 1.85\n";
+        assert_eq!(replace_readme_dependency(original, "doublets", "0.13.0"),
+            "doublets = \"0.13.0\"\nother = \"0.12.0\"\nRust 1.85\n");
+        assert_eq!(replace_readme_dependency(original, "absent", "1.0.0"), original);
+    }
+
+    #[test]
+    fn updates_local_package_without_changing_registry_versions_or_lock_format() {
+        let original = r#"version = 4
+
+[[package]]
+name = "doublets"
+version = "0.12.0"
+dependencies = ["platform-data"]
+
+[[package]]
+name = "doublets"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "unchanged"
+"#;
+        let updated = replace_local_lock_version(original, "doublets", "0.12.1");
+        assert_eq!(updated, original.replacen("0.12.0", "0.12.1", 1));
+        assert_eq!(replace_local_lock_version(&updated, "doublets", "0.12.1"), updated);
+        assert_eq!(replace_local_lock_version(original, "missing", "1.0.0"), original);
+    }
 }
