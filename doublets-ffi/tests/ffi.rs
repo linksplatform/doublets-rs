@@ -1,4 +1,5 @@
-use super::*;
+use doublets::{data::LinksConstants, Link};
+use doublets_ffi::*;
 use std::{cell::Cell, ffi::CString};
 
 thread_local! {

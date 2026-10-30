@@ -4,7 +4,9 @@
 
 Read issue 81, its complete comments and sub-issue inventory (both empty), all
 three PR 85 feedback endpoints (empty), the linked Data.Doublets PR 527 review,
-and the related issue 58/67 and PR 77/84 work on October 29, 2026.
+and the related issue 58/67 and PR 77/84 work on October 29, 2026. All feedback
+endpoints were read again on October 30, including the request to move Rust
+tests out of source directories; there are still no required sub-issues.
 
 - [x] Identify the unconditional backend update and reproduce redundant reset.
 - [x] Extract and document a minimal unchecked release on both layouts.
@@ -25,7 +27,9 @@ The baseline unit and split `delete_links` both call `self.update(index, 0, 0)`
 even after the caller has already performed that update. Test-only counters in
 the actual stores measure update invocations; they add no production fields or
 runtime work. The reproducer is
-`deletion_of_reset_link_does_not_update_again` in each store's internal tests.
+`deletion_of_reset_link_does_not_update_again` in
+[`tests/internal/unit.rs`](../../doublets/tests/internal/unit.rs) and
+[`tests/internal/split.rs`](../../doublets/tests/internal/split.rs).
 Logs are kept in `target/issue-81-logs/`.
 
 ## Architecture decisions
@@ -52,7 +56,7 @@ release workflow; the version guard forbids manual manifest version bumps.
 
 | Requirement | Implementation | Automated verification |
 | --- | --- | --- |
-| Minimal release, no reset or contract validation | `Release::release_unchecked` implementations in both stores | Internal `minimal_release_and_resolver_do_only_required_updates`; valid unchecked calls in `tests/release.rs` |
+| Minimal release, no reset or contract validation | `Release::release_unchecked` implementations in both stores | `tests/internal/{unit,split}.rs::minimal_release_and_resolver_do_only_required_updates`; valid unchecked calls in `tests/release.rs` |
 | Explicit live/detached/incoming contract | `mem::Release` safety documentation; `docs/deletion.md` | Safe rejection of null/service/out-of-range/freed addresses and nonzero endpoints; no invalid unchecked tests |
 | Optional resetting layer | Existing resolver composed with `CheckedRelease` | `reset_is_an_explicit_layer`, update counts (zero direct, exactly one resolver reset), already-reset skip |
 | Preserve safe convenience deletion | `decorators::delete_with_reset` compatibility composition | Existing deletion return, handler, query, delete-all, cascade, decorator, transaction and FFI suites |
@@ -62,6 +66,7 @@ release workflow; the version guard forbids manual manifest version bumps.
 | Both layouts, free lists, tail collapse, reuse | Both primitive implementations | All new scenarios run on unit and split, including holes and allocated-tail release |
 | Document supported deletion routes | API docs, deletion guide, README, `examples/release.rs` | Compiled doctests and executable example; no-default release tests on all three CI platforms |
 | Prepare next automated release | Minor changelog fragment | Existing changelog/version guards; no manual version bump |
+| Rust tests live under `tests/` | Private-state suites in `doublets/tests/internal/{mem,unit,split}.rs`; FFI integration suite in `doublets-ffi/tests/ffi.rs` | `check-test-layout.sh` runs locally and in CI; before/after inventories preserve all 12 library tests and seven FFI tests |
 
 ## Reproduction and verification
 
@@ -80,7 +85,8 @@ The verification script saves logs in `target/issue-81-logs/`. It runs the new
 suite with default features and without defaults, the example, and all maintained
 repository checks: strict Clippy, workspace tests/doctests, release and docs,
 standalone FFI/macro tests, C ABI smoke tests, package inventory, embedded script
-builds and documentation/release guards. Builds use one Cargo job and reduced
+builds and documentation/release guards, plus the source test layout check.
+Builds use one Cargo job and reduced
 debug information. Cases are finite; no invalid unchecked memory is exercised.
 
 `DOUBLETS_TRACE_SPLIT_INDEXES=1 cargo run -p doublets --example release` logs
@@ -95,6 +101,22 @@ checks; C ABI callbacks, disposal and reopening for all four address widths;
 all five package checks; all 13 embedded release-script builds; and repository
 documentation/release guards. The trace example confirmed incoming-index moves
 on both release and reuse. Builds stayed within the container's memory limit.
+
+## October 30 review: test organization
+
+[PR feedback](https://github.com/linksplatform/doublets-rs/pull/85#issuecomment-6523873049)
+requires Rust test implementations to live under `tests/`. Before relocation,
+`bash experiments/issue-81/check-test-layout.sh` failed with four offending files;
+[`test-layout-before.log`](test-layout-before.log) preserves the evidence.
+
+The three private-state suites moved unchanged to `doublets/tests/internal/`.
+Test-only path declarations retain their existing module scope, private field
+access, test names and update counters without exposing production internals.
+The FFI tests now import the public bindings from `doublets-ffi/tests/ffi.rs`;
+an additional `rlib` output supports Rust integration tests alongside the existing
+C library outputs. No test implementation remains under `src/`, and the flat
+test files avoid creating single-file module directories. Documentation examples
+remain with their APIs and are still checked as doctests.
 
 For PR CI, list the most recent runs with timestamps and SHAs, confirm each run
 matches the latest push, download any failing run into `ci-logs/`, inspect actual

@@ -14,7 +14,7 @@ description = "FFI bindings for the doublets library"
 readme = "../README.md"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 log = { version = "0.4.34", features = ["std"] }

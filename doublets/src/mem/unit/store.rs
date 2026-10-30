@@ -19,7 +19,7 @@ use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
 #[cfg(test)]
-#[path = "tests.rs"]
+#[path = "../../../tests/internal/unit.rs"]
 mod tests;
 
 /// A single-memory doublets store backed by a size-balanced search tree.

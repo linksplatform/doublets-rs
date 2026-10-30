@@ -16,6 +16,7 @@ mod traits;
 pub mod unit;
 
 #[cfg(test)]
+#[path = "../../tests/internal/mem.rs"]
 mod tests;
 
 #[cfg(feature = "mem")]

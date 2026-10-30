@@ -82,6 +82,9 @@ Thank you for your interest in contributing! This document provides guidelines a
    rust-script scripts/check-readme-badges.rs
    rust-script scripts/check-toolchain-docs.rs
 
+   # Keep Rust test implementations in tests/
+   bash experiments/issue-81/check-test-layout.sh
+
    # Run all checks together
    cargo fmt --all -- --check && cargo clippy --all-targets --all-features && rust-script scripts/check-file-size.rs && rust-script scripts/check-readme-badges.rs && rust-script scripts/check-toolchain-docs.rs
    ```
@@ -207,29 +210,24 @@ pub fn example_function(arg1: i32, arg2: i32) -> i32 {
 - Write tests for all new features
 - Maintain or improve test coverage
 - Use descriptive test names
-- Organize tests in modules when appropriate
-- Use `#[cfg(test)]` for test-only code
+- Keep all Rust test implementations in the package's `tests/` directory.
+- Prefer integration tests that exercise the public API.
+- Private-state tests live in `doublets/tests/internal/` and are included with
+  `#[cfg(test)]` and `#[path = "..."]` from the module they exercise. This keeps
+  private implementation details private while preserving internal coverage.
+- Use a single file instead of a new directory containing only one file.
 
-Example test structure:
+Example integration test in `doublets/tests/creation.rs`:
 
 ```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
+use doublets::{unit, Doublets, Link};
+use mem::Global;
 
-    mod my_feature_tests {
-        use super::*;
-
-        #[test]
-        fn test_basic_functionality() {
-            assert_eq!(my_function(), expected_result);
-        }
-
-        #[test]
-        fn test_edge_case() {
-            assert_eq!(my_function(edge_case_input), expected_result);
-        }
-    }
+#[test]
+fn creates_a_point() {
+    let mut store = unit::Store::<u32, _>::new(Global::new()).unwrap();
+    let index = store.create_point().unwrap();
+    assert_eq!(store.get_link(index), Some(Link::point(index)));
 }
 ```
 
