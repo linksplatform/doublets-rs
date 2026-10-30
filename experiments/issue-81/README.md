@@ -131,6 +131,15 @@ two relocated release-script tests); and dependency, layout, file-size, badge,
 toolchain, changelog and version guards. Before/after test inventories match.
 Logs are saved under `target/issue-81-logs/` and `ci-logs/`.
 
+The first fresh CI run (`41075101069`, commit `a856440`) found that the Ubuntu
+runner does not provide ripgrep: its lint log reports `rg: command not found`
+at line 612. The layout guard now uses Git's built-in grep. The existing embedded
+script compilation step uses standard `grep` so missing ripgrep cannot silently
+skip those tests. `verify-test-layout.sh` reproduces the missing-tool failure
+before the fix, then verifies accepted test files and rejected source test
+attributes using a finite temporary repository with no ripgrep on its PATH.
+The same regression check runs locally and in CI.
+
 For PR CI, list the most recent runs with timestamps and SHAs, confirm each run
 matches the latest push, download any failing run into `ci-logs/`, inspect actual
 errors and line numbers, fix them, and verify a fresh run. Before marking ready,

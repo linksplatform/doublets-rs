@@ -2,8 +2,9 @@
 # Keep Rust test implementations in tests directories.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-if rg -n --glob '*.rs' --glob '!**/tests/**' --glob '!**/target/**' \
-    '^[[:blank:]]*#\[([[:alnum:]_]+::)*test([[:blank:]]*\]|\()' .; then
+if git --no-pager grep --no-color --untracked --exclude-standard -n -E \
+    '^[[:blank:]]*#\[([[:alnum:]_]+::)*test([[:blank:]]*\]|\()' \
+    -- '*.rs' ':(exclude,glob)**/tests/**' ':(exclude,glob)**/target/**'; then
     echo 'Move Rust test implementations into tests/.' >&2
     exit 1
 else

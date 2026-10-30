@@ -6,6 +6,7 @@ export CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0
 export RUSTFLAGS=-Dwarnings RUSTDOCFLAGS=-Dwarnings
 export ISSUE22_LOG_DIR=target/issue-81-logs
 mkdir -p "$ISSUE22_LOG_DIR"
+bash experiments/issue-81/verify-test-layout.sh
 bash experiments/issue-81/check-test-layout.sh
 for features in default no-default; do
     args=()

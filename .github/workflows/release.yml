@@ -167,7 +167,9 @@ jobs:
 
       - name: Check Rust test layout
         shell: bash
-        run: bash experiments/issue-81/check-test-layout.sh
+        run: |
+          bash experiments/issue-81/verify-test-layout.sh
+          bash experiments/issue-81/check-test-layout.sh
 
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
@@ -180,7 +182,7 @@ jobs:
       - name: Compile embedded script dependencies
         run: |
           for script in scripts/*.rs; do
-            if rg -q '^//! \[dependencies\]' "$script"; then
+            if grep -q '^//! \[dependencies\]' "$script"; then
               rust-script --test "$script"
             fi
           done
