@@ -325,6 +325,9 @@ pub trait Doublets<T: LinkReference>: Links<T> {
     }
 
     /// Creates a link from `source` to `target`, calling `handler` with before/after states.
+    ///
+    /// A handler's [`Flow::Break`] suppresses later callbacks and is returned even if
+    /// an inner layer returns [`Flow::Continue`]. Link initialization still completes.
     fn create_link_with<F>(&mut self, source: T, target: T, handler: F) -> Result<Flow, Error<T>>
     where
         F: FnMut(Link<T>, Link<T>) -> Flow,
@@ -338,8 +341,13 @@ pub trait Doublets<T: LinkReference>: Links<T> {
             Flow::Continue
         })?;
 
-        self.update_links(&[new], &[new, source, target], &mut |before, after| {
+        let flow = self.update_links(&[new], &[new, source, target], &mut |before, after| {
             handler.call(before, after)
+        })?;
+        Ok(if handler.flow().is_break() {
+            Flow::Break
+        } else {
+            flow
         })
     }
 

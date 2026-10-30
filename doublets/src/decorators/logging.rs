@@ -27,6 +27,9 @@ use crate::{
 /// Delete. Before: (3: 1->2). After: (0->0)
 /// ```
 ///
+/// A callback's [`Flow::Break`] suppresses later user callbacks while completed
+/// mutations continue to be logged. The break is returned once the operation finishes.
+///
 /// # Deviation from C\#
 ///
 /// C# writes to an auto-flushing `StreamWriter` and drops I/O errors. This port keeps the
@@ -127,7 +130,11 @@ macro_rules! logged {
         let flow = $operation?;
         match failure {
             Some(err) => Err(Error::from(err)),
-            None => Ok(flow),
+            None => Ok(if fuse.flow().is_break() {
+                Flow::Break
+            } else {
+                flow
+            }),
         }
     }};
 }

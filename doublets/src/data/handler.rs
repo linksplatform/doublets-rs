@@ -22,6 +22,15 @@ impl<T: LinkReference, F: FnMut(Link<T>, Link<T>) -> Flow> Fuse<T, F> {
         }
     }
 
+    /// Returns the recorded callback control, independently of the store's result.
+    pub(crate) const fn flow(&self) -> Flow {
+        if self.done {
+            Flow::Break
+        } else {
+            Flow::Continue
+        }
+    }
+
     /// Calls the inner handler unless it has already returned [`Flow::Break`].
     pub fn call(&mut self, before: Link<T>, after: Link<T>) -> Flow {
         if self.done {
