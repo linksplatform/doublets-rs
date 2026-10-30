@@ -169,6 +169,7 @@ jobs:
         shell: bash
         run: |
           bash experiments/issue-81/verify-test-layout.sh
+          bash experiments/issue-81/verify-package-discovery.sh
           bash experiments/issue-81/check-test-layout.sh
 
       - name: Run Clippy

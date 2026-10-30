@@ -140,6 +140,15 @@ before the fix, then verifies accepted test files and rejected source test
 attributes using a finite temporary repository with no ripgrep on its PATH.
 The same regression check runs locally and in CI.
 
+The archived run also exposed the same missing tool in package discovery: the
+combined log reports it at lines 2933 and 4607 on Ubuntu and Windows, then
+continues without checking any manifests. Package discovery now uses Git and
+standard grep, propagates discovery errors, and rejects a zero-package result.
+`verify-package-discovery.sh` reproduces the skipped checks before the fix and
+verifies both a normal package and a nested standalone package with a mock Cargo
+command and no ripgrep on PATH. It also verifies the zero-package guard. Both
+finite regression fixtures run in CI, and all five real packages pass locally.
+
 For PR CI, list the most recent runs with timestamps and SHAs, confirm each run
 matches the latest push, download any failing run into `ci-logs/`, inspect actual
 errors and line numbers, fix them, and verify a fresh run. Before marking ready,
