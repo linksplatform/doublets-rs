@@ -215,6 +215,7 @@ pub fn example_function(arg1: i32, arg2: i32) -> i32 {
 - Private-state tests live in `doublets/tests/internal/` and are included with
   `#[cfg(test)]` and `#[path = "..."]` from the module they exercise. This keeps
   private implementation details private while preserving internal coverage.
+- Standalone Rust script tests follow the same rule, using `scripts/tests/`.
 - Use a single file instead of a new directory containing only one file.
 
 Example integration test in `doublets/tests/creation.rs`:

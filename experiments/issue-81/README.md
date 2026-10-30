@@ -66,7 +66,7 @@ release workflow; the version guard forbids manual manifest version bumps.
 | Both layouts, free lists, tail collapse, reuse | Both primitive implementations | All new scenarios run on unit and split, including holes and allocated-tail release |
 | Document supported deletion routes | API docs, deletion guide, README, `examples/release.rs` | Compiled doctests and executable example; no-default release tests on all three CI platforms |
 | Prepare next automated release | Minor changelog fragment | Existing changelog/version guards; no manual version bump |
-| Rust tests live under `tests/` | Private-state suites in `doublets/tests/internal/{mem,unit,split}.rs`; FFI integration suite in `doublets-ffi/tests/ffi.rs` | `check-test-layout.sh` runs locally and in CI; before/after inventories preserve all 12 library tests and seven FFI tests |
+| Rust tests live under `tests/` | Private-state suites in `doublets/tests/internal/{mem,unit,split}.rs`; FFI integration suite in `doublets-ffi/tests/ffi.rs`; release-script tests in `scripts/tests/version_and_commit.rs` | `check-test-layout.sh` runs locally and in CI; before/after inventories preserve all 12 library tests, seven FFI tests and two release-script tests |
 
 ## Reproduction and verification
 
@@ -86,8 +86,8 @@ suite with default features and without defaults, the example, and all maintaine
 repository checks: strict Clippy, workspace tests/doctests, release and docs,
 standalone FFI/macro tests, C ABI smoke tests, package inventory, embedded script
 builds and documentation/release guards, plus the source test layout check.
-Builds use one Cargo job and reduced
-debug information. Cases are finite; no invalid unchecked memory is exercised.
+Builds use one Cargo job and reduced debug information. Cases are finite; no
+invalid unchecked memory is exercised.
 
 `DOUBLETS_TRACE_SPLIT_INDEXES=1 cargo run -p doublets --example release` logs
 incoming-entry moves in both directions; the existing tracing option remains
@@ -108,15 +108,28 @@ on both release and reuse. Builds stayed within the container's memory limit.
 requires Rust test implementations to live under `tests/`. Before relocation,
 `bash experiments/issue-81/check-test-layout.sh` failed with four offending files;
 [`test-layout-before.log`](test-layout-before.log) preserves the evidence.
+The two release-script tests also moved into `scripts/tests/version_and_commit.rs`;
+[`script-test-layout-before.log`](script-test-layout-before.log) records their
+failure under the broader rule requiring every Rust test to live under `tests/`.
 
 The three private-state suites moved unchanged to `doublets/tests/internal/`.
 Test-only path declarations retain their existing module scope, private field
 access, test names and update counters without exposing production internals.
 The FFI tests now import the public bindings from `doublets-ffi/tests/ffi.rs`;
 an additional `rlib` output supports Rust integration tests alongside the existing
-C library outputs. No test implementation remains under `src/`, and the flat
-test files avoid creating single-file module directories. Documentation examples
-remain with their APIs and are still checked as doctests.
+C library outputs. Every Rust test implementation now lives under `tests/`, and
+the flat test files avoid creating single-file module directories. Documentation
+examples remain with their APIs and are still checked as doctests.
+
+Local verification on October 30 passed: 446 workspace tests with zero failures
+and one existing ignored doctest; six separate default-feature doctests; all
+16 release tests with default features and without defaults; all seven FFI
+integration tests and both procedural macro suites; C ABI smoke tests for all
+four address widths; strict formatting/Clippy; release, documentation and package
+checks; all five package manifests; all 13 embedded script builds (including the
+two relocated release-script tests); and dependency, layout, file-size, badge,
+toolchain, changelog and version guards. Before/after test inventories match.
+Logs are saved under `target/issue-81-logs/` and `ci-logs/`.
 
 For PR CI, list the most recent runs with timestamps and SHAs, confirm each run
 matches the latest push, download any failing run into `ci-logs/`, inspect actual

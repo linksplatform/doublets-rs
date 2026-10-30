@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Keep Rust test implementations outside source directories.
+# Keep Rust test implementations in tests directories.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-if rg -n --glob '**/src/**/*.rs' --glob '!**/target/**' \
+if rg -n --glob '*.rs' --glob '!**/tests/**' --glob '!**/target/**' \
     '^[[:blank:]]*#\[([[:alnum:]_]+::)*test([[:blank:]]*\]|\()' .; then
-    echo 'Move Rust test implementations from src/ to tests/.' >&2
+    echo 'Move Rust test implementations into tests/.' >&2
     exit 1
 else
     result=$?
     if [[ $result != 1 ]]; then exit "$result"; fi
 fi
-echo 'All Rust test implementations are outside src/.'
+echo 'All Rust test implementations are under tests/.'
