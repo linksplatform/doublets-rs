@@ -1,0 +1,3 @@
+./scripts/version-and-commit.rs:668:    #[test]
+./scripts/version-and-commit.rs:676:    #[test]
+Move Rust test implementations into tests/.

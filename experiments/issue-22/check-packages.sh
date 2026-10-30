@@ -9,10 +9,15 @@ export CARGO_TARGET_DIR="$(pwd -W 2>/dev/null || pwd)/target"
 log_dir=${ISSUE22_LOG_DIR:-target/issue-22-logs}
 mkdir -p "$log_dir"
 status=0
+checked=0
+# Git is available on every CI runner. Capture discovery first so a failed
+# command cannot be swallowed by process substitution and pass with zero checks.
+manifests=$(git ls-files --cached --others --exclude-standard -- 'Cargo.toml' '**/Cargo.toml')
 while IFS= read -r manifest; do
-    if ! rg -q '^\[package\]' "$manifest"; then
+    if ! grep -q '^\[package\]' "$manifest"; then
         continue
     fi
+    checked=$((checked + 1))
     package=$(dirname "$manifest")
     name=${package//\//-}
     echo "Checking $package on stable (log: $log_dir/$name.log)"
@@ -21,5 +26,9 @@ while IFS= read -r manifest; do
         cat "$log_dir/$name.log"
         status=1
     fi
-done < <(rg --files --path-separator / -g Cargo.toml -g '!target/**' -g '!**/target/**' | sort)
+done <<< "$manifests"
+if [[ $checked -eq 0 ]]; then
+    echo 'No package manifests were checked.' >&2
+    exit 1
+fi
 exit "$status"
