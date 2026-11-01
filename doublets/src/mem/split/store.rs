@@ -60,6 +60,9 @@ pub struct Store<
     unused: UL,
     #[cfg(test)]
     update_calls: usize,
+    /// Test-only count of contract lookups through [`Doublets::get_link`].
+    #[cfg(test)]
+    link_lookups: std::sync::atomic::AtomicUsize,
 }
 
 impl<
@@ -119,6 +122,8 @@ impl<
             unused,
             #[cfg(test)]
             update_calls: 0,
+            #[cfg(test)]
+            link_lookups: std::sync::atomic::AtomicUsize::new(0),
         };
 
         // SAFETY: Without this, the code will become unsafe
@@ -806,78 +811,7 @@ impl<
         change: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
-        #[cfg(test)]
-        {
-            self.update_calls += 1;
-        }
-        let index = query[0];
-        let new_source = change[1];
-        let new_target = change[2];
-
-        let link = self.try_get_link(index)?;
-
-        // Detaching a self reference temporarily clears this link's tree
-        // sizes. is_unused uses those sizes, so classify destinations while the
-        // original indexes still describe the link as live.
-        let virtual_source = self.is_virtual(new_source);
-        let virtual_target = self.is_virtual(new_target);
-
-        if link.source != T::from_byte(0) {
-            // SAFETY: Here index attach to source
-            unsafe {
-                if self.is_virtual(link.source) {
-                    self.detach_external_source(index);
-                } else if Self::USE_LIST {
-                    // self.sources_list.attach_as_last(source, index);
-                    todo!()
-                } else {
-                    self.detach_internal_source(link.source, index);
-                }
-            }
-        }
-
-        if link.target != T::from_byte(0) {
-            // SAFETY: Here index attach to target
-            unsafe {
-                if self.is_virtual(link.target) {
-                    self.detach_external_target(index);
-                } else {
-                    self.detach_internal_target(link.target, index);
-                }
-            }
-        }
-
-        let place = self.mut_data_part(index);
-        place.source = new_source;
-        place.target = new_target;
-        let place = place.clone();
-
-        if place.source != T::from_byte(0) {
-            // SAFETY: Here index attach to source
-            unsafe {
-                if virtual_source {
-                    self.attach_external_source(index);
-                } else if Self::USE_LIST {
-                    // self.sources_list.attach_as_last(source, index);
-                    todo!()
-                } else {
-                    self.attach_internal_source(place.source, index);
-                }
-            }
-        }
-
-        if place.target != T::from_byte(0) {
-            // SAFETY: Here index attach to target
-            unsafe {
-                if virtual_target {
-                    self.attach_external_target(index);
-                } else {
-                    self.attach_internal_target(place.target, index);
-                }
-            }
-        }
-
-        Ok(handler(link, Link::new(index, place.source, place.target)))
+        crate::decorators::CheckedMutation::new(self).update_links(query, change, handler)
     }
 
     fn delete_links(
@@ -885,7 +819,7 @@ impl<
         query: &[T],
         handler: WriteHandler<'_, T>,
     ) -> Result<Flow, LinksError<T>> {
-        crate::decorators::delete_with_reset(self, query, handler)
+        crate::decorators::CheckedMutation::new(self).delete_links(query, handler)
     }
 }
 
@@ -901,6 +835,9 @@ impl<
     > Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
+        #[cfg(test)]
+        self.link_lookups
+            .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         if self.exists(index) {
             Some(unsafe { self.get_link_unchecked(index) })
         } else {
@@ -974,5 +911,97 @@ impl<
             Link::new(index, T::from_byte(0), T::from_byte(0)),
             Link::nothing(),
         )
+    }
+}
+
+impl<
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+    > crate::mem::UncheckedMutation<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+{
+    #[inline]
+    unsafe fn update_unchecked(
+        &mut self,
+        index: T,
+        source: T,
+        target: T,
+        handler: WriteHandler<'_, T>,
+    ) -> Flow {
+        #[cfg(test)]
+        {
+            self.update_calls += 1;
+        }
+        let link = self.get_data_part(index).clone();
+        let link = Link::new(index, link.source, link.target);
+
+        // Detaching a self reference temporarily clears this link's tree
+        // sizes. is_unused uses those sizes, so classify destinations while the
+        // original indexes still describe the link as live.
+        let virtual_source = self.is_virtual(source);
+        let virtual_target = self.is_virtual(target);
+
+        if link.source != T::from_byte(0) {
+            // SAFETY: the caller guarantees that `index` is live, so it is a
+            // member of the tree that indexes its current nonzero source.
+            unsafe {
+                if self.is_virtual(link.source) {
+                    self.detach_external_source(index);
+                } else if Self::USE_LIST {
+                    // self.sources_list.attach_as_last(source, index);
+                    todo!()
+                } else {
+                    self.detach_internal_source(link.source, index);
+                }
+            }
+        }
+
+        if link.target != T::from_byte(0) {
+            // SAFETY: as above, for the current nonzero target.
+            unsafe {
+                if self.is_virtual(link.target) {
+                    self.detach_external_target(index);
+                } else {
+                    self.detach_internal_target(link.target, index);
+                }
+            }
+        }
+
+        let place = self.mut_data_part(index);
+        place.source = source;
+        place.target = target;
+        let place = place.clone();
+
+        if place.source != T::from_byte(0) {
+            // SAFETY: `index` is live and was detached from its source tree.
+            unsafe {
+                if virtual_source {
+                    self.attach_external_source(index);
+                } else if Self::USE_LIST {
+                    // self.sources_list.attach_as_last(source, index);
+                    todo!()
+                } else {
+                    self.attach_internal_source(place.source, index);
+                }
+            }
+        }
+
+        if place.target != T::from_byte(0) {
+            // SAFETY: `index` is live and was detached from its target tree.
+            unsafe {
+                if virtual_target {
+                    self.attach_external_target(index);
+                } else {
+                    self.attach_internal_target(place.target, index);
+                }
+            }
+        }
+
+        handler(link, Link::new(index, place.source, place.target))
     }
 }

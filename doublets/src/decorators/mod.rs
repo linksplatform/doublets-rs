@@ -39,6 +39,7 @@
 //! | `LinksItselfConstantToSelfReferenceResolver` | [`ItselfConstantToSelfReferenceResolver`] | | ● | | ● |
 //! | `LinksNullConstantToSelfReferenceResolver` | [`NullConstantToSelfReferenceResolver`] | ● | ● | | |
 //! | `LinksNonExistentDependenciesCreator` | [`NonExistentDependenciesCreator`] | | ● | | |
+//! | `LinksNonExistentDeletionResolver` | [`NonExistentDeletionResolver`] | | | ● | |
 //! | `NonNullContentsLinkDeletionResolver` | [`NonNullContentsLinkDeletionResolver`] | | | ● | |
 //! | `LoggingDecorator` | [`LoggingDecorator`] | ● | ● | ● | |
 //! | `NoExceptionsDecorator` | [`NoExceptionsDecorator`] | ● | ● | ● | ● |
@@ -89,6 +90,7 @@ mod deletion;
 mod existence;
 mod helpers;
 mod logging;
+mod mutation;
 mod no_exceptions;
 mod policy;
 pub mod transactions;
@@ -97,10 +99,12 @@ mod usages;
 
 pub use builder::{AutomaticUniquenessAndUsagesResolution, DecoratorsExt};
 pub use constants::{ItselfConstantToSelfReferenceResolver, NullConstantToSelfReferenceResolver};
-pub(crate) use deletion::delete_with_reset;
 pub use deletion::{CheckedRelease, NonNullContentsLinkDeletionResolver};
-pub use existence::{InnerReferenceExistenceValidator, NonExistentDependenciesCreator};
+pub use existence::{
+    InnerReferenceExistenceValidator, NonExistentDeletionResolver, NonExistentDependenciesCreator,
+};
 pub use logging::LoggingDecorator;
+pub use mutation::CheckedMutation;
 pub use no_exceptions::NoExceptionsDecorator;
 pub use policy::{CascadeResolve, Resolve, UniquenessPolicy, UsagesPolicy, Validate};
 pub use transactions::{

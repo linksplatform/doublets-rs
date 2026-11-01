@@ -102,3 +102,55 @@ impl<T: LinkReference, L: Doublets<T>> Links<T> for NonExistentDependenciesCreat
         self.links.update_links(query, change, handler)
     }
 }
+
+decorator_struct! {
+    /// Ignores deletion of a missing link without calling the inner store or the handler.
+    ///
+    /// Port of C# `LinksNonExistentDeletionResolver`. A deletion whose requested
+    /// index is not a live link returns `Ok(Flow::Continue)` with no writes and no
+    /// callbacks. A deletion of a live link is forwarded unchanged, so every error
+    /// the inner layers return — usages, contents, I/O, capacity — still
+    /// propagates. Unlike [`NoExceptionsDecorator`](super::NoExceptionsDecorator),
+    /// it decides before the operation and never swallows an error.
+    ///
+    /// This is the *ignore* policy for a missing deletion; the *error* policy is
+    /// [`InnerReferenceExistenceValidator`] (or the stores' checked
+    /// [`CheckedMutation`](super::CheckedMutation) route). It only guards the
+    /// requested address: endpoint reset, usages and other contracts remain
+    /// separate policies. Place it outside reset and cascade resolvers so it
+    /// runs before they read the link. Other operations are forwarded unchanged.
+    ///
+    /// ```
+    /// use doublets::{decorators::DecoratorsExt, unit, Doublets};
+    /// use mem::Global;
+    /// # fn main() -> Result<(), doublets::Error<u32>> {
+    /// let mut store = unit::Store::<u32, _>::new(Global::new())?
+    ///     .with_automatic_uniqueness_and_usages_resolution()
+    ///     .with_non_existent_deletion_resolution();
+    /// let index = store.create_point()?;
+    /// assert_eq!(store.delete(index)?, index);
+    /// // Deleting it again is a no-op instead of `Error::NotExists`.
+    /// assert_eq!(store.delete(index)?, 0);
+    /// # Ok(())
+    /// # }
+    /// ```
+    NonExistentDeletionResolver
+}
+
+impl<T: LinkReference, L: Doublets<T>> Links<T> for NonExistentDeletionResolver<T, L> {
+    forward!(count_links, each_links, create_links, update_links);
+
+    #[inline]
+    fn delete_links(
+        &mut self,
+        query: &[T],
+        handler: WriteHandler<'_, T>,
+    ) -> Result<Flow, Error<T>> {
+        let index = helpers::part(query, self.links.constants().index_part);
+        if self.links.get_link(index).is_some() {
+            self.links.delete_links(query, handler)
+        } else {
+            Ok(Flow::Continue)
+        }
+    }
+}
