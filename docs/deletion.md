@@ -6,14 +6,17 @@ remain safe Rust; contract checks can only be skipped through an `unsafe` call.
 
 | Route | Endpoint reset | Address/content checks | Callback |
 | --- | --- | --- | --- |
-| `store.delete*` | Automatic, only when needed | Checked | One original-state deletion event |
+| `store.delete*` (via `CheckedMutation`) | Automatic, only when needed | Checked | One original-state deletion event |
 | `Release::release` / `release_with` | Caller resets first | Checked | One reset-state deletion event |
 | `CheckedRelease::new(&mut store).delete*` | Caller resets first | Checked | One reset-state deletion event |
 | Reset resolver over `CheckedRelease` | Automatic, only when needed | Checked | Reset event if needed, then deletion |
 | `Release::release_unchecked` | Caller resets first | Caller guarantees contract | One reset-state deletion event |
+| `update_unchecked(index, 0, 0)` then `release_unchecked` | Caller-composed | Caller guarantees contract | Reset event, then deletion |
 
-`Release` is in `doublets::mem`. `CheckedRelease` and
-`NonNullContentsLinkDeletionResolver` are in `doublets::decorators`.
+`Release` and `UncheckedMutation` are in `doublets::mem`. `CheckedRelease`,
+`CheckedMutation` and `NonNullContentsLinkDeletionResolver` are in
+`doublets::decorators`. See [mutation](mutation.md) for updates, the
+missing-address policies and how to omit checks.
 
 ## Already detached live links
 
@@ -67,10 +70,14 @@ With a callback, this composition reports `(index, source, target)` to
 reports only the deletion. `Flow::Break` fuses subsequent callbacks; the reset
 and release still complete and the operation returns `Break`.
 
-Existing `store.delete*` calls remain a checked convenience route. Internally
-they compose this same reset resolver with checked release, retaining the
-original single callback `(original, Link::nothing())` and former-index result.
-The release primitive itself contains no endpoint update or reset policy.
+Existing `store.delete*` calls remain a checked convenience route through
+`CheckedMutation`. It looks the link up once. If an endpoint is nonzero, it
+resets the link with `UncheckedMutation::update_unchecked`. It then calls
+`release_unchecked`. The caller sees the original single callback
+`(original, Link::nothing())` and gets the former index as the result. A missing
+address returns `Error::NotExists`. To ignore a missing address instead, add
+`NonExistentDeletionResolver`. The release primitive itself contains no endpoint
+update or reset policy.
 
 ## Incoming references and index structure
 

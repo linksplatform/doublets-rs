@@ -937,71 +937,57 @@ impl<
         {
             self.update_calls += 1;
         }
-        let link = self.get_data_part(index).clone();
-        let link = Link::new(index, link.source, link.target);
-
+        let null = T::from_byte(0);
+        let old = self.get_data_part(index).clone();
         // Detaching a self reference temporarily clears this link's tree
         // sizes. is_unused uses those sizes, so classify destinations while the
         // original indexes still describe the link as live.
         let virtual_source = self.is_virtual(source);
         let virtual_target = self.is_virtual(target);
-
-        if link.source != T::from_byte(0) {
-            // SAFETY: the caller guarantees that `index` is live, so it is a
-            // member of the tree that indexes its current nonzero source.
-            unsafe {
-                if self.is_virtual(link.source) {
+        // SAFETY: the caller guarantees that `index` is live and the indexes are
+        // consistent, so it is a member of the trees of its current nonzero
+        // endpoints. Once detached, it is attached to those of the new ones.
+        unsafe {
+            if old.source != null {
+                if self.is_virtual(old.source) {
                     self.detach_external_source(index);
                 } else if Self::USE_LIST {
                     // self.sources_list.attach_as_last(source, index);
                     todo!()
                 } else {
-                    self.detach_internal_source(link.source, index);
+                    self.detach_internal_source(old.source, index);
                 }
             }
-        }
-
-        if link.target != T::from_byte(0) {
-            // SAFETY: as above, for the current nonzero target.
-            unsafe {
-                if self.is_virtual(link.target) {
+            if old.target != null {
+                if self.is_virtual(old.target) {
                     self.detach_external_target(index);
                 } else {
-                    self.detach_internal_target(link.target, index);
+                    self.detach_internal_target(old.target, index);
                 }
             }
-        }
-
-        let place = self.mut_data_part(index);
-        place.source = source;
-        place.target = target;
-        let place = place.clone();
-
-        if place.source != T::from_byte(0) {
-            // SAFETY: `index` is live and was detached from its source tree.
-            unsafe {
+            let place = self.mut_data_part(index);
+            (place.source, place.target) = (source, target);
+            if source != null {
                 if virtual_source {
                     self.attach_external_source(index);
                 } else if Self::USE_LIST {
                     // self.sources_list.attach_as_last(source, index);
                     todo!()
                 } else {
-                    self.attach_internal_source(place.source, index);
+                    self.attach_internal_source(source, index);
                 }
             }
-        }
-
-        if place.target != T::from_byte(0) {
-            // SAFETY: `index` is live and was detached from its target tree.
-            unsafe {
+            if target != null {
                 if virtual_target {
                     self.attach_external_target(index);
                 } else {
-                    self.attach_internal_target(place.target, index);
+                    self.attach_internal_target(target, index);
                 }
             }
         }
-
-        handler(link, Link::new(index, place.source, place.target))
+        handler(
+            Link::new(index, old.source, old.target),
+            Link::new(index, source, target),
+        )
     }
 }

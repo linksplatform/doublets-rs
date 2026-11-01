@@ -222,7 +222,7 @@ fn missing_deletion_is_ignored_only_when_selected(
 fn missing_deletion_resolver_propagates_unrelated_errors(
     mut store: impl UncheckedMutation<u32>,
 ) -> Result<(), Error<u32>> {
-    let root = store.create_point()?;
+    let root = store.create()?;
     let usage = store.create_link(root, root)?;
     {
         let mut guarded = CheckedMutation::new(&mut store)

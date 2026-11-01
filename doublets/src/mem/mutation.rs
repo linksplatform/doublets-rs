@@ -35,8 +35,8 @@ use crate::{data::WriteHandler, mem::Release};
 /// let b = store.create()?;
 ///
 /// // SAFETY: `b` was just created by this store and is still live.
-/// unsafe { store.update_unchecked(b, a, a, &mut |_, _| Flow::Continue) };
-/// assert_eq!(store.search(a, a), Some(b));
+/// unsafe { store.update_unchecked(b, a, b, &mut |_, _| Flow::Continue) };
+/// assert_eq!(store.search(a, b), Some(b));
 ///
 /// // SAFETY: `b` is live; resetting it detaches its outgoing index memberships,
 /// // which is the remaining precondition of `release_unchecked`.
