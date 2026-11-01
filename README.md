@@ -28,6 +28,17 @@ This simple yet powerful structure can represent any data model, from traditiona
 - **Query system** - flexible pattern matching using `any` constants
 - **FFI bindings** - C-compatible foreign function interface for cross-language integration
 
+## Deletion and release
+
+`delete*` methods retain automatic endpoint reset as a checked convenience.
+For an already reset live link, `doublets::mem::Release::release` releases its
+slot without another update. `CheckedRelease` offers the same release-only
+behavior in decorator stacks; adding `NonNullContentsLinkDeletionResolver`
+explicitly enables resetting. An unsafe primitive is available to callers that
+can guarantee the release contract. Incoming references remain valid in both
+layouts, including after address reuse. See [deletion and release](docs/deletion.md)
+for contracts, examples, callbacks and usage policies.
+
 ## Installation
 
 Add to your `Cargo.toml`:

@@ -39,6 +39,10 @@ pub trait Links<T: LinkReference>: Send + Sync {
     ) -> Result<Flow, Error<T>>;
 
     /// Deletes links matching `query` and reports each deletion via `handler`.
+    ///
+    /// Endpoint-reset and usage policies depend on the implementation. Memory
+    /// stores retain resetting convenience deletion; for release-only deletion
+    /// use [`crate::decorators::CheckedRelease`] or [`crate::mem::Release`].
     fn delete_links(&mut self, query: &[T], handler: WriteHandler<'_, T>)
         -> Result<Flow, Error<T>>;
 }

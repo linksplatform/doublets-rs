@@ -97,7 +97,8 @@ mod usages;
 
 pub use builder::{AutomaticUniquenessAndUsagesResolution, DecoratorsExt};
 pub use constants::{ItselfConstantToSelfReferenceResolver, NullConstantToSelfReferenceResolver};
-pub use deletion::NonNullContentsLinkDeletionResolver;
+pub(crate) use deletion::delete_with_reset;
+pub use deletion::{CheckedRelease, NonNullContentsLinkDeletionResolver};
 pub use existence::{InnerReferenceExistenceValidator, NonExistentDependenciesCreator};
 pub use logging::LoggingDecorator;
 pub use no_exceptions::NoExceptionsDecorator;

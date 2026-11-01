@@ -426,6 +426,3 @@ pub extern "C" fn init_fmt_logger() {
     let logger = build_shared_logger();
     setup_shared_logger(logger);
 }
-
-#[cfg(test)]
-mod tests;

@@ -165,6 +165,13 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+      - name: Check Rust test layout
+        shell: bash
+        run: |
+          bash experiments/issue-81/verify-test-layout.sh
+          bash experiments/issue-81/verify-package-discovery.sh
+          bash experiments/issue-81/check-test-layout.sh
+
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
 
@@ -176,7 +183,7 @@ jobs:
       - name: Compile embedded script dependencies
         run: |
           for script in scripts/*.rs; do
-            if rg -q '^//! \[dependencies\]' "$script"; then
+            if grep -q '^//! \[dependencies\]' "$script"; then
               rust-script --test "$script"
             fi
           done
@@ -244,8 +251,8 @@ jobs:
       - name: Check core without default features
         run: cargo check -p doublets --no-default-features --locked
 
-      - name: Test decorators without default features
-        run: cargo test -p doublets --test decorator_consolidation --no-default-features --locked
+      - name: Test decorators and release without default features
+        run: cargo test -p doublets --test decorator_consolidation --test release --no-default-features --locked
 
   # Generate and upload code coverage using cargo-llvm-cov
   # === CODE COVERAGE ===

@@ -46,7 +46,7 @@ for check in check-file-size check-readme-badges check-toolchain-docs; do
 done
 # Compile embedded dependencies without running release or publishing actions.
 for script in scripts/*.rs; do
-    if rg -q '^//! \[dependencies\]' "$script"; then
+    if grep -q '^//! \[dependencies\]' "$script"; then
         run "$(basename "$script" .rs)-compile" rust-script --test "$script"
     fi
 done

@@ -9,6 +9,10 @@ pub enum Error<T: LinkReference> {
     #[error("link {0} does not exist.")]
     NotExists(T),
 
+    /// Checked release requires both endpoints to have already been reset to zero.
+    #[error("link {0:?} must have null contents before release")]
+    NonNullContents(Link<T>),
+
     /// The link cannot be deleted because other links still reference it.
     #[error("link {0:?} has dependencies")]
     HasUsages(Vec<Link<T>>),
