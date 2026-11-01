@@ -95,3 +95,58 @@ fn minimal_release_and_resolver_do_only_required_updates() {
         .unwrap();
     assert_eq!(store.update_calls, updates);
 }
+
+#[test]
+fn unchecked_mutation_omits_validation_work() {
+    use crate::mem::{Release, UncheckedMutation};
+    use std::sync::atomic::Ordering::Relaxed;
+
+    let mut store = Store::<usize, _>::new(Global::new()).unwrap();
+    let a = store.create_point().unwrap();
+    let b = store.create().unwrap();
+    let c = store.create().unwrap();
+    let noop = &mut |_, _| Flow::Continue;
+
+    // The safe route validates the address exactly once.
+    let (lookups, updates) = (store.link_lookups.load(Relaxed), store.update_calls);
+    store.update(b, a, c).unwrap();
+    assert_eq!(store.link_lookups.load(Relaxed), lookups + 1);
+    assert_eq!(store.update_calls, updates + 1);
+
+    // A rejected safe call validates once and does not reach the primitive.
+    let (lookups, updates) = (store.link_lookups.load(Relaxed), store.update_calls);
+    assert!(matches!(
+        store.update(99, a, a),
+        Err(LinksError::NotExists(99))
+    ));
+    assert!(matches!(store.delete(99), Err(LinksError::NotExists(99))));
+    assert_eq!(store.link_lookups.load(Relaxed), lookups + 2);
+    assert_eq!(store.update_calls, updates);
+
+    // Omitting validation omits its work, but not the mutation itself.
+    let (lookups, updates) = (store.link_lookups.load(Relaxed), store.update_calls);
+    // SAFETY: `b` is live and the indexes were maintained by the store API.
+    unsafe { store.update_unchecked(b, a, b, noop) };
+    assert_eq!(store.link_lookups.load(Relaxed), lookups);
+    assert_eq!(store.update_calls, updates + 1);
+    assert_eq!(store.search(a, b), Some(b));
+
+    // Checked deletion: one lookup, one reset of the non-null endpoints.
+    let (lookups, updates) = (store.link_lookups.load(Relaxed), store.update_calls);
+    assert_eq!(store.delete(b).unwrap(), b);
+    assert_eq!(store.link_lookups.load(Relaxed), lookups + 1);
+    assert_eq!(store.update_calls, updates + 1);
+
+    // Unchecked deletion composed from the primitives does no lookups.
+    store.update(c, c, a).unwrap();
+    let (lookups, updates) = (store.link_lookups.load(Relaxed), store.update_calls);
+    // SAFETY: `c` is live; the reset detaches its outgoing index memberships.
+    unsafe {
+        store.update_unchecked(c, 0, 0, noop);
+        store.release_unchecked(c, noop);
+    }
+    assert_eq!(store.link_lookups.load(Relaxed), lookups);
+    assert_eq!(store.update_calls, updates + 1);
+    assert!(!store.exist(c));
+    check_links(&store, 1);
+}

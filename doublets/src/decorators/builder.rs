@@ -8,8 +8,9 @@ use super::{
     policy::{UniquenessPolicy, UsagesPolicy},
     CascadeUniquenessAndUsagesResolver, CascadeUsagesResolver, InnerReferenceExistenceValidator,
     ItselfConstantToSelfReferenceResolver, LoggingDecorator, NoExceptionsDecorator,
-    NonExistentDeletionResolver, NonExistentDependenciesCreator, NonNullContentsLinkDeletionResolver,
-    NullConstantToSelfReferenceResolver, TransactionsDecorator, TransitionLog, UsagesValidator,
+    NonExistentDeletionResolver, NonExistentDependenciesCreator,
+    NonNullContentsLinkDeletionResolver, NullConstantToSelfReferenceResolver,
+    TransactionsDecorator, TransitionLog, UsagesValidator,
 };
 use crate::Doublets;
 
