@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Minimal endpoint update of a live link, without contract validation."><title>UncheckedMutation in doublets::mem - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-0c87338a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="doublets" data-themes="" data-resource-suffix="" data-rustdoc-version="1.99.1 (58cf8f9c3 2026-10-13)" data-channel="1.99.1" data-search-js="search-cf4fc35e.js" data-stringdex-js="stringdex-b5109af9.js" data-settings-js="settings-170eb4bf.js" ><script src="../../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-417ebf0a.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-9f56287d.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">UncheckedMutation</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../../doublets/index.html">doublets</a><span class="version">0.18.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Unchecked<wbr>Mutation</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.update_unchecked" title="update_unchecked">update_unchecked</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In doublets::<wbr>mem</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">doublets</a>::<wbr><a href="index.html">mem</a></div><h1>Trait <span class="trait">Unchecked<wbr>Mutation</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/doublets/mem/mutation.rs.html#56-89">Source</a> </span></div><pre class="rust item-decl"><code>pub trait UncheckedMutation&lt;T: <a class="trait" href="../data/trait.LinkReference.html" title="trait doublets::data::LinkReference">LinkReference</a>&gt;: <a class="trait" href="trait.Release.html" title="trait doublets::mem::Release">Release</a>&lt;T&gt; {
+    // Required method
+    unsafe fn <a href="#tymethod.update_unchecked" class="fn">update_unchecked</a>(
+        &amp;mut self,
+        index: T,
+        source: T,
+        target: T,
+        handler: <a class="type" href="../data/type.WriteHandler.html" title="type doublets::data::WriteHandler">WriteHandler</a>&lt;'_, T&gt;,
+    ) -&gt; <a class="enum" href="../data/enum.Flow.html" title="enum doublets::data::Flow">Flow</a>;
+}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Minimal endpoint update of a live link, without contract validation.</p>
+<p>Implemented by both memory stores. Their safe <a href="../data/trait.Links.html#tymethod.update_links" title="method doublets::data::Links::update_links"><code>Links::update_links</code></a> and
+<a href="../data/trait.Links.html#tymethod.delete_links" title="method doublets::data::Links::delete_links"><code>Links::delete_links</code></a> methods are checked convenience routes: they
+delegate to <a href="../decorators/struct.CheckedMutation.html" title="struct doublets::decorators::CheckedMutation"><code>CheckedMutation</code></a>, which rejects a missing address with
+<a href="../data/enum.Error.html#variant.NotExists" title="variant doublets::data::Error::NotExists"><code>Error::NotExists</code></a> before calling these primitives. A caller that already
+guarantees the preconditions below can call the primitives directly and
+skip that redundant verification.</p>
+<p>Deletion is composed from two primitives: an optional endpoint reset via
+<a href="trait.UncheckedMutation.html#tymethod.update_unchecked" title="method doublets::mem::UncheckedMutation::update_unchecked"><code>update_unchecked</code></a> to <code>(0, 0)</code>, followed by
+<a href="trait.Release.html#tymethod.release_unchecked" title="method doublets::mem::Release::release_unchecked"><code>Release::release_unchecked</code></a>. Resetting is a policy, not part of
+release, so the caller decides whether it is needed.</p>
+<p>See <code>docs/mutation.md</code> for the full contract and the checked, ignore-missing
+and unchecked routes.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>doublets::{
+    mem::{Global, Release, UncheckedMutation},
+    unit, Doublets,
+};
+<span class="kw">use </span>data::Flow;
+<span class="kw">let </span><span class="kw-2">mut </span>store = unit::Store::&lt;u32, <span class="kw">_</span>&gt;::new(Global::new())<span class="question-mark">?</span>;
+<span class="kw">let </span>a = store.create_point()<span class="question-mark">?</span>;
+<span class="kw">let </span>b = store.create()<span class="question-mark">?</span>;
+
+<span class="comment">// SAFETY: `b` was just created by this store and is still live.
+</span><span class="kw">unsafe </span>{ store.update_unchecked(b, a, b, <span class="kw-2">&amp;mut </span>|<span class="kw">_</span>, <span class="kw">_</span>| Flow::Continue) };
+<span class="macro">assert_eq!</span>(store.search(a, b), <span class="prelude-val">Some</span>(b));
+
+<span class="comment">// SAFETY: `b` is live; resetting it detaches its outgoing index memberships,
+// which is the remaining precondition of `release_unchecked`.
+</span><span class="kw">unsafe </span>{
+    store.update_unchecked(b, <span class="number">0</span>, <span class="number">0</span>, <span class="kw-2">&amp;mut </span>|<span class="kw">_</span>, <span class="kw">_</span>| Flow::Continue);
+    store.release_unchecked(b, <span class="kw-2">&amp;mut </span>|<span class="kw">_</span>, <span class="kw">_</span>| Flow::Continue);
+}
+<span class="macro">assert!</span>(!store.exist(b));</code></pre></div></div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.update_unchecked" class="method"><a class="src rightside" href="../../src/doublets/mem/mutation.rs.html#82-88">Source</a><h4 class="code-header">unsafe fn <a href="#tymethod.update_unchecked" class="fn">update_unchecked</a>(
+    &amp;mut self,
+    index: T,
+    source: T,
+    target: T,
+    handler: <a class="type" href="../data/type.WriteHandler.html" title="type doublets::data::WriteHandler">WriteHandler</a>&lt;'_, T&gt;,
+) -&gt; <a class="enum" href="../data/enum.Flow.html" title="enum doublets::data::Flow">Flow</a></h4></section></summary><div class="docblock"><p>Sets the endpoints of a live link without checking that it exists.</p>
+<p>Detaches the link’s current outgoing source/target index memberships,
+writes <code>(source, target)</code>, and attaches the new memberships. Calls
+<code>handler</code> once, after the update, with the previous and the new state,
+returning its flow. <code>Break</code> does not undo the update.</p>
+<p>No other contract is verified: the new endpoints may be zero, the link
+itself, other live links, or unallocated addresses (the split layout
+indexes the latter externally). Uniqueness, reference existence and
+usages are separate decorator policies.</p>
+<h5 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h5>
+<ul>
+<li><code>index</code> must be a live allocated address of this store: never null, a
+service constant, an address beyond the allocated range, an unused
+(free-list) slot or an already released address.</li>
+<li>The index structures of the store must be consistent with its link
+data, as maintained by the store API. Do not write raw link or index
+memory directly.</li>
+</ul>
+<p>The caller must uphold these conditions even in release builds: an
+unused slot shares memory with the free list, so updating it corrupts
+allocation state. Safe code should use <a href="../data/trait.Doublets.html#method.update" title="method doublets::data::Doublets::update"><code>crate::Doublets::update</code></a> or
+<a href="../data/trait.Links.html#tymethod.update_links" title="method doublets::data::Links::update_links"><code>crate::Links::update_links</code></a>.</p>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait <b>is</b> <a href="https://doc.rust-lang.org/1.99.1/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety".</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><div class="negative-marker"></div><section id="impl-UncheckedMutation%3CT%3E-for-Store%3CT,+M,+TS,+TT,+TU%3E" class="impl"><a class="src rightside" href="../../src/doublets/mem/unit/store.rs.html#605-666">Source</a><a href="#impl-UncheckedMutation%3CT%3E-for-Store%3CT,+M,+TS,+TT,+TU%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T: <a class="trait" href="../data/trait.LinkReference.html" title="trait doublets::data::LinkReference">LinkReference</a>, M: <a class="trait" href="trait.RawMem.html" title="trait doublets::mem::RawMem">RawMem</a>&lt;Item = <a class="struct" href="unit/struct.LinkPart.html" title="struct doublets::mem::unit::LinkPart">LinkPart</a>&lt;T&gt;&gt;, TS: <a class="trait" href="trait.UnitTree.html" title="trait doublets::mem::UnitTree">UnitTree</a>&lt;T&gt;, TT: <a class="trait" href="trait.UnitTree.html" title="trait doublets::mem::UnitTree">UnitTree</a>&lt;T&gt;, TU: UnitList&lt;T&gt;&gt; <a class="trait" href="trait.UncheckedMutation.html" title="trait doublets::mem::UncheckedMutation">UncheckedMutation</a>&lt;T&gt; for doublets::mem::unit::<a class="struct" href="unit/struct.Store.html" title="struct doublets::mem::unit::Store">Store</a>&lt;T, M, TS, TT, TU&gt;</h3></section><section id="impl-UncheckedMutation%3CT%3E-for-Store%3CT,+MD,+MI,+IS,+ES,+IT,+ET,+UL%3E" class="impl"><a class="src rightside" href="../../src/doublets/mem/split/store.rs.html#917-993">Source</a><a href="#impl-UncheckedMutation%3CT%3E-for-Store%3CT,+MD,+MI,+IS,+ES,+IT,+ET,+UL%3E" class="anchor">§</a><h3 class="code-header">impl&lt;T: <a class="trait" href="../data/trait.LinkReference.html" title="trait doublets::data::LinkReference">LinkReference</a>, MD: <a class="trait" href="trait.RawMem.html" title="trait doublets::mem::RawMem">RawMem</a>&lt;Item = <a class="struct" href="split/struct.DataPart.html" title="struct doublets::mem::split::DataPart">DataPart</a>&lt;T&gt;&gt;, MI: <a class="trait" href="trait.RawMem.html" title="trait doublets::mem::RawMem">RawMem</a>&lt;Item = <a class="struct" href="split/struct.IndexPart.html" title="struct doublets::mem::split::IndexPart">IndexPart</a>&lt;T&gt;&gt;, IS: <a class="trait" href="trait.SplitTree.html" title="trait doublets::mem::SplitTree">SplitTree</a>&lt;T&gt;, ES: <a class="trait" href="trait.SplitTree.html" title="trait doublets::mem::SplitTree">SplitTree</a>&lt;T&gt;, IT: <a class="trait" href="trait.SplitTree.html" title="trait doublets::mem::SplitTree">SplitTree</a>&lt;T&gt;, ET: <a class="trait" href="trait.SplitTree.html" title="trait doublets::mem::SplitTree">SplitTree</a>&lt;T&gt;, UL: <a class="trait" href="trait.SplitList.html" title="trait doublets::mem::SplitList">SplitList</a>&lt;T&gt;&gt; <a class="trait" href="trait.UncheckedMutation.html" title="trait doublets::mem::UncheckedMutation">UncheckedMutation</a>&lt;T&gt; for doublets::mem::split::<a class="struct" href="split/struct.Store.html" title="struct doublets::mem::split::Store">Store</a>&lt;T, MD, MI, IS, ES, IT, ET, UL&gt;</h3></section></div><script src="../../trait.impl/doublets/mem/mutation/trait.UncheckedMutation.js" async></script></section></div></main></body></html>
