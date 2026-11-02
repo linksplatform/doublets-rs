@@ -11,6 +11,7 @@ for its preconditions.
 | `store.update*` / `store.delete*` | One existence lookup (via `CheckedMutation`) | `Error::NotExists`, store unchanged, no callback | Not checked |
 | `CheckedMutation::new(&mut store)` | One existence lookup | `Error::NotExists`, store unchanged, no callback | Not checked |
 | `.with_inner_reference_existence_validation()` | Request and endpoints | `Error::NotExists` (error policy) | Endpoint references |
+| Uniqueness resolvers (`with_uniqueness(Resolve)`, `with_uniqueness(CascadeResolve)`, automatic resolution) | None | Existing pair: `Ok` with the stored link; new pair: forwarded | Pair uniqueness (see [below](#updates-through-the-uniqueness-resolvers)) |
 | `.with_non_existent_deletion_resolution()` | One lookup before deleting | `Ok(Flow::Continue)`, no callback (ignore policy) | Inner errors propagate |
 | `.with_no_exceptions()` | None | Any inner error becomes `Ok(Flow::Break)` | Swallows *all* errors |
 | `unsafe UncheckedMutation::update_unchecked` | None | Caller guarantees it never happens | None |
@@ -106,6 +107,48 @@ let usage = store.create_link(root, root)?;
 assert!(matches!(store.delete(root), Err(Error::HasUsages(_)))); // not swallowed
 store.delete(usage)?;
 assert_eq!(store.delete(usage)?, 0); // missing: ignored
+# Ok(())
+# }
+```
+
+## Updates through the uniqueness resolvers
+
+`UniquenessResolver`, `CascadeUniquenessAndUsagesResolver` and
+`.with_automatic_uniqueness_and_usages_resolution()` resolve pair conflicts and
+nothing else. They do not check that the requested address exists. As in C#,
+an update first looks up the new `(source, target)` pair:
+
+| Requested address | New pair | Result without an existence policy |
+| --- | --- | --- |
+| Missing | Not stored | Forwarded; the store's checked route returns `Error::NotExists` |
+| Missing | Already stored | `Ok`, reports the stored link, nothing changes |
+| Live | Already stored | Usages merged (cascade), old link deleted, survivor reported |
+
+The second row is not an error, because existence is a separate policy that you
+select (issue #66). The resolver never acquires a hidden lookup, so callers who
+already guarantee live addresses pay nothing for it. To get `Error::NotExists`
+for every missing address, choose one of these explicitly:
+
+- Compose `.with_inner_reference_existence_validation()` **outside** the
+  resolver, that is, after it in the builder chain. It runs before the pair
+  lookup and also rejects missing endpoint references. Placed inside the
+  resolver, it is never reached when the pair is already stored.
+- Call `store.try_get_link(index)?` before the updates that need the check.
+
+```rust
+use doublets::{decorators::DecoratorsExt, unit, Doublets, Error};
+use mem::Global;
+
+# fn main() -> Result<(), Error<u32>> {
+let mut store = unit::Store::<u32, _>::new(Global::new())?
+    .with_automatic_uniqueness_and_usages_resolution()
+    .with_inner_reference_existence_validation();
+store.create_point()?;
+store.create_point()?;
+store.create_link(1, 2)?;
+assert!(matches!(store.update(99, 3, 3), Err(Error::NotExists(99))));
+assert!(matches!(store.update(99, 1, 2), Err(Error::NotExists(99))));
+assert_eq!(store.count(), 3);
 # Ok(())
 # }
 ```

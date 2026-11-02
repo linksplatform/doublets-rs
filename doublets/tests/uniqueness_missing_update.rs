@@ -16,6 +16,7 @@ use doublets::{
 use mem::Global;
 
 type Snapshot = (u32, Vec<Link<u32>>);
+type Events = Vec<(Link<u32>, Link<u32>)>;
 
 const MISSING: u32 = 99;
 
@@ -42,7 +43,7 @@ fn update_missing(
     store: &mut impl Doublets<u32>,
     source: u32,
     target: u32,
-) -> (Result<Flow, Error<u32>>, Vec<(Link<u32>, Link<u32>)>) {
+) -> (Result<Flow, Error<u32>>, Events) {
     let mut events = Vec::new();
     let result = store.update_with(MISSING, source, target, |before, after| {
         events.push((before, after));

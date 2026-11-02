@@ -134,6 +134,12 @@ pub trait DecoratorsExt<T: LinkReference>: Doublets<T> + Sized {
     /// then [`CascadeUniquenessAndUsagesResolver`] outermost.
     /// The cascade explicitly resets each nested usage before descending, so handlers
     /// observe resets before the corresponding deletions, as with C#'s facade recursion.
+    ///
+    /// The stack does not check that an updated address exists: an update of a missing
+    /// link to an existing pair reports that link and changes nothing. Add
+    /// [`with_inner_reference_existence_validation`](Self::with_inner_reference_existence_validation)
+    /// *after* this call to get `Error::NotExists` instead; see
+    /// [`CascadeUniquenessAndUsagesResolver`] and `docs/mutation.md`.
     #[inline]
     fn with_automatic_uniqueness_and_usages_resolution(
         self,
