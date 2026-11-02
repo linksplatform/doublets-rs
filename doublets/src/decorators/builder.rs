@@ -8,8 +8,9 @@ use super::{
     policy::{UniquenessPolicy, UsagesPolicy},
     CascadeUniquenessAndUsagesResolver, CascadeUsagesResolver, InnerReferenceExistenceValidator,
     ItselfConstantToSelfReferenceResolver, LoggingDecorator, NoExceptionsDecorator,
-    NonExistentDependenciesCreator, NonNullContentsLinkDeletionResolver,
-    NullConstantToSelfReferenceResolver, TransactionsDecorator, TransitionLog, UsagesValidator,
+    NonExistentDeletionResolver, NonExistentDependenciesCreator,
+    NonNullContentsLinkDeletionResolver, NullConstantToSelfReferenceResolver,
+    TransactionsDecorator, TransitionLog, UsagesValidator,
 };
 use crate::Doublets;
 
@@ -87,6 +88,12 @@ pub trait DecoratorsExt<T: LinkReference>: Doublets<T> + Sized {
     #[inline]
     fn with_non_existent_dependencies_creation(self) -> NonExistentDependenciesCreator<T, Self> {
         NonExistentDependenciesCreator::new(self)
+    }
+
+    /// Wraps in [`NonExistentDeletionResolver`], ignoring deletion of missing links.
+    #[inline]
+    fn with_non_existent_deletion_resolution(self) -> NonExistentDeletionResolver<T, Self> {
+        NonExistentDeletionResolver::new(self)
     }
 
     /// Wraps in [`ItselfConstantToSelfReferenceResolver`].

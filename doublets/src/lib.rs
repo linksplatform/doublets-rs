@@ -90,3 +90,13 @@ pub use self::data::{
     CriterionMatcher, Doublet, Doublets, DoubletsExt, Error, Fuse, Link, Links, TargetMatcher,
 };
 pub(crate) use self::data::{Error as LinksError, ReadHandler, WriteHandler};
+
+/// Compiles and runs the examples of the mutation guide as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../../docs/mutation.md")]
+struct MutationGuide;
+
+/// Compiles and runs the examples of the deletion guide as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../../docs/deletion.md")]
+struct DeletionGuide;

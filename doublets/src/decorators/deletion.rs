@@ -100,28 +100,6 @@ impl<T: LinkReference, L: Release<T>> Doublets<T> for CheckedRelease<'_, T, L> {
     }
 }
 
-/// Compatibility deletion: automatic reset with the original single callback.
-/// Endpoint policy lives in the resolver; the backend only releases the slot.
-#[inline]
-pub(crate) fn delete_with_reset<T: LinkReference, L: Release<T>>(
-    links: &mut L,
-    query: &[T],
-    handler: WriteHandler<'_, T>,
-) -> Result<Flow, Error<T>> {
-    let index = helpers::part(query, links.constants().index_part);
-    let original = links.try_get_link(index)?;
-    NonNullContentsLinkDeletionResolver::new(CheckedRelease::new(links)).delete_links(
-        query,
-        &mut |_, after| {
-            if after.is_null() {
-                handler(original.clone(), after)
-            } else {
-                Flow::Continue
-            }
-        },
-    )
-}
-
 decorator_struct! {
     /// Resets a link to `(null, null)` before deleting it. Already reset links
     /// skip the update. Compose over [`CheckedRelease`] to make resetting an

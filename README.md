@@ -39,6 +39,18 @@ can guarantee the release contract. Incoming references remain valid in both
 layouts, including after address reuse. See [deletion and release](docs/deletion.md)
 for contracts, examples, callbacks and usage policies.
 
+## Checked and unchecked mutation
+
+The safe `update*` and `delete*` methods of both stores reject a missing address
+with `Error::NotExists`. They leave the store unchanged and make no callback.
+That check is the explicit `decorators::CheckedMutation` adapter. A caller that
+already guarantees a live address can omit it by calling
+`unsafe doublets::mem::UncheckedMutation::update_unchecked` and
+`Release::release_unchecked`. To ignore a missing deletion instead of returning
+an error, add `NonExistentDeletionResolver`; it never swallows unrelated errors.
+See [checked and unchecked mutation](docs/mutation.md) for the preconditions and
+the routes.
+
 ## Installation
 
 Add to your `Cargo.toml`:
