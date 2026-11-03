@@ -258,6 +258,13 @@ fn main() -> Result<(), doublets::Error<usize>> {
 
 See `doublets/examples/uniqueness.rs` for a before/after comparison.
 
+Each layer checks only its own contract. The uniqueness resolvers do not check that
+an updated address exists, so updating a missing link to a pair that is already
+stored reports that link instead of failing. Add
+`.with_inner_reference_existence_validation()` after the resolver in the builder
+chain, or call `try_get_link(index)?` first, when you want `Error::NotExists`. See
+[updates through the uniqueness resolvers](docs/mutation.md#updates-through-the-uniqueness-resolvers).
+
 The former `doublets-decorators` compatibility package has been removed. Import
 its implementations directly from `doublets::decorators`: `UniqueValidator` becomes
 `UniquenessValidator`, `UniqueResolver` becomes `UniquenessResolver`,

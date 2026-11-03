@@ -61,6 +61,16 @@ decorator_struct! {
     /// of the link it just deleted. This port reports the surviving link as
     /// `(before, after)` instead, so [`Doublets::update_by`] and [`Doublets::create_link`]
     /// return an address that is actually valid.
+    ///
+    /// # Requested address
+    ///
+    /// This decorator resolves pair conflicts and nothing else. It does not check that
+    /// the link being updated exists. Like the C# original, it looks up the new pair
+    /// first and deletes the old link only if it still exists. When the old address is
+    /// missing and the pair is already stored, the update therefore reports the existing
+    /// link and changes nothing. A missing address with a new pair is forwarded, so the
+    /// inner layers decide. See [`CascadeUniquenessAndUsagesResolver`] for how to select
+    /// the `Error::NotExists` contract explicitly.
     UniquenessResolver
 }
 
@@ -104,6 +114,50 @@ decorator_struct! {
     /// redundant link at the surviving one.
     ///
     /// Port of C# `LinksCascadeUniquenessAndUsagesResolver`.
+    ///
+    /// # Requested address
+    ///
+    /// Like [`UniquenessResolver`], this decorator does not check that the link being
+    /// updated exists. Existence is a separate policy, so callers who guarantee valid
+    /// addresses pay for no extra lookup. When the old address is missing and the new
+    /// pair is already stored, the update reports the existing link and changes
+    /// nothing; when the pair is new, the update is forwarded to the inner layers.
+    ///
+    /// To get [`Error::NotExists`] for a missing address, select that contract
+    /// explicitly. Compose [`InnerReferenceExistenceValidator`] *outside* the resolver,
+    /// so it runs before the pair lookup. It also checks the new endpoints. Or call
+    /// [`Doublets::try_get_link`] before the updates that need it. A validator placed
+    /// inside the resolver is never reached for an existing pair.
+    ///
+    /// ```
+    /// use doublets::{decorators::DecoratorsExt, unit, Doublets, Error};
+    /// use mem::Global;
+    /// # fn main() -> Result<(), Error<u32>> {
+    /// let mut store = unit::Store::<u32, _>::new(Global::new())?
+    ///     .with_automatic_uniqueness_and_usages_resolution()
+    ///     .with_inner_reference_existence_validation();
+    /// store.create_point()?;
+    /// store.create_point()?;
+    /// let link = store.create_link(1, 2)?;
+    /// assert!(matches!(store.update(99, 3, 3), Err(Error::NotExists(99))));
+    /// assert!(matches!(store.update(99, 1, 2), Err(Error::NotExists(99))));
+    /// assert_eq!(store.search(1, 2), Some(link));
+    ///
+    /// // Without the validator only the pair is resolved: link 99 is not checked.
+    /// let mut store = unit::Store::<u32, _>::new(Global::new())?
+    ///     .with_automatic_uniqueness_and_usages_resolution();
+    /// store.create_point()?;
+    /// store.create_point()?;
+    /// store.create_link(1, 2)?;
+    /// // Per-call alternative: look the address up only where you need the error.
+    /// assert!(matches!(store.try_get_link(99), Err(Error::NotExists(99))));
+    /// assert_eq!(store.update(99, 1, 2)?, link);
+    /// assert_eq!(store.count(), 3);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// [`InnerReferenceExistenceValidator`]: super::InnerReferenceExistenceValidator
     CascadeUniquenessAndUsagesResolver
 }
 
