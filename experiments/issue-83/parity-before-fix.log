@@ -1,0 +1,39 @@
+running 12 tests
+test cascade_uniqueness_resolver_redirects_usages::split ... ok
+test cascade_uniqueness_resolver_redirects_usages::unit ... ok
+test cascade_usages_resolver_composes_with_deletion::split ... FAILED
+test cascade_usages_resolver_composes_with_deletion::unit ... ok
+test non_null_deletion_resets_contents_before_deleting::split ... ok
+test non_null_deletion_resets_contents_before_deleting::unit ... ok
+test uniqueness_resolver_reuses_links::split ... ok
+test uniqueness_resolver_reuses_links::unit ... ok
+test uniqueness_validator_rejects_duplicates::split ... ok
+test uniqueness_validator_rejects_duplicates::unit ... ok
+test usages_validator_protects_referenced_links::split ... FAILED
+test usages_validator_protects_referenced_links::unit ... ok
+
+failures:
+
+---- cascade_usages_resolver_composes_with_deletion::split stdout ----
+
+thread 'cascade_usages_resolver_composes_with_deletion::split' (5291) panicked at doublets/tests/decorator_consolidation.rs:56:5:
+assertion `left == right` failed
+  left: 2
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- usages_validator_protects_referenced_links::split stdout ----
+
+thread 'usages_validator_protects_referenced_links::split' (5299) panicked at doublets/tests/decorator_consolidation.rs:44:5:
+assertion `left == right` failed
+  left: None
+ right: Some(2: 1 0)
+
+
+failures:
+    cascade_usages_resolver_composes_with_deletion::split
+    usages_validator_protects_referenced_links::split
+
+test result: FAILED. 10 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s
+
+error: test failed, to rerun pass `-p doublets --test decorator_consolidation`

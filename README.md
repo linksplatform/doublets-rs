@@ -1,46 +1,416 @@
 # Doublets
 
-[![Build Status][actions-badge]][actions-url]
+[![CI/CD Pipeline](https://github.com/linksplatform/doublets-rs/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/linksplatform/doublets-rs/actions/workflows/release.yml?query=branch%3Amain)
+[![Crates.io](https://img.shields.io/crates/v/doublets.svg)](https://crates.io/crates/doublets)
+[![License](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://github.com/linksplatform/doublets-rs/blob/main/LICENSE)
 
-[actions-badge]: https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg
-[actions-url]: https://github.com/linksplatform/doublets-rs/actions?query=workflow%3ACI+branch%3Amain
+LinksPlatform's Rust implementation of Doublets (associative storage links).
 
-later
+Rust port of [Data.Doublets](https://github.com/linksplatform/Data.Doublets) library.
 
-## [Overview](https://github.com/linksplatform)
+## Overview
 
-later
+Doublets is an associative data structure that represents a link store where each link consists of:
+- **Index** - unique identifier of the link
+- **Source** - the link's source (can reference itself or another link)
+- **Target** - the link's target (can reference itself or another link)
+
+This simple yet powerful structure can represent any data model, from traditional key-value pairs to complex graph structures. Doublets provide a unified approach to data storage with constant-time lookup operations using size-balanced trees.
+
+### Key Features
+
+- **File-mapped storage** - data persists directly to disk using memory-mapped files
+- **Generic link types** - supports any unsigned integer type (`u8`, `u16`, `u32`, `u64`, `usize`)
+- **Two storage modes**:
+  - `unit::Store` - combined data and index storage in a single memory region
+  - `split::Store` - separated data and index storage for optimized memory layouts
+- **Thread-safe** - `Send` and `Sync` implementations for concurrent access
+- **Query system** - flexible pattern matching using `any` constants
+- **FFI bindings** - C-compatible foreign function interface for cross-language integration
+
+## Deletion and release
+
+`delete*` methods retain automatic endpoint reset as a checked convenience.
+For an already reset live link, `doublets::mem::Release::release` releases its
+slot without another update. `CheckedRelease` offers the same release-only
+behavior in decorator stacks; adding `NonNullContentsLinkDeletionResolver`
+explicitly enables resetting. An unsafe primitive is available to callers that
+can guarantee the release contract. Incoming references remain valid in both
+layouts, including after address reuse. See [deletion and release](docs/deletion.md)
+for contracts, examples, callbacks and usage policies.
+
+## Checked and unchecked mutation
+
+The safe `update*` and `delete*` methods of both stores reject a missing address
+with `Error::NotExists`. They leave the store unchanged and make no callback.
+That check is the explicit `decorators::CheckedMutation` adapter. A caller that
+already guarantees a live address can omit it by calling
+`unsafe doublets::mem::UncheckedMutation::update_unchecked` and
+`Release::release_unchecked`. To ignore a missing deletion instead of returning
+an error, add `NonExistentDeletionResolver`; it never swallows unrelated errors.
+See [checked and unchecked mutation](docs/mutation.md) for the preconditions and
+the routes.
+
+## Installation
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+doublets = "0.19.0"
+```
+
+Use stable Rust 1.85 or newer. The repository's `rust-toolchain.toml` selects the
+stable channel, and the crate declares `rust-version = "1.85"` in
+`doublets/Cargo.toml`.
+
+```bash
+rustup toolchain install stable
+cargo +stable build
+```
 
 ## Example
 
-A basic operations in doublets:
+Basic CRUD operations with doublets:
 
 ```rust
-use doublets::{data, mem, unit, Doublets, DoubletsExt, Links};
+use doublets::{mem, unit, Doublets, DoubletsExt, Link, Links};
+use data::Flow;
 
 fn main() -> Result<(), doublets::Error<usize>> {
-    // use file as memory for doublets
+    // Use file as persistent storage for doublets
     let mem = mem::FileMapped::from_path("db.links")?;
     let mut store = unit::Store::<usize, _>::new(mem)?;
 
-    // create 1: 1 1 - it's point: link where source and target it self
-    let point = store.create_link(1, 1)?;
+    // Create a point link (a link that references itself as both source and target)
+    // Point: 1 -> (1, 1)
+    let point = store.create_point()?;
+    println!("Created point: {}", point);
 
-    // `any` constant denotes any link
+    // Create a regular link with explicit source and target
+    // Link: 2 -> (1, 1)
+    let link = store.create_link(point, point)?;
+    println!("Created link: {}", link);
+
+    // The `any` constant matches any link in queries
     let any = store.constants().any;
 
-    // print all store from store where (index: any, source: any, target: any)
+    // Count all links in the store
+    println!("Total links: {}", store.count());
+
+    // Iterate over all links using pattern [any, any, any]
+    println!("All links:");
     store.each_iter([any, any, any]).for_each(|link| {
-        println!("{link:?}");
+        println!("  {}: {} -> {}", link.index, link.source, link.target);
     });
 
-    // delete point with handler (Link, Link)
-    store
-        .delete_with(point, |before, after| {
-            println!("delete: {before:?} => {after:?}");
-            // track issue: https://github.com/linksplatform/doublets-rs/issues/4
-            data::Flow::Continue
-        })
-        .map(|_| ())
+    // Query links by source: find all links where source = point
+    println!("Links with source = {}:", point);
+    store.each_iter([any, point, any]).for_each(|link| {
+        println!("  {}: {} -> {}", link.index, link.source, link.target);
+    });
+
+    // Update a link: change the target
+    let updated = store.update(link, point, link)?;
+    println!("Updated link {} to target {}", link, updated);
+
+    // Delete a link with a callback handler
+    store.delete_with(link, |before, after| {
+        println!("Deleted: {:?} => {:?}", before, after);
+        Flow::Continue
+    })?;
+
+    // Clean up: delete all remaining links
+    store.delete_all()?;
+
+    Ok(())
 }
 ```
+
+### Using In-Memory Storage
+
+For testing or temporary data, you can use heap-allocated memory instead of file storage:
+
+```rust
+use doublets::{mem, unit, Doublets, Links};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    // Use global allocator for in-memory storage
+    let mem = mem::Global::new();
+    let mut store = unit::Store::<usize, _>::new(mem)?;
+
+    // Create some links
+    for i in 0..100 {
+        store.create_point()?;
+    }
+
+    println!("Created {} links", store.count());
+    Ok(())
+}
+```
+
+### Using Split Storage
+
+Split storage separates data and index trees for potentially better cache utilization:
+
+```rust
+use doublets::{split::Store, Doublets, Links};
+use mem::Global;
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = Store::<usize, _, _>::new(Global::new(), Global::new())?;
+
+    // Create 1 million point links
+    for _ in 0..1_000_000 {
+        store.create_point()?;
+    }
+
+    println!("Total links: {}", store.count());
+    Ok(())
+}
+```
+
+## API Overview
+
+### Core Traits
+
+| Trait | Description |
+|-------|-------------|
+| `Links<T>` | Low-level CRUD operations with handlers |
+| `Doublets<T>` | High-level operations with ergonomic API |
+| `DoubletsExt<T>` | Iterator extensions and parallel processing |
+
+### Main Types
+
+| Type | Description |
+|------|-------------|
+| `Link<T>` | A triplet of (index, source, target) |
+| `Doublet<T>` | A pair of (source, target) without index |
+| `unit::Store` | Combined memory layout storage |
+| `split::Store` | Separated memory layout storage |
+| `Error<T>` | Error type for link operations |
+
+### Key Operations
+
+```rust
+// Create operations
+store.create()?;                      // Create empty link
+store.create_point()?;                // Create self-referencing link
+store.create_link(source, target)?;   // Create link with source and target
+
+// Read operations
+store.count();                        // Count all links
+store.count_by([any, source, any]);   // Count by pattern
+store.get_link(index);                // Get link by index
+store.search(source, target);         // Find link by source and target
+store.iter();                         // Iterate all links
+store.each_iter(query);               // Iterate by pattern
+
+// Update operations
+store.update(index, source, target)?; // Update link
+
+// Delete operations
+store.delete(index)?;                 // Delete link
+store.delete_all()?;                  // Delete all links
+```
+
+### Decorators
+
+Decorators are included in `doublets::decorators` and need no optional feature
+flags or additional dependency. Use the builder below or each type's `new(store)`
+constructor.
+
+Optional policy layers, ported from `Platform.Data.Doublets`. Each one is a generic
+struct that owns the store below it, so a chosen stack is a single concrete type that the
+optimiser fuses into one `create` / `update` / `delete` / `each`:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, Resolve}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_uniqueness(Resolve)
+        .with_usages_validation();
+
+    let a = store.create_point()?;
+    let b = store.create_point()?;
+
+    // Creating the same doublet twice returns the existing link instead of a duplicate.
+    assert_eq!(store.create_link(a, b)?, store.create_link(a, b)?);
+    Ok(())
+}
+```
+
+| Decorator | Builder method | Create | Update | Delete | Each |
+|---|---|:--:|:--:|:--:|:--:|
+| `UniquenessValidator` | `with_uniqueness(Validate)` | | ● | | |
+| `UniquenessResolver` | `with_uniqueness(Resolve)` | | ● | | |
+| `CascadeUniquenessAndUsagesResolver` | `with_uniqueness(CascadeResolve)` | | ● | ● | |
+| `UsagesValidator` | `with_usages_validation()` | | ● | ● | |
+| `CascadeUsagesResolver` | `with_cascade_usages_resolution()` | | | ● | |
+| `InnerReferenceExistenceValidator` | `with_inner_reference_existence_validation()` | | ● | ● | ● |
+| `ItselfConstantToSelfReferenceResolver` | `with_itself_constant_resolution()` | | ● | | ● |
+| `NullConstantToSelfReferenceResolver` | `with_null_constant_resolution()` | ● | ● | | |
+| `NonExistentDependenciesCreator` | `with_non_existent_dependencies_creation()` | | ● | | |
+| `NonNullContentsLinkDeletionResolver` | `with_non_null_contents_deletion_resolution()` | | | ● | |
+| `LoggingDecorator` | `with_logging(writer)` | ● | ● | ● | |
+| `NoExceptionsDecorator` | `with_no_exceptions()` | ● | ● | ● | ● |
+
+See `doublets/examples/uniqueness.rs` for a before/after comparison.
+
+Each layer checks only its own contract. The uniqueness resolvers do not check that
+an updated address exists, so updating a missing link to a pair that is already
+stored reports that link instead of failing. Add
+`.with_inner_reference_existence_validation()` after the resolver in the builder
+chain, or call `try_get_link(index)?` first, when you want `Error::NotExists`. See
+[updates through the uniqueness resolvers](docs/mutation.md#updates-through-the-uniqueness-resolvers).
+
+The former `doublets-decorators` compatibility package has been removed. Import
+its implementations directly from `doublets::decorators`: `UniqueValidator` becomes
+`UniquenessValidator`, `UniqueResolver` becomes `UniquenessResolver`,
+`CascadeUniqueResolver` becomes `CascadeUniquenessAndUsagesResolver`, and
+`NonNullDeletionResolver` becomes `NonNullContentsLinkDeletionResolver`.
+`UsagesValidator` and `CascadeUsagesResolver` keep their names. All six retain
+their constructors, composition, and `Flow` callback behavior. If you relied on
+the old package enabling `full` transitively, enable `full` on your `doublets`
+dependency to retain those optional optimizations.
+
+### Transactions
+
+`TransactionsDecorator` groups writes into a transaction with explicit commit or
+rollback. Dropping an unfinished handle restores the original graph:
+
+```rust
+use doublets::{decorators::{DecoratorsExt, MemoryTransitionLog}, mem, unit, Doublets};
+
+fn main() -> Result<(), doublets::Error<usize>> {
+    let mut store = unit::Store::<usize, _>::new(mem::Global::new())?
+        .with_transactions(MemoryTransitionLog::default())?;
+    let mut tx = store.begin_transaction()?;
+    let point = tx.create_point()?;
+    tx.commit()?;
+    assert!(store.exist(point));
+    Ok(())
+}
+```
+
+For durable recovery, use `FileTransitionLog::<usize>::open("db.transactions")`
+with your persistent raw store. Construction recovers the matching journal,
+undoing an interrupted transaction and replaying committed state even if the
+store did not flush. Each write records a `Transition` with its kind and before/
+after links; `Transition::apply` and `Transition::revert` work on raw stores.
+
+Because store callbacks run after mutation, begin and commit also persist complete
+graph snapshots. They use O(number of links) space, and journals grow without automatic
+retention. Restoration uses O(number of links + highest address) store operations,
+plus sorting and backend index costs. File records
+are checksummed and synchronized on each append; torn final records are discarded,
+while complete corruption and address narrowing are errors.
+
+The store and its journal must be exclusively owned and paired. Recovery requires
+a structurally readable store; it cannot repair a torn backend tree-index write.
+Use a handle for compound helpers and place policy decorators around that handle,
+so all policy writes are recorded and recovery can restore raw addresses. Nested
+transactions are rejected. A commit I/O error has an indeterminate outcome until
+recovery and blocks further writes. Drop-time rollback failures are available via
+`rollback_error()`. Diagnostics can be enabled with `set_tracing(true)`.
+
+Run `cargo run -p doublets --example transactions` for commit, policy composition
+and rollback in one example.
+
+### Sequences and Unicode strings
+
+`doublets::sequences` provides the store-backed converter pipeline from
+`Platform.Data.Doublets.Sequences` 0.6.5. It is available with all feature
+configurations and adds no dependencies. Use `converters`, `walkers` and
+`unicode` submodules or import their types directly from `sequences`.
+
+The pipeline stores each UTF-16 code unit as `(raw number, symbol marker)`,
+pairs adjacent symbols into a balanced sequence, and wraps the root as
+`(root, sequence marker)`. The sequence marker represents the empty string.
+Supply your own marker addresses and enable external references when opening
+the store with `LinksConstants::external()`.
+
+See [`doublets/examples/unicode_strings.rs`](doublets/examples/unicode_strings.rs)
+for a complete encoding, decoding and caching example:
+
+```bash
+cargo run -p doublets --example unicode_strings
+```
+
+The character converters use `u16`, matching C# `char`. String conversion uses
+UTF-16, including surrogate pairs; `convert_utf16` methods also preserve lone
+surrogates that cannot form a Rust `String`. Numeric overflow, missing links,
+wrong markers and cyclic sequences return typed errors. The sequence walker
+offers both a lazy iterator and a collected result, preserves repeated subtrees,
+and uses a heap stack. Clear conversion caches when modifying or deleting their
+underlying links.
+
+## Architecture
+
+```
+doublets-rs/
+├── doublets/           # Core library
+│   ├── src/
+│   │   ├── data/       # Core data structures (Link, Doublet, traits)
+│   │   └── mem/        # Memory management and storage
+│   │       ├── unit/   # Combined storage implementation
+│   │       └── split/  # Split storage implementation
+│   └── benches/        # Performance benchmarks
+├── doublets-ffi/       # C FFI bindings
+└── integration/        # Integration tests
+```
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| `platform` (default) | Core platform types and traits |
+| `mem` | Memory management utilities |
+| `num` | Numeric utilities |
+| `data` | Re-exports from `platform-data` |
+| `rayon` | Parallel iteration support |
+| `small-search` | Stack-allocated buffers for small queries |
+| `full` | All features enabled |
+
+## Performance
+
+The library is optimized for high-throughput operations:
+
+- **Size-balanced trees** for O(log n) search, insert, and delete operations
+- **Memory-mapped files** for efficient disk I/O
+- **Optional parallel iteration** with rayon feature
+- Benchmarks show creation of 1 million points in ~1 second on modern hardware
+
+Run benchmarks:
+
+```bash
+cargo bench --all-features
+```
+
+## Related Projects
+
+- [Data.Doublets](https://github.com/linksplatform/Data.Doublets) - C# implementation
+- [Comparisons.SQLiteVSDoublets](https://github.com/linksplatform/Comparisons.SQLiteVSDoublets) - Performance comparison with SQLite
+
+## Documentation
+
+- [API Documentation](https://docs.rs/doublets) (when published)
+- [LinksPlatform Overview](https://github.com/linksplatform)
+
+## Dependencies
+
+- [platform-num](https://crates.io/crates/platform-num) - Link reference numeric traits
+- [platform-data](https://crates.io/crates/platform-data) - Core data types
+- [platform-mem](https://crates.io/crates/platform-mem) - Memory abstractions
+- [platform-trees](https://crates.io/crates/platform-trees) - Tree implementations
+
+## Support
+
+- Ask questions at [stackoverflow.com/tags/links-platform](https://stackoverflow.com/tags/links-platform) (use tag `links-platform`)
+- Join our [Discord server](https://discord.gg/eEXJyjWv5e) for real-time support
+- Open issues on [GitHub](https://github.com/linksplatform/doublets-rs/issues)
+
+## License
+
+This project is released into the public domain under the [Unlicense](LICENSE).

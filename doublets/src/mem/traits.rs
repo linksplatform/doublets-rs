@@ -3,10 +3,10 @@ use crate::{
     split::{DataPart, IndexPart},
     Link,
 };
-use data::{Flow, LinkType};
+use data::{Flow, LinkReference};
 use std::ptr::NonNull;
 
-pub trait LinksTree<T: LinkType> {
+pub trait LinksTree<T: LinkReference> {
     fn count_usages(&self, root: T) -> T;
 
     fn search(&self, source: T, target: T) -> T;
@@ -18,24 +18,24 @@ pub trait LinksTree<T: LinkType> {
     fn attach(&mut self, root: &mut T, index: T);
 }
 
-pub trait UnitUpdateMem<T: LinkType> {
+pub trait UnitUpdateMem<T: LinkReference> {
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>);
 }
 
-pub trait UnitTree<T: LinkType>: LinksTree<T> + UnitUpdateMem<T> {}
+pub trait UnitTree<T: LinkReference>: LinksTree<T> + UnitUpdateMem<T> {}
 
-pub trait SplitUpdateMem<T: LinkType> {
+pub trait SplitUpdateMem<T: LinkReference> {
     fn update_mem(&mut self, data: NonNull<[DataPart<T>]>, index: NonNull<[IndexPart<T>]>);
 }
 
-pub trait SplitTree<T: LinkType>: LinksTree<T> + SplitUpdateMem<T> {}
+pub trait SplitTree<T: LinkReference>: LinksTree<T> + SplitUpdateMem<T> {}
 
-pub trait LinksList<T: LinkType> {
+pub trait LinksList<T: LinkReference> {
     fn detach(&mut self, link: T);
 
     fn attach_as_first(&mut self, link: T);
 }
 
-pub trait UnitList<T: LinkType>: LinksList<T> + UnitUpdateMem<T> {}
+pub trait UnitList<T: LinkReference>: LinksList<T> + UnitUpdateMem<T> {}
 
-pub trait SplitList<T: LinkType>: LinksList<T> + SplitUpdateMem<T> {}
+pub trait SplitList<T: LinkReference>: LinksList<T> + SplitUpdateMem<T> {}

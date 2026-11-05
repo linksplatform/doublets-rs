@@ -1,0 +1,35 @@
+[2026-04-18T15:23:10Z INFO  rust_script] Arguments: Args { script: Some("scripts/check-file-size.rs"), script_args: [], expr: false, loop_: false, count: false, base_path: None, pkg_path: None, gen_pkg_only: false, cargo_output: false, clear_cache: false, debug: false, dep: [], extern_: [], force: false, unstable_features: [], build_kind: Normal, toolchain_version: None, wrapper: None }
+[2026-04-18T15:23:10Z INFO  rust_script] input: File("check-file-size", "/tmp/gh-issue-solver-1776525124844/scripts/check-file-size.rs", "#!/usr/bin/env rust-script\n//! Check for files exceeding the maximum allowed line count\n//! Exits with error code 1 if any files exceed the limit\n//!\n//! Usage: rust-script scripts/check-file-size.rs\n//!\n//! ```cargo\n//! [dependencies]\n//! walkdir = \"2\"\n//! ```\n\nuse std::fs;\nuse std::path::Path;\nuse std::process::exit;\nuse walkdir::WalkDir;\n\nconst MAX_LINES: usize = 1000;\nconst FILE_EXTENSIONS: &[&str] = &[\".rs\"];\nconst EXCLUDE_PATTERNS: &[&str] = &[\"target\", \".git\", \"node_modules\"];\n\nfn should_exclude(path: &Path) -> bool {\n    let path_str = path.to_string_lossy();\n    EXCLUDE_PATTERNS.iter().any(|pattern| path_str.contains(pattern))\n}\n\nfn has_valid_extension(path: &Path) -> bool {\n    if let Some(ext) = path.extension() {\n        let ext_with_dot = format!(\".{}\", ext.to_string_lossy());\n        FILE_EXTENSIONS.contains(&ext_with_dot.as_str())\n    } else {\n        false\n    }\n}\n\nfn count_lines(path: &Path) -> Result<usize, std::io::Error> {\n    let content = fs::read_to_string(path)?;\n    Ok(content.lines().count())\n}\n\nstruct Violation {\n    file: String,\n    lines: usize,\n}\n\nfn main() {\n    println!(\"\\nChecking Rust files for maximum {} lines...\\n\", MAX_LINES);\n\n    let cwd = std::env::current_dir().expect(\"Failed to get current directory\");\n    let mut violations: Vec<Violation> = Vec::new();\n\n    for entry in WalkDir::new(&cwd)\n        .into_iter()\n        .filter_map(|e| e.ok())\n        .filter(|e| e.file_type().is_file())\n    {\n        let path = entry.path();\n\n        if should_exclude(path) {\n            continue;\n        }\n\n        if !has_valid_extension(path) {\n            continue;\n        }\n\n        match count_lines(path) {\n            Ok(line_count) => {\n                if line_count > MAX_LINES {\n                    let relative_path = path\n                        .strip_prefix(&cwd)\n                        .unwrap_or(path)\n                        .to_string_lossy()\n                        .to_string();\n                    violations.push(Violation {\n                        file: relative_path,\n                        lines: line_count,\n                    });\n                }\n            }\n            Err(e) => {\n                eprintln!(\"Warning: Could not read {}: {}\", path.display(), e);\n            }\n        }\n    }\n\n    if violations.is_empty() {\n        println!(\"All files are within the line limit\\n\");\n        exit(0);\n    } else {\n        println!(\"Found files exceeding the line limit:\\n\");\n        for violation in &violations {\n            println!(\n                \"  {}: {} lines (exceeds {})\",\n                violation.file, violation.lines, MAX_LINES\n            );\n        }\n        println!(\"\\nPlease refactor these files to be under {} lines\\n\", MAX_LINES);\n        exit(1);\n    }\n}\n", "/tmp/gh-issue-solver-1776525124844/scripts")
+[2026-04-18T15:23:10Z INFO  rust_script] prelude_items: []
+[2026-04-18T15:23:10Z INFO  rust_script] id: "cdc7e88a571c0397df8916a6"
+[2026-04-18T15:23:10Z INFO  rust_script] pkg_path: "/workspace/.cache/rust-script/projects/cdc7e88a571c0397df8916a6"
+[2026-04-18T15:23:10Z INFO  rust_script] using_cache: true
+[2026-04-18T15:23:10Z INFO  rust_script::manifest] part_mani: {"dependencies": Table({"walkdir": String("2")})}
+[2026-04-18T15:23:10Z INFO  rust_script::manifest] source: None
+[2026-04-18T15:23:10Z INFO  rust_script::manifest] manifest: [[bin]]
+    name = "check-file-size_cdc7e88a571c0397df8916a6"
+    path = "/tmp/gh-issue-solver-1776525124844/scripts/check-file-size.rs"
+
+    [dependencies]
+    walkdir = "2"
+
+    [package]
+    authors = ["Anonymous"]
+    edition = "2021"
+    name = "check-file-size_cdc7e88a571c0397df8916a6"
+    version = "0.1.0"
+
+    [profile.release]
+    strip = true
+
+[2026-04-18T15:23:10Z INFO  rust_script] action: InputAction { cargo_output: false, force_compile: false, execute: true, pkg_path: "/workspace/.cache/rust-script/projects/cdc7e88a571c0397df8916a6", script_path: "/tmp/gh-issue-solver-1776525124844/scripts/check-file-size.rs", using_cache: true, toolchain_version: None, debug: false, manifest: "[[bin]]\nname = \"check-file-size_cdc7e88a571c0397df8916a6\"\npath = \"/tmp/gh-issue-solver-1776525124844/scripts/check-file-size.rs\"\n\n[dependencies]\nwalkdir = \"2\"\n\n[package]\nauthors = [\"Anonymous\"]\nedition = \"2021\"\nname = \"check-file-size_cdc7e88a571c0397df8916a6\"\nversion = \"0.1.0\"\n\n[profile.release]\nstrip = true\n", script: None, build_kind: Normal, bin_name: "check-file-size_cdc7e88a571c0397df8916a6", original_script_path: Some("scripts/check-file-size.rs") }
+[2026-04-18T15:23:10Z INFO  rust_script] creating pkg dir...
+[2026-04-18T15:23:10Z INFO  rust_script] generating Cargo package...
+[2026-04-18T15:23:10Z DEBUG rust_script] overwrite_file("/workspace/.cache/rust-script/projects/cdc7e88a571c0397df8916a6/Cargo.toml", _)
+[2026-04-18T15:23:10Z DEBUG rust_script] Equal content
+[2026-04-18T15:23:10Z INFO  rust_script] disarming pkg dir cleanup...
+[2026-04-18T15:23:10Z DEBUG rust_script] Keeping old binary
+
+Checking Rust files for maximum 1000 lines...
+
+All files are within the line limit

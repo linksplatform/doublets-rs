@@ -1,0 +1,699 @@
+Benchmark	UNKNOWN STEP	﻿2026-04-14T08:18:07.3510573Z Current runner version: '2.333.1'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3544224Z ##[group]Runner Image Provisioner
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3545321Z Hosted Compute Agent
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3546271Z Version: 20260213.493
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3547173Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3548358Z Build Date: 2026-02-13T00:28:41Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3549695Z Worker ID: {61a36d16-c777-4ff3-a756-233ef2c3a4ad}
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3550720Z Azure Region: eastus2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3551543Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3554001Z ##[group]Operating System
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3554889Z Ubuntu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3555579Z 24.04.4
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3556406Z LTS
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3557155Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3557906Z ##[group]Runner Image
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3558843Z Image: ubuntu-24.04
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3559627Z Version: 20260406.80.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3561624Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3564309Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3565911Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3570322Z ##[group]GITHUB_TOKEN Permissions
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3573373Z Actions: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3574174Z ArtifactMetadata: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3575004Z Attestations: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3575746Z Checks: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3576648Z Contents: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3577366Z Deployments: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3578168Z Discussions: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3579019Z Issues: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3579798Z Metadata: read
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3580591Z Models: read
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3581309Z Packages: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3582428Z Pages: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3583344Z PullRequests: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3584324Z RepositoryProjects: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3585246Z SecurityEvents: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3586109Z Statuses: write
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3587000Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3589802Z Secret source: Actions
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.3591016Z Prepare workflow directory
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.4142584Z Prepare all required actions
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.4197833Z Getting action download info
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:07.8461498Z Download action repository 'actions/checkout@v2' (SHA:ee0669bd1cc54295c223e0bb666b733df41de1c5)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.2508463Z Download action repository 'actions-rs/toolchain@v1' (SHA:16499b5e05bf2e26879000db0c1d13f7e13fa3af)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.4951713Z Download action repository 'actions-rs/cargo@v1' (SHA:844f36862e911db73fe0815f00a4a2602c279505)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.8521415Z Complete job name: Benchmark
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9310953Z ##[group]Run actions/checkout@v2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9312537Z with:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9313245Z   submodules: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9314103Z   repository: linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9315396Z   token: ***
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9316125Z   ssh-strict: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9316935Z   persist-credentials: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9317840Z   clean: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9318551Z   fetch-depth: 1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9319288Z   lfs: false
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9320038Z   set-safe-directory: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9321144Z env:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9321852Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:08.9322936Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0365427Z Syncing repository: linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0368012Z ##[group]Getting Git version info
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0369388Z Working directory is '/home/runner/work/doublets-rs/doublets-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0371306Z [command]/usr/bin/git version
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0404294Z git version 2.53.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0429371Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0444209Z Temporarily overriding HOME='/home/runner/work/_temp/80abbcc6-5a0e-4f98-9cb9-4573ae44290d' before making global git config changes
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0447334Z Adding repository directory to the temporary git global config as a safe directory
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0449697Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0483293Z Deleting the contents of '/home/runner/work/doublets-rs/doublets-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0487293Z ##[group]Initializing the repository
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0490358Z [command]/usr/bin/git init /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0593840Z hint: Using 'master' as the name for the initial branch. This default branch name
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0596102Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0598025Z hint: to use in all of your new repositories, which will suppress this warning,
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0599481Z hint: call:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0600162Z hint:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0601071Z hint: 	git config --global init.defaultBranch <name>
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0602790Z hint:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0604291Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0606179Z hint: 'development'. The just-created branch can be renamed via this command:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0607659Z hint:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0608554Z hint: 	git branch -m <name>
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0609435Z hint:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0610621Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0613192Z Initialized empty Git repository in /home/runner/work/doublets-rs/doublets-rs/.git/
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0615358Z [command]/usr/bin/git remote add origin https://github.com/linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0637073Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0638520Z ##[group]Disabling automatic garbage collection
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0640716Z [command]/usr/bin/git config --local gc.auto 0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0669947Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0672512Z ##[group]Setting up auth
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0677802Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0709049Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.0998820Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.1027110Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.1238776Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.1273317Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.1274934Z ##[group]Fetching the repository
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.1281840Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +896061d1076dde33654a5524c0d47fb849d7edd5:refs/remotes/pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3324597Z remote: Enumerating objects: 124, done.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3329676Z remote: Counting objects:   0% (1/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3332195Z remote: Counting objects:   1% (2/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3334096Z remote: Counting objects:   2% (3/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3336791Z remote: Counting objects:   3% (4/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3338254Z remote: Counting objects:   4% (5/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3339402Z remote: Counting objects:   5% (7/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3340577Z remote: Counting objects:   6% (8/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3341718Z remote: Counting objects:   7% (9/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3343186Z remote: Counting objects:   8% (10/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3344342Z remote: Counting objects:   9% (12/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3345503Z remote: Counting objects:  10% (13/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3346659Z remote: Counting objects:  11% (14/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3347822Z remote: Counting objects:  12% (15/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3348982Z remote: Counting objects:  13% (17/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3350480Z remote: Counting objects:  14% (18/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3351694Z remote: Counting objects:  15% (19/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3353108Z remote: Counting objects:  16% (20/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3354267Z remote: Counting objects:  17% (22/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3355410Z remote: Counting objects:  18% (23/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3356547Z remote: Counting objects:  19% (24/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3357695Z remote: Counting objects:  20% (25/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3358826Z remote: Counting objects:  21% (27/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3360002Z remote: Counting objects:  22% (28/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3361152Z remote: Counting objects:  23% (29/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3362572Z remote: Counting objects:  24% (30/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3363696Z remote: Counting objects:  25% (31/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3364850Z remote: Counting objects:  26% (33/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3365996Z remote: Counting objects:  27% (34/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3367182Z remote: Counting objects:  28% (35/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3368313Z remote: Counting objects:  29% (36/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3369442Z remote: Counting objects:  30% (38/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3370581Z remote: Counting objects:  31% (39/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3371740Z remote: Counting objects:  32% (40/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3373123Z remote: Counting objects:  33% (41/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3374268Z remote: Counting objects:  34% (43/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3375405Z remote: Counting objects:  35% (44/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3377257Z remote: Counting objects:  36% (45/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3379377Z remote: Counting objects:  37% (46/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3381573Z remote: Counting objects:  38% (48/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3383883Z remote: Counting objects:  39% (49/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3385980Z remote: Counting objects:  40% (50/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3387823Z remote: Counting objects:  41% (51/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3389790Z remote: Counting objects:  42% (53/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3391866Z remote: Counting objects:  43% (54/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3394169Z remote: Counting objects:  44% (55/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3396453Z remote: Counting objects:  45% (56/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3398387Z remote: Counting objects:  46% (58/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3400307Z remote: Counting objects:  47% (59/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3402831Z remote: Counting objects:  48% (60/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3404795Z remote: Counting objects:  49% (61/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3406670Z remote: Counting objects:  50% (62/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3408569Z remote: Counting objects:  51% (64/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3410415Z remote: Counting objects:  52% (65/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3412488Z remote: Counting objects:  53% (66/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3414363Z remote: Counting objects:  54% (67/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3415601Z remote: Counting objects:  55% (69/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3416748Z remote: Counting objects:  56% (70/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3417890Z remote: Counting objects:  57% (71/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3419019Z remote: Counting objects:  58% (72/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3420140Z remote: Counting objects:  59% (74/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3421261Z remote: Counting objects:  60% (75/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3422625Z remote: Counting objects:  61% (76/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3423851Z remote: Counting objects:  62% (77/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3424977Z remote: Counting objects:  63% (79/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3426118Z remote: Counting objects:  64% (80/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3427254Z remote: Counting objects:  65% (81/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3428376Z remote: Counting objects:  66% (82/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3429692Z remote: Counting objects:  67% (84/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3430840Z remote: Counting objects:  68% (85/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3432108Z remote: Counting objects:  69% (86/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3433246Z remote: Counting objects:  70% (87/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3434367Z remote: Counting objects:  71% (89/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3435488Z remote: Counting objects:  72% (90/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3436603Z remote: Counting objects:  73% (91/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3437737Z remote: Counting objects:  74% (92/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3438878Z remote: Counting objects:  75% (93/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3440167Z remote: Counting objects:  76% (95/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3441684Z remote: Counting objects:  77% (96/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3443660Z remote: Counting objects:  78% (97/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3447319Z remote: Counting objects:  79% (98/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3449390Z remote: Counting objects:  80% (100/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3451383Z remote: Counting objects:  81% (101/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3453330Z remote: Counting objects:  82% (102/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3455017Z remote: Counting objects:  83% (103/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3456947Z remote: Counting objects:  84% (105/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3458744Z remote: Counting objects:  85% (106/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3460159Z remote: Counting objects:  86% (107/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3462452Z remote: Counting objects:  87% (108/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3464822Z remote: Counting objects:  88% (110/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3466754Z remote: Counting objects:  89% (111/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3469355Z remote: Counting objects:  90% (112/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3471015Z remote: Counting objects:  91% (113/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3473023Z remote: Counting objects:  92% (115/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3474177Z remote: Counting objects:  93% (116/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3475413Z remote: Counting objects:  94% (117/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3476552Z remote: Counting objects:  95% (118/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3477697Z remote: Counting objects:  96% (120/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3478835Z remote: Counting objects:  97% (121/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3480420Z remote: Counting objects:  98% (122/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3481810Z remote: Counting objects:  99% (123/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3483262Z remote: Counting objects: 100% (124/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3484712Z remote: Counting objects: 100% (124/124), done.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3485941Z remote: Compressing objects:   0% (1/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3487102Z remote: Compressing objects:   1% (2/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3488306Z remote: Compressing objects:   2% (3/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3490197Z remote: Compressing objects:   3% (4/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3492967Z remote: Compressing objects:   4% (5/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3494898Z remote: Compressing objects:   5% (6/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3496832Z remote: Compressing objects:   6% (7/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3498673Z remote: Compressing objects:   7% (8/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3499868Z remote: Compressing objects:   8% (9/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3501132Z remote: Compressing objects:   9% (10/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3502908Z remote: Compressing objects:  10% (11/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3504980Z remote: Compressing objects:  11% (12/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3507249Z remote: Compressing objects:  12% (13/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3509214Z remote: Compressing objects:  13% (14/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3511652Z remote: Compressing objects:  14% (15/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3514717Z remote: Compressing objects:  15% (17/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3518053Z remote: Compressing objects:  16% (18/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3520345Z remote: Compressing objects:  17% (19/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3523459Z remote: Compressing objects:  18% (20/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3525452Z remote: Compressing objects:  19% (21/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3527375Z remote: Compressing objects:  20% (22/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3528849Z remote: Compressing objects:  21% (23/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3530021Z remote: Compressing objects:  22% (24/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3531199Z remote: Compressing objects:  23% (25/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3532682Z remote: Compressing objects:  24% (26/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3533886Z remote: Compressing objects:  25% (27/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3536207Z remote: Compressing objects:  26% (28/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3538272Z remote: Compressing objects:  27% (29/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3540365Z remote: Compressing objects:  28% (30/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3542620Z remote: Compressing objects:  29% (32/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3544582Z remote: Compressing objects:  30% (33/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3546864Z remote: Compressing objects:  31% (34/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3548905Z remote: Compressing objects:  32% (35/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3550794Z remote: Compressing objects:  33% (36/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3553781Z remote: Compressing objects:  34% (37/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3582415Z remote: Compressing objects:  35% (38/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3584676Z remote: Compressing objects:  36% (39/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3586624Z remote: Compressing objects:  37% (40/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3588584Z remote: Compressing objects:  38% (41/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3590561Z remote: Compressing objects:  39% (42/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3592666Z remote: Compressing objects:  40% (43/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3594717Z remote: Compressing objects:  41% (44/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3596653Z remote: Compressing objects:  42% (45/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3598675Z remote: Compressing objects:  43% (47/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3600639Z remote: Compressing objects:  44% (48/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3602921Z remote: Compressing objects:  45% (49/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3604911Z remote: Compressing objects:  46% (50/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3606838Z remote: Compressing objects:  47% (51/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3608660Z remote: Compressing objects:  48% (52/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3609854Z remote: Compressing objects:  49% (53/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3611265Z remote: Compressing objects:  50% (54/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3612766Z remote: Compressing objects:  51% (55/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3613923Z remote: Compressing objects:  52% (56/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3615082Z remote: Compressing objects:  53% (57/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3616727Z remote: Compressing objects:  54% (58/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3618058Z remote: Compressing objects:  55% (59/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3619233Z remote: Compressing objects:  56% (60/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3620392Z remote: Compressing objects:  57% (61/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3621540Z remote: Compressing objects:  58% (63/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3623090Z remote: Compressing objects:  59% (64/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3624265Z remote: Compressing objects:  60% (65/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3625417Z remote: Compressing objects:  61% (66/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3626579Z remote: Compressing objects:  62% (67/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3627778Z remote: Compressing objects:  63% (68/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3628932Z remote: Compressing objects:  64% (69/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3630085Z remote: Compressing objects:  65% (70/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3631234Z remote: Compressing objects:  66% (71/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3632861Z remote: Compressing objects:  67% (72/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3634034Z remote: Compressing objects:  68% (73/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3647782Z remote: Compressing objects:  69% (74/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3648944Z remote: Compressing objects:  70% (75/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3650111Z remote: Compressing objects:  71% (76/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3651273Z remote: Compressing objects:  72% (78/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3652786Z remote: Compressing objects:  73% (79/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3653959Z remote: Compressing objects:  74% (80/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3655101Z remote: Compressing objects:  75% (81/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3656267Z remote: Compressing objects:  76% (82/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3658255Z remote: Compressing objects:  77% (83/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3659637Z remote: Compressing objects:  78% (84/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3661226Z remote: Compressing objects:  79% (85/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3663243Z remote: Compressing objects:  80% (86/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3665106Z remote: Compressing objects:  81% (87/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3666691Z remote: Compressing objects:  82% (88/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3668535Z remote: Compressing objects:  83% (89/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3670191Z remote: Compressing objects:  84% (90/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3672183Z remote: Compressing objects:  85% (91/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3674179Z remote: Compressing objects:  86% (93/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3676125Z remote: Compressing objects:  87% (94/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3677904Z remote: Compressing objects:  88% (95/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3679136Z remote: Compressing objects:  89% (96/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3681218Z remote: Compressing objects:  90% (97/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3683262Z remote: Compressing objects:  91% (98/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3685350Z remote: Compressing objects:  92% (99/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3687309Z remote: Compressing objects:  93% (100/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3689221Z remote: Compressing objects:  94% (101/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3691151Z remote: Compressing objects:  95% (102/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3693389Z remote: Compressing objects:  96% (103/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3695359Z remote: Compressing objects:  97% (104/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3697377Z remote: Compressing objects:  98% (105/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3699368Z remote: Compressing objects:  99% (106/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3701354Z remote: Compressing objects: 100% (107/107)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3703565Z remote: Compressing objects: 100% (107/107), done.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3704765Z Receiving objects:   0% (1/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3705979Z Receiving objects:   1% (2/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3707390Z Receiving objects:   2% (3/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3708876Z Receiving objects:   3% (4/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3710316Z Receiving objects:   4% (5/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3711505Z Receiving objects:   5% (7/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3712709Z Receiving objects:   6% (8/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3713588Z Receiving objects:   7% (9/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3714656Z Receiving objects:   8% (10/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3715714Z Receiving objects:   9% (12/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3717303Z Receiving objects:  10% (13/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3718694Z Receiving objects:  11% (14/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3720355Z Receiving objects:  12% (15/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3722162Z Receiving objects:  13% (17/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3723734Z Receiving objects:  14% (18/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3725283Z Receiving objects:  15% (19/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3726870Z Receiving objects:  16% (20/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3728415Z Receiving objects:  17% (22/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3729970Z Receiving objects:  18% (23/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3731573Z Receiving objects:  19% (24/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3733357Z Receiving objects:  20% (25/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3734764Z Receiving objects:  21% (27/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3736004Z Receiving objects:  22% (28/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3737743Z Receiving objects:  23% (29/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3738946Z Receiving objects:  24% (30/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3740490Z Receiving objects:  25% (31/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3742314Z Receiving objects:  26% (33/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3743840Z Receiving objects:  27% (34/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3745311Z Receiving objects:  28% (35/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3746913Z Receiving objects:  29% (36/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3748545Z Receiving objects:  30% (38/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3750118Z Receiving objects:  31% (39/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3751646Z Receiving objects:  32% (40/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3753466Z Receiving objects:  33% (41/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3755020Z Receiving objects:  34% (43/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3756549Z Receiving objects:  35% (44/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3758033Z Receiving objects:  36% (45/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3759495Z Receiving objects:  37% (46/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3761003Z Receiving objects:  38% (48/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3763345Z Receiving objects:  39% (49/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3764915Z Receiving objects:  40% (50/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3766420Z Receiving objects:  41% (51/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3838587Z Receiving objects:  42% (53/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3840444Z Receiving objects:  43% (54/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3842196Z Receiving objects:  44% (55/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3843180Z Receiving objects:  45% (56/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3844124Z Receiving objects:  46% (58/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3845057Z Receiving objects:  47% (59/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3846080Z Receiving objects:  48% (60/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3847585Z Receiving objects:  49% (61/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3849081Z Receiving objects:  50% (62/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3850624Z Receiving objects:  51% (64/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3852334Z Receiving objects:  52% (65/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3853857Z Receiving objects:  53% (66/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3855425Z Receiving objects:  54% (67/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3856941Z Receiving objects:  55% (69/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3858469Z Receiving objects:  56% (70/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3859988Z Receiving objects:  57% (71/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3861516Z Receiving objects:  58% (72/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3863367Z Receiving objects:  59% (74/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3864927Z Receiving objects:  60% (75/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3866452Z Receiving objects:  61% (76/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3867927Z Receiving objects:  62% (77/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3869383Z Receiving objects:  63% (79/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3870942Z Receiving objects:  64% (80/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3872693Z Receiving objects:  65% (81/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3873854Z Receiving objects:  66% (82/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3874779Z Receiving objects:  67% (84/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3875680Z Receiving objects:  68% (85/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3876590Z Receiving objects:  69% (86/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3877519Z Receiving objects:  70% (87/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3878434Z Receiving objects:  71% (89/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3879346Z Receiving objects:  72% (90/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3880536Z Receiving objects:  73% (91/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3882500Z Receiving objects:  74% (92/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3883860Z Receiving objects:  75% (93/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3884798Z Receiving objects:  76% (95/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3885700Z Receiving objects:  77% (96/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3886617Z Receiving objects:  78% (97/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3887513Z Receiving objects:  79% (98/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3888419Z Receiving objects:  80% (100/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3889338Z Receiving objects:  81% (101/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3890720Z remote: Total 124 (delta 18), reused 67 (delta 8), pack-reused 0 (from 0)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3892552Z Receiving objects:  82% (102/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3893503Z Receiving objects:  83% (103/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3894419Z Receiving objects:  84% (105/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3895337Z Receiving objects:  85% (106/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3896406Z Receiving objects:  86% (107/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3898012Z Receiving objects:  87% (108/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3899569Z Receiving objects:  88% (110/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3901232Z Receiving objects:  89% (111/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3903250Z Receiving objects:  90% (112/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3904903Z Receiving objects:  91% (113/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3906416Z Receiving objects:  92% (115/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3907974Z Receiving objects:  93% (116/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3909500Z Receiving objects:  94% (117/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3911127Z Receiving objects:  95% (118/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3912967Z Receiving objects:  96% (120/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3914608Z Receiving objects:  97% (121/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3916254Z Receiving objects:  98% (122/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3917812Z Receiving objects:  99% (123/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3919333Z Receiving objects: 100% (124/124)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3921475Z Receiving objects: 100% (124/124), 84.33 KiB | 9.37 MiB/s, done.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3923089Z Resolving deltas:   0% (0/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3924018Z Resolving deltas:   5% (1/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3924893Z Resolving deltas:  11% (2/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3925762Z Resolving deltas:  16% (3/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3926630Z Resolving deltas:  22% (4/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3927510Z Resolving deltas:  27% (5/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3928382Z Resolving deltas:  33% (6/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3929514Z Resolving deltas:  38% (7/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3931057Z Resolving deltas:  44% (8/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3932639Z Resolving deltas:  50% (9/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3933552Z Resolving deltas:  55% (10/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3934456Z Resolving deltas:  61% (11/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3935334Z Resolving deltas:  66% (12/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3936211Z Resolving deltas:  72% (13/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3937086Z Resolving deltas:  77% (14/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3937970Z Resolving deltas:  83% (15/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3938843Z Resolving deltas:  88% (16/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3939718Z Resolving deltas:  94% (17/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3940596Z Resolving deltas: 100% (18/18)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3941489Z Resolving deltas: 100% (18/18), done.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3942842Z From https://github.com/linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3944829Z  * [new ref]         896061d1076dde33654a5524c0d47fb849d7edd5 -> pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3948418Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3950603Z ##[group]Determining the checkout info
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3953363Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3955419Z ##[group]Checking out the ref
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3957737Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3959473Z Note: switching to 'refs/remotes/pull/48/merge'.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3960233Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3960892Z You are in 'detached HEAD' state. You can look around, make experimental
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3962919Z changes and commit them, and you can discard any commits you make in this
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3964595Z state without impacting any branches by switching back to a branch.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3966063Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3967164Z If you want to create a new branch to retain commits you create, you may
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3969185Z do so (now or later) by using -c with the switch command. Example:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3970126Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3970499Z   git switch -c <new-branch-name>
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3971153Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3971502Z Or undo this operation with:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3972341Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3972648Z   git switch -
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3973070Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3973815Z Turn off this advice by setting config variable advice.detachedHead to false
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3974873Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3976064Z HEAD is now at 896061d Merge cc26e7009ba117ea9aaba535d735a02df44fb251 into 69a725305fcbaf81b9a038ce2384c3f111e2fa51
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3978461Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3979852Z ##[group]Setting up auth for fetching submodules
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3982515Z [command]/usr/bin/git config --global http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3986683Z [command]/usr/bin/git config --global --unset-all url.https://github.com/.insteadOf
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3990355Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf git@github.com:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.3994791Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf org-15116341@github.com:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4023242Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4025378Z ##[group]Fetching submodules
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4026996Z [command]/usr/bin/git submodule sync
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4270581Z [command]/usr/bin/git -c protocol.version=2 submodule update --init --force --depth=1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4505610Z Submodule 'dev-deps/data-rs' (https://github.com/linksplatform/data-rs) registered for path 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4510704Z Submodule 'dev-deps/mem-rs' (https://github.com/linksplatform/mem-rs) registered for path 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4515788Z Submodule 'dev-deps/trees-rs' (https://github.com/linksplatform/trees-rs) registered for path 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.4540016Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/data-rs'...
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:09.7506771Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/mem-rs'...
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:10.0739574Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/trees-rs'...
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:10.3697092Z Submodule path 'dev-deps/data-rs': checked out '04821c65a2439bb8c9e5ba0771dbbad7aae4a46a'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:10.9380562Z From https://github.com/linksplatform/mem-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:10.9381472Z  * branch            260fe8ac0f510a16aae99ff3033348b940a01106 -> FETCH_HEAD
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:10.9441267Z Submodule path 'dev-deps/mem-rs': checked out '260fe8ac0f510a16aae99ff3033348b940a01106'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5682215Z From https://github.com/linksplatform/trees-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5682857Z  * branch            de22eef5987a0f241ce124b07e745e4e5ab15c68 -> FETCH_HEAD
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5740616Z Submodule path 'dev-deps/trees-rs': checked out 'de22eef5987a0f241ce124b07e745e4e5ab15c68'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5751628Z [command]/usr/bin/git submodule foreach git config --local gc.auto 0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5958493Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.5980452Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6003481Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6033853Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6034717Z ##[group]Persisting credentials for submodules
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6040875Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'url\.https\:\/\/github\.com\/\.insteadOf' && git config --local --unset-all 'url.https://github.com/.insteadOf' || :"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6246141Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6287840Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6328515Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6379644Z [command]/usr/bin/git submodule foreach sh -c "git config --local 'http.https://github.com/.extraheader' 'AUTHORIZATION: basic ***' && git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6581247Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6618138Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/data-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6622823Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6659140Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/mem-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6664107Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6700571Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/trees-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6734681Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'git@github.com:'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6937410Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6959427Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.6982333Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7015594Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'org-15116341@github.com:'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7216747Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7238535Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7261854Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7293417Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7326581Z [command]/usr/bin/git log -1 --format='%H'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7347983Z '896061d1076dde33654a5524c0d47fb849d7edd5'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7558941Z ##[group]Run actions-rs/toolchain@v1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7559251Z with:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7559441Z   profile: minimal
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7559664Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7559916Z   components: rustfmt, clippy
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7560142Z   default: true
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7560326Z   override: false
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7560512Z env:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7560686Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.7560914Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:11.8550771Z [command]/home/runner/.cargo/bin/rustup show
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4060325Z Default host: x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4067158Z rustup home:  /home/runner/.rustup
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4067592Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4740270Z installed toolchains
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4740619Z --------------------
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4741032Z stable-x86_64-unknown-linux-gnu (active, default)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4741371Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4741498Z active toolchain
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4742068Z ----------------
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4742578Z name: stable-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4743393Z active because: overridden by '/home/runner/work/doublets-rs/doublets-rs/rust-toolchain.toml'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4744186Z installed targets:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4744572Z   x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4780459Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4830628Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:12.4832374Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1624684Z info: the currently active `rustc` version is `rustc 1.94.1 (e408947bf 2026-03-25)`
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1642286Z Installed rustup 1.29.0 support profiles
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1645438Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1696309Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1697778Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1789955Z info: the currently active `rustc` version is `rustc 1.94.1 (e408947bf 2026-03-25)`
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1801367Z Installed rustup 1.29.0 support components
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1805423Z [command]/home/runner/.cargo/bin/rustup set profile minimal
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1900262Z info: profile set to minimal
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1918603Z [command]/home/runner/.cargo/bin/rustup toolchain install nightly-2022-08-22 --component rustfmt --component clippy
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.1984103Z info: syncing channel updates for nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.3393517Z info: latest update on 2022-08-22 for version 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:15.3394414Z info: downloading 5 components
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1231467Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1329370Z   nightly-2022-08-22-x86_64-unknown-linux-gnu installed - rustc 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1330071Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1380828Z [command]/home/runner/.cargo/bin/rustup default nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1443499Z info: using existing install for nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1451186Z info: default toolchain set to nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1452083Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1546062Z   nightly-2022-08-22-x86_64-unknown-linux-gnu unchanged - rustc 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1546760Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1547558Z info: note that the toolchain 'stable-x86_64-unknown-linux-gnu' is currently in use (overridden by '/home/runner/work/doublets-rs/doublets-rs/rust-toolchain.toml')
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1559653Z ##[group]Gathering installed versions
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1569963Z [command]/home/runner/.cargo/bin/rustc -V
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1700199Z rustc 1.94.1 (e408947bf 2026-03-25)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1733691Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1745664Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.1747175Z [command]/home/runner/.cargo/bin/cargo -V
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5474219Z cargo 1.94.1 (29ea6fb6a 2026-03-24)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5488365Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5495747Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5546127Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5546756Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5639768Z info: the currently active `rustc` version is `rustc 1.94.1 (e408947bf 2026-03-25)`
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5653982Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5656016Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5749329Z ##[group]Run actions-rs/cargo@v1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5749583Z with:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5749755Z   command: build
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5749971Z   args: --release --all-features
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5750202Z   use-cross: false
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5750388Z env:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5750562Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.5750788Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6397501Z [command]/home/runner/.cargo/bin/cargo build --release --all-features
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6934328Z warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6945991Z ##[warning]package:   /home/runner/work/doublets-rs/doublets-rs/doublets/Cargo.toml
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6947805Z workspace: /home/runner/work/doublets-rs/doublets-rs/Cargo.toml
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6949140Z warning: virtual workspace defaulting to `resolver = "1"` despite one or more workspace members being on edition 2021 which implies `resolver = "2"`
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6951062Z ##[warning]  |
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6952623Z   = note: to keep the current resolver, specify `workspace.resolver = "1"` in the workspace root's manifest
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6953845Z   = note: to use the edition 2021 resolver, specify `workspace.resolver = "2"` in the workspace root's manifest
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:22.6955069Z   = note: for more details see https://doc.rust-lang.org/cargo/reference/resolver.html#resolver-versions
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:23.1896725Z     Updating crates.io index
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.1070857Z  Downloading crates ...
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3442394Z   Downloaded cfg-if v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3485241Z   Downloaded crossbeam-epoch v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3512636Z   Downloaded fastrand v1.8.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3535369Z   Downloaded autocfg v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3561602Z   Downloaded funty v2.0.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3570496Z   Downloaded either v1.7.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3586741Z   Downloaded crossbeam-utils v0.8.11
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3610637Z   Downloaded leak_slice v0.2.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3618372Z   Downloaded crossbeam-deque v0.8.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3631886Z   Downloaded beef v0.5.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3653247Z   Downloaded memoffset v0.6.5
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3666961Z   Downloaded memmap2 v0.5.5
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3702544Z   Downloaded num_cpus v1.13.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3729772Z   Downloaded scopeguard v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3740795Z   Downloaded platform-mem v0.1.0-pre+beta.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3754447Z   Downloaded remove_dir_all v0.5.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3780353Z   Downloaded thiserror-impl v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3805049Z   Downloaded tap v1.0.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3814672Z   Downloaded quote v1.0.45
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3841447Z   Downloaded tempfile v3.3.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3865758Z   Downloaded thiserror-impl v2.0.18
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3879763Z   Downloaded thiserror v2.0.18
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3945167Z   Downloaded unicode-ident v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.3968870Z   Downloaded rayon-core v1.9.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4003051Z   Downloaded proc-macro2 v1.0.106
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4031836Z   Downloaded platform-mem v0.3.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4079132Z   Downloaded num-traits v0.2.19
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4105518Z   Downloaded memmap2 v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4122530Z   Downloaded crossbeam-channel v0.5.6
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4162117Z   Downloaded allocator-api2 v0.4.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4186255Z   Downloaded rayon v1.5.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4273150Z   Downloaded smallvec v1.9.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4291432Z   Downloaded once_cell v1.21.4
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4317838Z   Downloaded thiserror v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4359614Z   Downloaded syn v1.0.98
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4447959Z   Downloaded platform-trees v0.3.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4523167Z   Downloaded platform-num v0.6.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4532747Z   Downloaded syn v2.0.117
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4632399Z   Downloaded platform-num v0.1.0-aplha.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.4737528Z   Downloaded libc v0.2.185
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.5324896Z    Compiling autocfg v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.5326002Z    Compiling proc-macro2 v1.0.106
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.5326473Z    Compiling quote v1.0.45
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:24.5326851Z    Compiling libc v0.2.185
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:27.6551220Z    Compiling unicode-ident v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:27.6936852Z    Compiling cfg-if v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:27.7121151Z    Compiling crossbeam-utils v0.8.11
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.1183016Z    Compiling memoffset v0.6.5
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.1230118Z    Compiling num-traits v0.2.19
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.1837993Z    Compiling once_cell v1.21.4
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.2863818Z    Compiling crossbeam-epoch v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.3757821Z    Compiling syn v1.0.98
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.9505345Z    Compiling scopeguard v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:30.9784209Z    Compiling rayon-core v1.9.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.0533856Z    Compiling syn v2.0.117
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.4695388Z    Compiling fastrand v1.8.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.5693125Z    Compiling remove_dir_all v0.5.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.5967792Z    Compiling thiserror v2.0.18
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.6703047Z    Compiling tempfile v3.3.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.8313270Z    Compiling crossbeam-deque v0.8.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:31.9913071Z    Compiling num_cpus v1.13.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:32.3063904Z    Compiling crossbeam-channel v0.5.6
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:32.6992917Z    Compiling rayon v1.5.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:32.9943154Z    Compiling platform-num v0.6.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:33.0394520Z    Compiling memmap2 v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:33.2744769Z    Compiling allocator-api2 v0.4.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:33.6835497Z    Compiling either v1.7.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:33.7792992Z    Compiling funty v2.0.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:34.8615719Z    Compiling thiserror-impl v2.0.18
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:34.9553239Z    Compiling beef v0.5.2
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:34.9994463Z    Compiling thiserror-impl v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.5754577Z    Compiling platform-trees v0.3.3
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6564585Z    Compiling platform-num v0.1.0-aplha.1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6821356Z error[E0554]: `#![feature]` may not be used on the stable release channel
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6874868Z ##[error] --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/platform-num-0.1.0-aplha.1/src/lib.rs:1:1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6877395Z   |
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6902697Z 1 | #![feature(step_trait)]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6932539Z   | ^^^^^^^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6962272Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6963169Z error[E0554]: `#![feature]` may not be used on the stable release channel
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6983671Z ##[error] --> /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/platform-num-0.1.0-aplha.1/src/lib.rs:2:1
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6985759Z   |
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6986197Z 2 | #![feature(trait_alias)]
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6986680Z   | ^^^^^^^^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.6987025Z
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.7012755Z For more information about this error, try `rustc --explain E0554`.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.7083214Z error: could not compile `platform-num` (lib) due to 2 previous errors
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:35.7107580Z ##[error]warning: build failed, waiting for other jobs to finish...
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.7940826Z ##[error]The process '/home/runner/.cargo/bin/cargo' failed with exit code 101
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8028969Z Post job cleanup.
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8899193Z [command]/usr/bin/git version
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8936078Z git version 2.53.0
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8981241Z Temporarily overriding HOME='/home/runner/work/_temp/d8780960-dfac-4429-9e16-15072b9a0763' before making global git config changes
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8982862Z Adding repository directory to the temporary git global config as a safe directory
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.8986252Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9018782Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9049612Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9251053Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9292203Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9334515Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9386165Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9407519Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9417806Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9447361Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9645479Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9668134Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9700416Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9724232Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9756306Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9780026Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:36.9953368Z Cleaning up orphan processes
+Benchmark	UNKNOWN STEP	2026-04-14T08:18:37.0307767Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions-rs/cargo@v1, actions-rs/toolchain@v1, actions/checkout@v2. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

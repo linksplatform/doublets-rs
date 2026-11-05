@@ -1,0 +1,99 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /tmp/gh-issue-solver-1776525124844/doublets/Cargo.toml
+workspace: /tmp/gh-issue-solver-1776525124844/Cargo.toml
+       Fresh autocfg v1.1.0
+       Fresh unicode-ident v1.0.2
+       Fresh cfg-if v1.0.0
+       Fresh proc-macro2 v1.0.106
+       Fresh quote v1.0.45
+       Fresh libc v0.2.185
+       Fresh num-traits v0.2.19
+       Fresh syn v2.0.117
+       Fresh once_cell v1.21.4
+       Fresh syn v1.0.98
+       Fresh crossbeam-utils v0.8.11
+       Fresh thiserror-impl v2.0.18
+       Fresh thiserror v2.0.18
+       Fresh serde_derive v1.0.140
+       Fresh zerocopy-derive v0.8.48
+       Fresh memoffset v0.6.5
+       Fresh platform-num v0.8.0
+       Fresh scopeguard v1.1.0
+       Fresh fastrand v1.8.0
+       Fresh remove_dir_all v0.5.3
+       Fresh crossbeam-epoch v0.9.10
+       Fresh serde v1.0.140
+       Fresh zerocopy v0.8.48
+       Fresh memmap2 v0.9.10
+       Fresh tempfile v3.3.0
+       Fresh beef v0.5.2
+       Fresh cc v1.0.73
+       Fresh allocator-api2 v0.4.0
+       Fresh either v1.7.0
+       Fresh platform-mem v0.3.0
+       Fresh platform-data v2.0.0
+       Fresh crossbeam-deque v0.8.2
+       Fresh half v2.7.1
+       Fresh platform-trees v0.3.4
+       Fresh crossbeam-channel v0.5.6
+       Fresh num_cpus v1.13.1
+       Fresh getrandom v0.2.7
+       Fresh itoa v1.0.2
+       Fresh ryu v1.0.10
+       Fresh tap v1.0.1
+       Fresh plotters-backend v0.3.4
+       Fresh leak_slice v0.2.0
+       Fresh ciborium-io v0.2.2
+       Fresh anstyle v1.0.14
+       Fresh clap_lex v1.1.0
+   Compiling doublets v0.2.0 (/tmp/gh-issue-solver-1776525124844/doublets)
+       Fresh ciborium-ll v0.2.2
+       Fresh serde_json v1.0.82
+       Fresh plotters-svg v0.3.2
+       Fresh rayon-core v1.9.3
+       Fresh clap_builder v4.6.0
+       Fresh rand_core v0.6.3
+       Fresh itertools v0.10.3
+     Running `/workspace/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name doublets --edition=2021 doublets/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 '--warn=clippy::pedantic' '--warn=clippy::nursery' '--warn=clippy::all' --allow=unsafe_code '--allow=clippy::too_many_lines' '--allow=clippy::needless_pass_by_value' '--allow=clippy::module_name_repetitions' '--allow=clippy::missing_safety_doc' '--allow=clippy::missing_panics_doc' '--allow=clippy::missing_errors_doc' '--allow=clippy::missing_const_for_fn' '--allow=clippy::comparison_chain' --cfg 'feature="data"' --cfg 'feature="default"' --cfg 'feature="mem"' --cfg 'feature="num"' --cfg 'feature="platform"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("data", "default", "full", "mem", "more-inline", "num", "platform", "rayon", "small-search", "smallvec"))' -C metadata=92217f759b985bf3 -C extra-filename=-b19ed5b61775bd41 --out-dir /tmp/gh-issue-solver-1776525124844/target/debug/deps -C incremental=/tmp/gh-issue-solver-1776525124844/target/debug/incremental -L dependency=/tmp/gh-issue-solver-1776525124844/target/debug/deps --extern cfg_if=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libcfg_if-9e8ca6ed031de0b9.rmeta --extern leak_slice=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libleak_slice-4305db22a283620d.rmeta --extern data=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_data-eebde4058fac0ad1.rmeta --extern mem=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_mem-b5b8422cc5fce83f.rmeta --extern num=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_num-1f3459767b7419f6.rmeta --extern trees=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_trees-cc8deac914798a84.rmeta --extern tap=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libtap-bfffd143e15a2dcf.rmeta --extern thiserror=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libthiserror-7b25b95850f00c78.rmeta`
+       Fresh same-file v1.0.6
+       Fresh cast v0.3.0
+       Fresh ppv-lite86 v0.2.16
+       Fresh regex-syntax v0.6.27
+       Fresh libmimalloc-sys v0.1.25
+       Fresh rand_chacha v0.3.1
+       Fresh walkdir v2.3.2
+       Fresh criterion-plot v0.5.0
+       Fresh regex v1.6.0
+       Fresh clap v4.6.0
+       Fresh rayon v1.5.3
+       Fresh plotters v0.3.2
+       Fresh ciborium v0.2.2
+       Fresh tinytemplate v1.2.1
+       Fresh is-terminal v0.4.17
+       Fresh tinyvec_macros v0.1.0
+       Fresh anes v0.1.6
+       Fresh oorandom v11.1.3
+       Fresh rand v0.8.5
+       Fresh mimalloc v0.1.29
+       Fresh tinyvec v1.6.0
+       Fresh criterion v0.5.1
+       Fresh static_assertions v1.1.0
+   Compiling smallvec v1.9.0
+     Running `/workspace/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name smallvec --edition=2018 /workspace/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/smallvec-1.9.0/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("arbitrary", "const_generics", "const_new", "may_dangle", "serde", "specialization", "union", "write"))' -C metadata=1ae1a1a7d8d2defe -C extra-filename=-84287b9e4519f5ad --out-dir /tmp/gh-issue-solver-1776525124844/target/debug/deps -L dependency=/tmp/gh-issue-solver-1776525124844/target/debug/deps --cap-lints allow`
+   Compiling integration v0.1.0 (/tmp/gh-issue-solver-1776525124844/integration)
+     Running `/workspace/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name integration --edition=2021 integration/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values())' -C metadata=8bcd972ce529c045 -C extra-filename=-3ee86891665ed265 --out-dir /tmp/gh-issue-solver-1776525124844/target/debug/deps -C incremental=/tmp/gh-issue-solver-1776525124844/target/debug/incremental -L dependency=/tmp/gh-issue-solver-1776525124844/target/debug/deps --extern doublets=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libdoublets-b19ed5b61775bd41.rmeta --extern mem=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_mem-b5b8422cc5fce83f.rmeta`
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+   Doc-tests doublets
+     Running `/workspace/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustdoc --edition=2021 --crate-type lib --color auto --crate-name doublets --test doublets/src/lib.rs --test-run-directory /tmp/gh-issue-solver-1776525124844/doublets -L native=/tmp/gh-issue-solver-1776525124844/target/debug/build/libmimalloc-sys-b1addc247fdeece4/out '--warn=clippy::pedantic' '--warn=clippy::nursery' '--warn=clippy::all' --allow=unsafe_code '--allow=clippy::too_many_lines' '--allow=clippy::needless_pass_by_value' '--allow=clippy::module_name_repetitions' '--allow=clippy::missing_safety_doc' '--allow=clippy::missing_panics_doc' '--allow=clippy::missing_errors_doc' '--allow=clippy::missing_const_for_fn' '--allow=clippy::comparison_chain' --extern cfg_if=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libcfg_if-9e8ca6ed031de0b9.rlib --extern criterion=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libcriterion-82ecaa5f1018c43a.rlib --extern doublets=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libdoublets-b19ed5b61775bd41.rlib --extern leak_slice=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libleak_slice-4305db22a283620d.rlib --extern mimalloc=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libmimalloc-85e3f210db11d47e.rlib --extern data=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_data-eebde4058fac0ad1.rlib --extern mem=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_mem-b5b8422cc5fce83f.rlib --extern num=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_num-1f3459767b7419f6.rlib --extern trees=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_trees-cc8deac914798a84.rlib --extern rand=/tmp/gh-issue-solver-1776525124844/target/debug/deps/librand-e96f27ee6a9afa42.rlib --extern smallvec=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libsmallvec-84287b9e4519f5ad.rlib --extern static_assertions=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libstatic_assertions-86a16e891ace2aab.rlib --extern tap=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libtap-bfffd143e15a2dcf.rlib --extern thiserror=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libthiserror-7b25b95850f00c78.rlib --extern tinyvec=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libtinyvec-8429c3f8b4754073.rlib -L dependency=/tmp/gh-issue-solver-1776525124844/target/debug/deps -C embed-bitcode=no --cfg 'feature="data"' --cfg 'feature="default"' --cfg 'feature="mem"' --cfg 'feature="num"' --cfg 'feature="platform"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("data", "default", "full", "mem", "more-inline", "num", "platform", "rayon", "small-search", "smallvec"))' --error-format human`
+
+running 1 test
+test doublets/src/lib.rs - (line 12) ... ignored
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests integration
+     Running `/workspace/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustdoc --edition=2021 --crate-type lib --color auto --crate-name integration --test integration/src/lib.rs --test-run-directory /tmp/gh-issue-solver-1776525124844/integration -L native=/tmp/gh-issue-solver-1776525124844/target/debug/build/libmimalloc-sys-b1addc247fdeece4/out --extern doublets=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libdoublets-b19ed5b61775bd41.rlib --extern integration=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libintegration-3ee86891665ed265.rlib --extern mem=/tmp/gh-issue-solver-1776525124844/target/debug/deps/libplatform_mem-b5b8422cc5fce83f.rlib -L dependency=/tmp/gh-issue-solver-1776525124844/target/debug/deps -C embed-bitcode=no --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values())' --error-format human`
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

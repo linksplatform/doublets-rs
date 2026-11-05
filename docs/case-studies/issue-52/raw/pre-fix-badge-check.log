@@ -1,0 +1,9 @@
+
+Checking documentation workflow badges...
+
+Found stale documentation workflow badges:
+
+  docs/case-studies/issue-52/raw/readme-before-fix.md:3: legacy workflow query link should point to `actions/workflows/<workflow-file>`
+  docs/case-studies/issue-52/raw/readme-before-fix.md:3: legacy workflow-name badge URL `https://github.com/linksplatform/doublets-rs/workflows/CI/badge.svg` should use `actions/workflows/<workflow-file>/badge.svg?branch=main`
+  docs/case-studies/issue-52/raw/readme-before-fix.md:4: legacy workflow query link should point to `actions/workflows/<workflow-file>`
+  docs/case-studies/issue-52/raw/readme-before-fix.md:4: legacy workflow-name badge URL `https://github.com/linksplatform/doublets-rs/workflows/Benchmark/badge.svg` should use `actions/workflows/<workflow-file>/badge.svg?branch=main`
