@@ -69,6 +69,9 @@ rustup toolchain install stable
 cargo +stable build
 ```
 
+For source checkouts, standalone FFI builds, and troubleshooting older nightly
+dependency errors, see [Stable Rust Support](STABLE_RUST.md).
+
 ## Example
 
 Basic CRUD operations with doublets:

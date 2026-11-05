@@ -52,6 +52,9 @@ Thank you for your interest in contributing! This document provides guidelines a
    cargo build
    ```
 
+   See [Stable Rust Support](STABLE_RUST.md) for complete source-build commands,
+   independent FFI builds, and troubleshooting historical nightly dependencies.
+
 ## Development Workflow
 
 1. **Create a feature branch**
