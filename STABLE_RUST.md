@@ -49,3 +49,63 @@ releases. The ordinary Travis test entry also uses stable Rust.
 The main workspace migration landed in PR 48. PR 26 completed the standalone
 package migration. Decorator coverage now lives in the main library; CI also
 checks the standalone FFI packages and their dependencies.
+
+## Build from source
+
+Clone the current repository and build the workspace from its root:
+
+```bash
+git clone https://github.com/linksplatform/doublets-rs.git
+cd doublets-rs
+rustup toolchain install stable
+cargo +stable build --workspace --locked
+```
+
+Git submodule initialization and nightly feature flags are unnecessary. The
+tracked lockfile keeps source builds reproducible. To compile optional features:
+
+```bash
+cargo +stable build --workspace --all-features --locked
+```
+
+FFI is an independent package, excluded from the main workspace. Build it
+explicitly with its own tracked lockfile:
+
+```bash
+cargo +stable build --manifest-path doublets-ffi/Cargo.toml --release --locked
+```
+
+For machines with limited memory, set `CARGO_BUILD_JOBS=1` and
+`CARGO_PROFILE_DEV_DEBUG=0` before development builds.
+
+## Troubleshoot historical build errors
+
+[Issue 23](https://github.com/linksplatform/doublets-rs/issues/23) reported a real
+stable-channel failure in older versions: `platform-num 0.1.0-aplha.1` and
+`platform-data 0.1.0-beta.3` used nightly features such as `step_trait`,
+`trait_alias`, and `try_trait_v2`. Those versions can report E0554, unknown
+feature errors, or unresolved `std::default::default` imports. Merely removing
+their feature attributes leaves unstable APIs in use.
+
+Current source uses stable platform dependencies and retains both storage
+layouts and all optional features. If those old dependency versions still
+appear in a build log:
+
+1. Check `rustc +stable --version` and `cargo +stable --version`. Rust 1.81,
+   used in the report, is below the current library's declared minimum of 1.85.
+   Use latest stable for repository development and FFI.
+2. Update the source checkout to a current revision, or update your consuming
+   project's `doublets` dependency to the version in the
+   [installation instructions](README.md#installation). In a consuming project,
+   run `cargo update -p doublets` after updating its manifest.
+3. Check `cargo +stable tree` for old direct `platform-*` dependencies or local
+   path/`[patch.crates-io]` overrides that keep the historical crates in use.
+   Update those declarations too; updating a lockfile alone cannot override
+   an old manifest's version constraint.
+4. Build again using the source commands above, without `RUSTC_BOOTSTRAP`.
+   Keep the required `data`, `mem`, and `trees` dependencies enabled.
+
+The issue's `nightly-2022-07-23` suggestion applies to historical revisions.
+The current supported build uses stable. For a small reproduction of the
+original errors and the investigation record, see
+[experiments/issue-23](experiments/issue-23/README.md).
