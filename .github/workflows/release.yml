@@ -239,6 +239,10 @@ jobs:
         shell: bash
         run: bash experiments/issue-22/check-packages.sh
 
+      - name: Test an external Git dependency on stable Rust
+        shell: bash
+        run: bash experiments/issue-19/verify.sh
+
       - name: Test FFI bindings
         run: cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
 
