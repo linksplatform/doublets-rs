@@ -113,10 +113,13 @@ Thank you for your interest in contributing! This document provides guidelines a
    ```bash
    bash experiments/issue-22/check-packages.sh
    cargo +stable test --manifest-path doublets-ffi/Cargo.toml --locked
+   bash experiments/issue-19/verify.sh
    ```
 
    Use the latest stable toolchain for development and FFI builds. Some test and
    procedural macro dependencies require newer Rust than the core library's MSRV.
+   The Git consumer check tests the committed `HEAD`; commit source changes
+   before using it to verify an external dependency.
 
 5. **Add a changelog fragment**
 
@@ -285,7 +288,6 @@ Fragments are automatically collected into CHANGELOG.md during the release proce
 ├── changelog.d/          # Changelog fragments
 │   └── README.md         # Fragment instructions
 ├── ci/                   # CI scripts
-├── dev-deps/             # Development dependencies (git submodules)
 ├── doublets/             # Main doublets library
 │   ├── src/              # Source code
 │   │   └── decorators/   # Policy wrappers and transactions

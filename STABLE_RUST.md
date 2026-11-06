@@ -109,3 +109,42 @@ The issue's `nightly-2022-07-23` suggestion applies to historical revisions.
 The current supported build uses stable. For a small reproduction of the
 original errors and the investigation record, see
 [experiments/issue-23](experiments/issue-23/README.md).
+
+## Git dependencies and issue 19
+
+[Issue 19](https://github.com/linksplatform/doublets-rs/issues/19) used Git
+revision `5522d91c` and Rust 1.81 nightly from June 2024. Its submodule copy of
+`platform-data 0.1.0-beta.3` used opaque associated types without the required
+feature gate, removed features (`const_deref`, `const_result_drop`,
+`const_convert`), and obsolete `~const` bounds. Switching toolchains alone
+cannot repair that source.
+
+The maintained source builds on stable, including when `doublets` is used as
+an external Git dependency. The stable migration in PRs 48 and 26 replaced
+those dependencies with stable crates.io releases. Current iterator methods
+use stable return-position `impl Iterator`; no `impl_trait_in_assoc_type`
+feature gate is needed. Both storage layouts and the optional `full` features
+remain available.
+
+For a consuming project using the Git declaration in the
+[installation instructions](README.md#installation):
+
+```bash
+rustup toolchain install stable
+cargo update -p doublets
+cargo +stable run
+```
+
+If the old errors persist, check `cargo +stable tree` and the `doublets` entry
+in `Cargo.lock`. Remove or update a historical `rev`/`tag` pin or local patch
+before updating the lockfile; `cargo update` preserves explicit revision pins.
+Consumer projects select their own toolchain, so use `+stable` explicitly when
+their configuration still selects nightly. Stable Rust 1.85 is the library's
+minimum; use latest stable for development and FFI.
+
+CI runs `bash experiments/issue-19/verify.sh` on Linux, macOS, and Windows. It
+creates an independent consumer, resolves `doublets` through a Git URL pinned
+to the checked-out commit, and runs CRUD and iterator assertions on both layouts
+with default and full features, with `RUSTC_BOOTSTRAP` unset. See the
+[investigation record](experiments/issue-19/README.md) for the tested revision
+and reproduction commands.

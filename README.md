@@ -72,6 +72,18 @@ cargo +stable build
 For source checkouts, standalone FFI builds, and troubleshooting older nightly
 dependency errors, see [Stable Rust Support](STABLE_RUST.md).
 
+To depend on the current Git source instead of a crates.io release:
+
+```toml
+[dependencies]
+doublets = { git = "https://github.com/linksplatform/doublets-rs", branch = "main" }
+```
+
+Both sources build on stable Rust. If a Git dependency still reports the old
+`impl Trait` or unknown-feature errors from
+[issue 19](https://github.com/linksplatform/doublets-rs/issues/19), follow the
+[Git dependency troubleshooting steps](STABLE_RUST.md#git-dependencies-and-issue-19).
+
 ## Example
 
 Basic CRUD operations with doublets:
