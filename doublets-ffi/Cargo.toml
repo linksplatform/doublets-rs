@@ -2,19 +2,29 @@
 name = "doublets-ffi"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.88"
+authors = [
+    "uselessgoddess",
+    "Linksplatform Team <linksplatformtechnologies@gmail.com>"
+]
+license = "Unlicense"
+repository = "https://github.com/linksplatform/doublets-rs"
+homepage = "https://github.com/linksplatform/doublets-rs"
+description = "FFI bindings for the doublets library"
+readme = "../README.md"
 
 [lib]
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
-log = "0.4.14"
-libc = "0.2.100"
-tracing-subscriber = "0.3.3"
-tracing-log = "0.1.2"
-tracing = "0.1.29"
+log = { version = "0.4.34", features = ["std"] }
+libc = "0.2.191"
+tracing-subscriber = "0.3.23"
+tracing-log = "0.2.0"
+tracing = "0.1.44"
 doublets = { path = "../doublets" }
 ffi-attributes = { path = "ffi-attributes" }
 env-decorators = { path = "env-decorators" }
 
-[package.log]
-features = ["release_max_level_error"]
+[dev-dependencies]
+tempfile = "3.27.0"

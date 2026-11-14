@@ -1,13 +1,13 @@
 [workspace]
+resolver = "2"
 
 members = [
-    "doublets-ffi",
     "doublets",
 
     # internal
     "integration"
 ]
-# in global rework
+# FFI bindings are built independently.
 exclude = [
-    "doublets-decorators",
+    "doublets-ffi",
 ]

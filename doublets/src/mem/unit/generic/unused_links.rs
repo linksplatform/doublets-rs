@@ -3,14 +3,14 @@ use std::{mem::transmute, ptr::NonNull};
 use crate::mem::{
     header::LinksHeader, traits::UnitList, unit::raw_link::LinkPart, LinksList, UnitUpdateMem,
 };
-use data::LinkType;
+use data::LinkReference;
 use trees::{AbsoluteCircularLinkedList, AbsoluteLinkedList, LinkedList};
 
-pub struct UnusedLinks<T: LinkType> {
+pub struct UnusedLinks<T: LinkReference> {
     mem: NonNull<[LinkPart<T>]>,
 }
 
-impl<T: LinkType> UnusedLinks<T> {
+impl<T: LinkReference> UnusedLinks<T> {
     #[must_use]
     pub fn new(mem: NonNull<[LinkPart<T>]>) -> Self {
         Self { mem }
@@ -25,15 +25,15 @@ impl<T: LinkType> UnusedLinks<T> {
     }
 
     fn get_link(&self, link: T) -> &LinkPart<T> {
-        unsafe { &self.mem.as_ref()[link.as_usize()] }
+        unsafe { &self.mem.as_ref()[link.as_()] }
     }
 
     fn get_mut_link(&mut self, link: T) -> &mut LinkPart<T> {
-        unsafe { &mut self.mem.as_mut()[link.as_usize()] }
+        unsafe { &mut self.mem.as_mut()[link.as_()] }
     }
 }
 
-impl<T: LinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
+impl<T: LinkReference> AbsoluteLinkedList<T> for UnusedLinks<T> {
     fn get_first(&self) -> T {
         self.get_header().first_free
     }
@@ -59,7 +59,7 @@ impl<T: LinkType> AbsoluteLinkedList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> LinkedList<T> for UnusedLinks<T> {
+impl<T: LinkReference> LinkedList<T> for UnusedLinks<T> {
     fn get_previous(&self, element: T) -> T {
         self.get_link(element).source
     }
@@ -77,9 +77,9 @@ impl<T: LinkType> LinkedList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> AbsoluteCircularLinkedList<T> for UnusedLinks<T> {}
+impl<T: LinkReference> AbsoluteCircularLinkedList<T> for UnusedLinks<T> {}
 
-impl<T: LinkType> LinksList<T> for UnusedLinks<T> {
+impl<T: LinkReference> LinksList<T> for UnusedLinks<T> {
     fn detach(&mut self, link: T) {
         AbsoluteCircularLinkedList::detach(self, link);
     }
@@ -89,10 +89,10 @@ impl<T: LinkType> LinksList<T> for UnusedLinks<T> {
     }
 }
 
-impl<T: LinkType> UnitUpdateMem<T> for UnusedLinks<T> {
+impl<T: LinkReference> UnitUpdateMem<T> for UnusedLinks<T> {
     fn update_mem(&mut self, mem: NonNull<[LinkPart<T>]>) {
         self.mem = mem;
     }
 }
 
-impl<T: LinkType> UnitList<T> for UnusedLinks<T> {}
+impl<T: LinkReference> UnitList<T> for UnusedLinks<T> {}

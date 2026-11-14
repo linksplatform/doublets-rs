@@ -1,0 +1,32 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /tmp/gh-issue-solver-1793267575096/doublets/Cargo.toml
+workspace: /tmp/gh-issue-solver-1793267575096/Cargo.toml
+   Compiling doublets v0.13.0 (/tmp/gh-issue-solver-1793267575096/doublets)
+    Finished `test` profile [unoptimized] target(s) in 1.61s
+     Running tests/split_null_endpoint.rs (target/debug/deps/split_null_endpoint-ef1e62040836f7cd)
+
+running 2 tests
+test a_null_target_does_not_make_a_live_link_unused ... FAILED
+test null_endpoints_remain_live_while_free_slots_are_reused ... FAILED
+
+failures:
+
+---- a_null_target_does_not_make_a_live_link_unused stdout ----
+
+thread 'a_null_target_does_not_make_a_live_link_unused' (5786) panicked at doublets/tests/split_null_endpoint.rs:11:5:
+assertion failed: !store.is_unused(usage)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- null_endpoints_remain_live_while_free_slots_are_reused stdout ----
+
+thread 'null_endpoints_remain_live_while_free_slots_are_reused' (5787) panicked at doublets/tests/split_null_endpoint.rs:31:5:
+assertion failed: !store.is_unused(source_only)
+
+
+failures:
+    a_null_target_does_not_make_a_live_link_unused
+    null_endpoints_remain_live_while_free_slots_are_reused
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `-p doublets --test split_null_endpoint`

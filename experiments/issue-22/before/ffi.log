@@ -1,0 +1,101 @@
+warning: Cargo.toml: unused manifest key: package.log
+warning: `doublets-ffi` (manifest) generated 1 warning
+     Locking 1 package to highest compatible version
+    Updating doublets v0.9.0 (/tmp/gh-issue-solver-1793262556873/doublets) -> v0.12.0
+ Downloading crates ...
+  Downloaded lazy_static v1.5.1
+  Downloaded pin-project-lite v0.2.17
+  Downloaded nu-ansi-term v0.50.3
+  Downloaded log v0.4.34
+  Downloaded thread_local v1.1.10
+  Downloaded tracing-log v0.2.0
+  Downloaded sharded-slab v0.1.7
+  Downloaded tracing-attributes v0.1.31
+  Downloaded tracing-core v0.1.36
+  Downloaded tracing-subscriber v0.3.23
+  Downloaded tracing v0.1.44
+    Blocking waiting for file lock on build directory
+    Checking once_cell v1.21.4
+   Compiling thiserror-impl v2.0.21
+    Checking thiserror v2.0.21
+    Checking tracing-core v0.1.36
+    Checking tempfile v3.27.0
+   Compiling syn v2.0.119
+    Checking log v0.4.34
+    Checking lazy_static v1.5.1
+    Checking platform-mem v0.4.0
+    Checking platform-data v2.0.0
+    Checking sharded-slab v0.1.7
+    Checking tracing-log v0.2.0
+   Compiling tracing-attributes v0.1.31
+    Checking thread_local v1.1.10
+    Checking smallvec v1.16.4
+    Checking pin-project-lite v0.2.17
+    Checking nu-ansi-term v0.50.3
+    Checking doublets v0.12.0 (/tmp/gh-issue-solver-1793262556873/doublets)
+    Checking tracing-subscriber v0.3.23
+    Checking tracing v0.1.44
+   Compiling ffi-attributes v0.1.0 (/tmp/gh-issue-solver-1793262556873/doublets-ffi/ffi-attributes)
+   Compiling env-decorators v0.1.0 (/tmp/gh-issue-solver-1793262556873/doublets-ffi/env-decorators)
+    Checking doublets-ffi v0.1.0 (/tmp/gh-issue-solver-1793262556873/doublets-ffi)
+error: `box_syntax` has been removed
+   --> src/lib.rs:180:13
+    |
+180 |             box UnitedLinks::<T>::with_constants(mem, constants.into())?;
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: use `Box::new()` instead
+    |
+180 -             box UnitedLinks::<T>::with_constants(mem, constants.into())?;
+180 +             Box::new(UnitedLinks::<T>::with_constants(mem, constants.into())?);
+    |
+
+error[E0557]: feature has been removed
+ --> src/lib.rs:2:12
+  |
+2 | #![feature(box_syntax)]
+  |            ^^^^^^^^^^ feature has been removed
+  |
+  = note: removed in 1.70.0; see <https://github.com/rust-lang/rust/pull/108471> for more information
+  = note: replaced with `#[rustc_box]`
+
+error: expected an expression
+   --> src/lib.rs:180:13
+    |
+180 |             box UnitedLinks::<T>::with_constants(mem, constants.into())?;
+    |             ^^^
+
+error[E0432]: unresolved import `doublets::data::LinkType`
+  --> src/lib.rs:19:9
+   |
+19 |         LinkType, LinksConstants, Query, ToQuery,
+   |         ^^^^^^^^ no `LinkType` in `data`
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+ --> src/lib.rs:1:1
+  |
+1 | #![feature(try_blocks)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `error::Error`, `ffi::CStr`, `fs::File`, `mem`, and `null_mut`
+  --> src/lib.rs:6:5
+   |
+ 6 |     error::Error,
+   |     ^^^^^^^^^^^^
+ 7 |     ffi::CStr,
+   |     ^^^^^^^^^
+ 8 |     fmt::Display,
+ 9 |     fs::File,
+   |     ^^^^^^^^
+10 |     mem,
+   |     ^^^
+11 |     ops::{RangeInclusive, Try},
+12 |     ptr::{drop_in_place, null_mut},
+   |                          ^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+Some errors have detailed explanations: E0432, E0554, E0557.
+For more information about an error, try `rustc --explain E0432`.
+warning: `doublets-ffi` (lib) generated 1 warning
+error: could not compile `doublets-ffi` (lib) due to 5 previous errors; 1 warning emitted

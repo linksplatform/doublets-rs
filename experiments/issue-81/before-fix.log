@@ -1,0 +1,35 @@
+   Compiling leak_slice v0.2.0
+   Compiling static_assertions v1.1.0
+   Compiling doublets v0.15.0 (/tmp/gh-issue-solver-1793299452704/doublets)
+    Finished `test` profile [unoptimized] target(s) in 1m 32s
+     Running unittests src/lib.rs (target/debug/deps/doublets-e595dbbb4703efd3)
+
+running 2 tests
+test mem::split::store::tests::deletion_of_reset_link_does_not_update_again ... FAILED
+test mem::unit::store::tests::deletion_of_reset_link_does_not_update_again ... FAILED
+
+failures:
+
+---- mem::split::store::tests::deletion_of_reset_link_does_not_update_again stdout ----
+
+thread 'mem::split::store::tests::deletion_of_reset_link_does_not_update_again' (5511) panicked at doublets/src/mem/split/tests.rs:12:5:
+assertion `left == right` failed: release must not reset again
+  left: 3
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- mem::unit::store::tests::deletion_of_reset_link_does_not_update_again stdout ----
+
+thread 'mem::unit::store::tests::deletion_of_reset_link_does_not_update_again' (5512) panicked at doublets/src/mem/unit/tests.rs:12:5:
+assertion `left == right` failed: release must not reset again
+  left: 3
+ right: 2
+
+
+failures:
+    mem::split::store::tests::deletion_of_reset_link_does_not_update_again
+    mem::unit::store::tests::deletion_of_reset_link_does_not_update_again
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.26s
+
+error: test failed, to rerun pass `-p doublets --lib`

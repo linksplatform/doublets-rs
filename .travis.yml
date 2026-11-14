@@ -2,8 +2,8 @@ language: rust
 
 matrix:
   include:
-    # Nightly
-    - rust: nightly
+    # Stable Rust
+    - rust: stable
       script:
         - cargo test --verbose
         - cargo test --all-features --verbose

@@ -6,18 +6,18 @@ use crate::{
     mem::split::{DataPart, IndexPart},
     Link,
 };
-use data::{LinkType, LinksConstants};
-use trees::NoRecurSzbTree;
+use data::{LinkReference, LinksConstants};
+use trees::IterativeSizeBalancedTree;
 
 // TODO: why is there so much duplication in OOP!!! FIXME
-pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkReference> {
     pub(crate) data: NonNull<[DataPart<T>]>,
     pub(crate) indexes: NonNull<[IndexPart<T>]>,
     pub(crate) r#break: T,
     pub(crate) r#continue: T,
 }
 
-impl<T: LinkType> InternalRecursionlessSizeBalancedTreeBase<T> {
+impl<T: LinkReference> InternalRecursionlessSizeBalancedTreeBase<T> {
     pub(crate) fn new(
         constants: LinksConstants<T>,
         data: NonNull<[DataPart<T>]>,
@@ -32,8 +32,8 @@ impl<T: LinkType> InternalRecursionlessSizeBalancedTreeBase<T> {
     }
 }
 
-pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
-    NoRecurSzbTree<T> + LinksTree<T>
+pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkReference>:
+    IterativeSizeBalancedTree<T> + LinksTree<T>
 {
     fn get_index_part(&self, link: T) -> &IndexPart<T>;
 
@@ -56,7 +56,7 @@ pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
 
     fn search_core(&self, mut root: T, key: T) -> T {
         unsafe {
-            while root != T::funty(0) {
+            while root != T::from_byte(0) {
                 let root_key = self.get_key_part(root);
                 if key < root_key {
                     root = self.get_left_or_default(root);
@@ -66,7 +66,7 @@ pub(crate) trait InternalRecursionlessSizeBalancedTreeBaseAbstract<T: LinkType>:
                     return root;
                 }
             }
-            T::funty(0)
+            T::from_byte(0)
         }
     }
 

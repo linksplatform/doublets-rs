@@ -1,5 +1,1 @@
-error_on_line_overflow = true
-error_on_unformatted = true
-version = "Two"
-
-imports_granularity = "Crate"
+edition = "2021"

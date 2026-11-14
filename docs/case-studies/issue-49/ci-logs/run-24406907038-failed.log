@@ -1,0 +1,15 @@
+Auto Release	Check if version already released or no fragments	﻿2026-04-14T15:14:10.2704245Z ##[group]Run rust-script scripts/check-release-needed.rs
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2704915Z [36;1mrust-script scripts/check-release-needed.rs[0m
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2725778Z shell: /usr/bin/bash -e {0}
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2726103Z env:
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2726409Z   CARGO_TERM_COLOR: always
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2726680Z   RUSTFLAGS: -Dwarnings
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2782405Z   CARGO_REGISTRY_TOKEN: ***
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2782920Z   CARGO_TOKEN: ***
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2783238Z   CARGO_HOME: /home/runner/.cargo
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2783607Z   CARGO_INCREMENTAL: 0
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2784175Z   HAS_FRAGMENTS: true
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:10.2784871Z ##[endgroup]
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:34.5924661Z Detected single-language repository (Cargo.toml in root)
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:34.5926800Z Error: Could not find name in ./Cargo.toml
+Auto Release	Check if version already released or no fragments	2026-04-14T15:14:34.5943244Z ##[error]Process completed with exit code 1.

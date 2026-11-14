@@ -1,0 +1,174 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded platform-mem v0.3.0
+  Downloaded doublets v0.9.0
+   Compiling getrandom v0.4.3
+    Checking tempfile v3.27.0
+    Checking either v1.19.0
+    Checking rayon v1.12.0
+    Checking platform-mem v0.3.0
+    Checking doublets v0.9.0
+    Checking doublets-decorators v0.1.0-alpha.3 (/tmp/gh-issue-solver-1793262556873/doublets-decorators)
+error[E0432]: unresolved import `doublets::num`
+ --> src/cascade_unique_resolver.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0432]: unresolved import `std::default::default`
+ --> src/cascade_usages_resolver.rs:1:11
+  |
+1 | use std::{default::default, marker::PhantomData, ops::Try};
+  |           ^^^^^^^^^-------
+  |                    |
+  |                    no `default` in `default`
+  |
+  = help: consider importing this module instead:
+          std::default
+help: a similar name exists in the module
+  |
+1 - use std::{default::default, marker::PhantomData, ops::Try};
+1 + use std::{default::Default, marker::PhantomData, ops::Try};
+  |
+
+error[E0432]: unresolved import `doublets::num`
+ --> src/cascade_usages_resolver.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0432]: unresolved import `std::default::default`
+ --> src/non_null_deletion_resolver.rs:1:11
+  |
+1 | use std::{default::default, marker::PhantomData, ops::Try};
+  |           ^^^^^^^^^-------
+  |                    |
+  |                    no `default` in `default`
+  |
+  = help: consider importing this module instead:
+          std::default
+help: a similar name exists in the module
+  |
+1 - use std::{default::default, marker::PhantomData, ops::Try};
+1 + use std::{default::Default, marker::PhantomData, ops::Try};
+  |
+
+error[E0432]: unresolved import `doublets::num`
+ --> src/non_null_deletion_resolver.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0432]: unresolved import `doublets::num`
+ --> src/unique_resolver.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0432]: unresolved import `std::default::default`
+ --> src/unique_validator.rs:1:30
+  |
+1 | use std::{borrow::BorrowMut, default::default, marker::PhantomData, ops::Try};
+  |                              ^^^^^^^^^-------
+  |                                       |
+  |                                       no `default` in `default`
+  |
+  = help: consider importing this module instead:
+          std::default
+help: a similar name exists in the module
+  |
+1 - use std::{borrow::BorrowMut, default::default, marker::PhantomData, ops::Try};
+1 + use std::{borrow::BorrowMut, default::Default, marker::PhantomData, ops::Try};
+  |
+
+error[E0432]: unresolved import `doublets::num`
+ --> src/unique_validator.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0432]: unresolved import `std::default::default`
+ --> src/usages_validator.rs:1:30
+  |
+1 | use std::{borrow::BorrowMut, default::default, marker::PhantomData, ops::Try};
+  |                              ^^^^^^^^^-------
+  |                                       |
+  |                                       no `default` in `default`
+  |
+  = help: consider importing this module instead:
+          std::default
+help: a similar name exists in the module
+  |
+1 - use std::{borrow::BorrowMut, default::default, marker::PhantomData, ops::Try};
+1 + use std::{borrow::BorrowMut, default::Default, marker::PhantomData, ops::Try};
+  |
+
+error[E0432]: unresolved import `doublets::num`
+ --> src/usages_validator.rs:5:5
+  |
+5 |     num::LinkType,
+  |     ^^^ could not find `num` in `doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/cascade_unique_resolver.rs:30:5
+   |
+30 | /     fn constants(&self) -> LinksConstants<T> {
+31 | |         self.links.constants()
+32 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/cascade_usages_resolver.rs:26:5
+   |
+26 | /     fn constants(&self) -> LinksConstants<T> {
+27 | |         self.links.constants()
+28 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/non_null_deletion_resolver.rs:26:5
+   |
+26 | /     fn constants(&self) -> LinksConstants<T> {
+27 | |         self.links.constants()
+28 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/unique_resolver.rs:26:5
+   |
+26 | /     fn constants(&self) -> LinksConstants<T> {
+27 | |         self.links.constants()
+28 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/unique_validator.rs:26:5
+   |
+26 | /     fn constants(&self) -> LinksConstants<T> {
+27 | |         self.links.constants()
+28 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0407]: method `constants` is not a member of trait `Doublets`
+  --> src/usages_validator.rs:26:5
+   |
+26 | /     fn constants(&self) -> LinksConstants<T> {
+27 | |         self.links.constants()
+28 | |     }
+   | |_____^ not a member of trait `Doublets`
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+ --> src/lib.rs:1:1
+  |
+1 | #![feature(try_trait_v2)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0635]: unknown feature `default_free_fn`
+ --> src/lib.rs:2:12
+  |
+2 | #![feature(default_free_fn)]
+  |            ^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0407, E0432, E0554, E0635.
+For more information about an error, try `rustc --explain E0407`.
+error: could not compile `doublets-decorators` (lib) due to 18 previous errors

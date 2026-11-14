@@ -1,0 +1,1176 @@
+Benchmark	UNKNOWN STEP	﻿2026-04-13T10:07:04.0530679Z Current runner version: '2.333.1'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0554877Z ##[group]Runner Image Provisioner
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0555787Z Hosted Compute Agent
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0556342Z Version: 20260213.493
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0556932Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0557929Z Build Date: 2026-02-13T00:28:41Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0558575Z Worker ID: {d1187733-e46f-4bd6-8996-02ffafb00196}
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0559229Z Azure Region: westus3
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0559821Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0561263Z ##[group]Operating System
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0561827Z Ubuntu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0562378Z 24.04.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0562802Z LTS
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0563255Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0563740Z ##[group]Runner Image
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0564320Z Image: ubuntu-24.04
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0564792Z Version: 20260406.80.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0566002Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260406.80/images/ubuntu/Ubuntu2404-Readme.md
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0567714Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260406.80
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0568678Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0571327Z ##[group]GITHUB_TOKEN Permissions
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0573359Z Actions: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0573897Z ArtifactMetadata: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0574449Z Attestations: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0574911Z Checks: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0575489Z Contents: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0575989Z Deployments: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0576457Z Discussions: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0577044Z Issues: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0577993Z Metadata: read
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0578482Z Models: read
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0579037Z Packages: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0579532Z Pages: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0580121Z PullRequests: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0580690Z RepositoryProjects: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0581258Z SecurityEvents: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0581753Z Statuses: write
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0582353Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0584377Z Secret source: Actions
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.0585066Z Prepare workflow directory
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.1038815Z Prepare all required actions
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.1076793Z Getting action download info
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:04.5663415Z Download action repository 'actions/checkout@v2' (SHA:ee0669bd1cc54295c223e0bb666b733df41de1c5)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:05.5144242Z Download action repository 'actions-rs/toolchain@v1' (SHA:16499b5e05bf2e26879000db0c1d13f7e13fa3af)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:06.3792417Z Download action repository 'actions-rs/cargo@v1' (SHA:844f36862e911db73fe0815f00a4a2602c279505)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.0393784Z Complete job name: Benchmark
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1018194Z ##[group]Run actions/checkout@v2
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1018895Z with:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1019077Z   submodules: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1019308Z   repository: linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1019724Z   token: ***
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1019900Z   ssh-strict: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1020099Z   persist-credentials: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1020335Z   clean: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1020521Z   fetch-depth: 1
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1020693Z   lfs: false
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1020873Z   set-safe-directory: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1021298Z env:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1021482Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.1021710Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2059922Z Syncing repository: linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2061273Z ##[group]Getting Git version info
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2061674Z Working directory is '/home/runner/work/doublets-rs/doublets-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2062223Z [command]/usr/bin/git version
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2102688Z git version 2.53.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2128428Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2143184Z Temporarily overriding HOME='/home/runner/work/_temp/d1de684c-83da-45c7-a057-84a95dc4f3be' before making global git config changes
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2144171Z Adding repository directory to the temporary git global config as a safe directory
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2147391Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2180781Z Deleting the contents of '/home/runner/work/doublets-rs/doublets-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2184405Z ##[group]Initializing the repository
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2187656Z [command]/usr/bin/git init /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2277028Z hint: Using 'master' as the name for the initial branch. This default branch name
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2278196Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2279109Z hint: to use in all of your new repositories, which will suppress this warning,
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2279584Z hint: call:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2279755Z hint:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2280058Z hint: 	git config --global init.defaultBranch <name>
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2280366Z hint:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2280658Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2281163Z hint: 'development'. The just-created branch can be renamed via this command:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2281556Z hint:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2281743Z hint: 	git branch -m <name>
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2281968Z hint:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2282284Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2282856Z Initialized empty Git repository in /home/runner/work/doublets-rs/doublets-rs/.git/
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2286923Z [command]/usr/bin/git remote add origin https://github.com/linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2316303Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2316932Z ##[group]Disabling automatic garbage collection
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2319914Z [command]/usr/bin/git config --local gc.auto 0
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2346343Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2346914Z ##[group]Setting up auth
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2352776Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2380271Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2663997Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2693026Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2910184Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2945024Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2945782Z ##[group]Fetching the repository
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.2952868Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +67ef447d8739e30dee596f7e136c4ec1978399f7:refs/remotes/pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6893268Z remote: Enumerating objects: 124, done.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6894208Z remote: Counting objects:   0% (1/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6895302Z remote: Counting objects:   1% (2/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6895886Z remote: Counting objects:   2% (3/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6896450Z remote: Counting objects:   3% (4/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6897373Z remote: Counting objects:   4% (5/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6897919Z remote: Counting objects:   5% (7/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6898454Z remote: Counting objects:   6% (8/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6898998Z remote: Counting objects:   7% (9/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6899541Z remote: Counting objects:   8% (10/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6900111Z remote: Counting objects:   9% (12/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6900667Z remote: Counting objects:  10% (13/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6901222Z remote: Counting objects:  11% (14/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6901758Z remote: Counting objects:  12% (15/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6902371Z remote: Counting objects:  13% (17/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6903308Z remote: Counting objects:  14% (18/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6903898Z remote: Counting objects:  15% (19/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6904458Z remote: Counting objects:  16% (20/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6905025Z remote: Counting objects:  17% (22/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6905567Z remote: Counting objects:  18% (23/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6906111Z remote: Counting objects:  19% (24/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6906653Z remote: Counting objects:  20% (25/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6907451Z remote: Counting objects:  21% (27/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6908013Z remote: Counting objects:  22% (28/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6908630Z remote: Counting objects:  23% (29/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6909149Z remote: Counting objects:  24% (30/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6909675Z remote: Counting objects:  25% (31/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6910182Z remote: Counting objects:  26% (33/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6910753Z remote: Counting objects:  27% (34/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6911384Z remote: Counting objects:  28% (35/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6911947Z remote: Counting objects:  29% (36/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6912498Z remote: Counting objects:  30% (38/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6913095Z remote: Counting objects:  31% (39/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6913685Z remote: Counting objects:  32% (40/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6914224Z remote: Counting objects:  33% (41/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6914768Z remote: Counting objects:  34% (43/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6915333Z remote: Counting objects:  35% (44/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6915895Z remote: Counting objects:  36% (45/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6916522Z remote: Counting objects:  37% (46/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6917065Z remote: Counting objects:  38% (48/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6918518Z remote: Counting objects:  39% (49/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6919042Z remote: Counting objects:  40% (50/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6919582Z remote: Counting objects:  41% (51/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6920100Z remote: Counting objects:  42% (53/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6920684Z remote: Counting objects:  43% (54/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6921206Z remote: Counting objects:  44% (55/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6921733Z remote: Counting objects:  45% (56/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6922253Z remote: Counting objects:  46% (58/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6922769Z remote: Counting objects:  47% (59/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6923588Z remote: Counting objects:  48% (60/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6924144Z remote: Counting objects:  49% (61/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6924681Z remote: Counting objects:  50% (62/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6925245Z remote: Counting objects:  51% (64/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6925755Z remote: Counting objects:  52% (65/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6926368Z remote: Counting objects:  53% (66/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6926925Z remote: Counting objects:  54% (67/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6927750Z remote: Counting objects:  55% (69/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6928287Z remote: Counting objects:  56% (70/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6928823Z remote: Counting objects:  57% (71/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6929369Z remote: Counting objects:  58% (72/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6929903Z remote: Counting objects:  59% (74/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6930418Z remote: Counting objects:  60% (75/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6930947Z remote: Counting objects:  61% (76/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6931496Z remote: Counting objects:  62% (77/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6932033Z remote: Counting objects:  63% (79/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6932607Z remote: Counting objects:  64% (80/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6933174Z remote: Counting objects:  65% (81/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6933709Z remote: Counting objects:  66% (82/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6934530Z remote: Counting objects:  67% (84/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6935076Z remote: Counting objects:  68% (85/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6935623Z remote: Counting objects:  69% (86/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6936176Z remote: Counting objects:  70% (87/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6936721Z remote: Counting objects:  71% (89/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6937525Z remote: Counting objects:  72% (90/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6938067Z remote: Counting objects:  73% (91/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6938614Z remote: Counting objects:  74% (92/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6939150Z remote: Counting objects:  75% (93/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6939679Z remote: Counting objects:  76% (95/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6940211Z remote: Counting objects:  77% (96/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6940757Z remote: Counting objects:  78% (97/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6941300Z remote: Counting objects:  79% (98/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6941848Z remote: Counting objects:  80% (100/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6942401Z remote: Counting objects:  81% (101/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6942956Z remote: Counting objects:  82% (102/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6943504Z remote: Counting objects:  83% (103/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6944045Z remote: Counting objects:  84% (105/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6944596Z remote: Counting objects:  85% (106/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6945146Z remote: Counting objects:  86% (107/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6945668Z remote: Counting objects:  87% (108/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6946193Z remote: Counting objects:  88% (110/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6946759Z remote: Counting objects:  89% (111/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6947639Z remote: Counting objects:  90% (112/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6948192Z remote: Counting objects:  91% (113/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6948743Z remote: Counting objects:  92% (115/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6949288Z remote: Counting objects:  93% (116/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6949862Z remote: Counting objects:  94% (117/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6950415Z remote: Counting objects:  95% (118/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6950944Z remote: Counting objects:  96% (120/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6951491Z remote: Counting objects:  97% (121/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6952046Z remote: Counting objects:  98% (122/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6952612Z remote: Counting objects:  99% (123/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6953156Z remote: Counting objects: 100% (124/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6954025Z remote: Counting objects: 100% (124/124), done.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6981586Z remote: Compressing objects:   0% (1/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6982714Z remote: Compressing objects:   1% (2/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6983485Z remote: Compressing objects:   2% (3/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6984170Z remote: Compressing objects:   3% (4/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6984664Z remote: Compressing objects:   4% (5/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6985031Z remote: Compressing objects:   5% (6/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6985357Z remote: Compressing objects:   6% (7/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6985679Z remote: Compressing objects:   7% (8/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6985986Z remote: Compressing objects:   8% (9/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6986341Z remote: Compressing objects:   9% (10/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6986669Z remote: Compressing objects:  10% (11/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6986991Z remote: Compressing objects:  11% (12/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6987508Z remote: Compressing objects:  12% (13/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6987831Z remote: Compressing objects:  13% (14/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6988147Z remote: Compressing objects:  14% (15/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6988459Z remote: Compressing objects:  15% (16/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6988777Z remote: Compressing objects:  16% (17/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6989330Z remote: Compressing objects:  17% (18/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6989650Z remote: Compressing objects:  18% (19/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6989962Z remote: Compressing objects:  19% (20/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6990277Z remote: Compressing objects:  20% (21/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6990589Z remote: Compressing objects:  21% (22/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6990911Z remote: Compressing objects:  22% (23/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6991227Z remote: Compressing objects:  23% (24/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6991535Z remote: Compressing objects:  24% (25/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6991852Z remote: Compressing objects:  25% (26/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6992161Z remote: Compressing objects:  26% (28/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6992473Z remote: Compressing objects:  27% (29/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6992779Z remote: Compressing objects:  28% (30/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6993090Z remote: Compressing objects:  29% (31/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6993408Z remote: Compressing objects:  30% (32/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6993719Z remote: Compressing objects:  31% (33/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6994028Z remote: Compressing objects:  32% (34/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6994339Z remote: Compressing objects:  33% (35/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6994652Z remote: Compressing objects:  34% (36/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6994955Z remote: Compressing objects:  35% (37/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6995271Z remote: Compressing objects:  36% (38/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6995576Z remote: Compressing objects:  37% (39/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6995892Z remote: Compressing objects:  38% (40/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6996206Z remote: Compressing objects:  39% (41/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6996513Z remote: Compressing objects:  40% (42/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6996825Z remote: Compressing objects:  41% (43/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.6997262Z remote: Compressing objects:  42% (44/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7223100Z remote: Compressing objects:  43% (45/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7224595Z remote: Compressing objects:  44% (46/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7225385Z remote: Compressing objects:  45% (47/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7225799Z remote: Compressing objects:  46% (48/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7226190Z remote: Compressing objects:  47% (49/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7226581Z remote: Compressing objects:  48% (50/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7226962Z remote: Compressing objects:  49% (51/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7228059Z remote: Compressing objects:  50% (52/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7228472Z remote: Compressing objects:  51% (54/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7228852Z remote: Compressing objects:  52% (55/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7229227Z remote: Compressing objects:  53% (56/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7229593Z remote: Compressing objects:  54% (57/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7229974Z remote: Compressing objects:  55% (58/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7230363Z remote: Compressing objects:  56% (59/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7230740Z remote: Compressing objects:  57% (60/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7231119Z remote: Compressing objects:  58% (61/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7231489Z remote: Compressing objects:  59% (62/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7231863Z remote: Compressing objects:  60% (63/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7232232Z remote: Compressing objects:  61% (64/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7232607Z remote: Compressing objects:  62% (65/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7232979Z remote: Compressing objects:  63% (66/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7233365Z remote: Compressing objects:  64% (67/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7233756Z remote: Compressing objects:  65% (68/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7234131Z remote: Compressing objects:  66% (69/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7234544Z remote: Compressing objects:  67% (70/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7234914Z remote: Compressing objects:  68% (71/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7235454Z remote: Compressing objects:  69% (72/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7235825Z remote: Compressing objects:  70% (73/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7236183Z remote: Compressing objects:  71% (74/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7236517Z remote: Compressing objects:  72% (75/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7236863Z remote: Compressing objects:  73% (76/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7237334Z remote: Compressing objects:  74% (77/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7237642Z remote: Compressing objects:  75% (78/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7237974Z remote: Compressing objects:  76% (80/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7238297Z remote: Compressing objects:  77% (81/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7238617Z remote: Compressing objects:  78% (82/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7238921Z remote: Compressing objects:  79% (83/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7239224Z remote: Compressing objects:  80% (84/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7239532Z remote: Compressing objects:  81% (85/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7239834Z remote: Compressing objects:  82% (86/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7240138Z remote: Compressing objects:  83% (87/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7240440Z remote: Compressing objects:  84% (88/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7240744Z remote: Compressing objects:  85% (89/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7241043Z remote: Compressing objects:  86% (90/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7241349Z remote: Compressing objects:  87% (91/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7241645Z remote: Compressing objects:  88% (92/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7241956Z remote: Compressing objects:  89% (93/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7242281Z remote: Compressing objects:  90% (94/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7242590Z remote: Compressing objects:  91% (95/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7242891Z remote: Compressing objects:  92% (96/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7243194Z remote: Compressing objects:  93% (97/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7243498Z remote: Compressing objects:  94% (98/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7243804Z remote: Compressing objects:  95% (99/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7247720Z remote: Compressing objects:  96% (100/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7248663Z remote: Compressing objects:  97% (101/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7249312Z remote: Compressing objects:  98% (102/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7250034Z remote: Compressing objects:  99% (103/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7250671Z remote: Compressing objects: 100% (104/104)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7251592Z remote: Compressing objects: 100% (104/104), done.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7399180Z Receiving objects:   0% (1/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7400042Z Receiving objects:   1% (2/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7400541Z Receiving objects:   2% (3/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7400973Z Receiving objects:   3% (4/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7402208Z Receiving objects:   4% (5/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7403303Z Receiving objects:   5% (7/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7403730Z Receiving objects:   6% (8/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7404129Z Receiving objects:   7% (9/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7404531Z Receiving objects:   8% (10/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7468692Z Receiving objects:   9% (12/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7469373Z Receiving objects:  10% (13/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7470009Z Receiving objects:  11% (14/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7472095Z Receiving objects:  12% (15/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7472372Z Receiving objects:  13% (17/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7472617Z Receiving objects:  14% (18/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7472867Z Receiving objects:  15% (19/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7473131Z Receiving objects:  16% (20/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7473370Z Receiving objects:  17% (22/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7473608Z Receiving objects:  18% (23/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7473833Z Receiving objects:  19% (24/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7711695Z Receiving objects:  20% (25/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7712653Z Receiving objects:  21% (27/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7713652Z Receiving objects:  22% (28/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7714543Z Receiving objects:  23% (29/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7715001Z Receiving objects:  24% (30/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7715435Z Receiving objects:  25% (31/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7715874Z Receiving objects:  26% (33/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7716388Z Receiving objects:  27% (34/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7716798Z Receiving objects:  28% (35/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7717498Z Receiving objects:  29% (36/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7717937Z Receiving objects:  30% (38/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7718375Z Receiving objects:  31% (39/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7718800Z Receiving objects:  32% (40/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7719275Z Receiving objects:  33% (41/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7719694Z Receiving objects:  34% (43/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7720129Z Receiving objects:  35% (44/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7720567Z Receiving objects:  36% (45/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7720992Z Receiving objects:  37% (46/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7721441Z Receiving objects:  38% (48/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7740753Z Receiving objects:  39% (49/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7741425Z Receiving objects:  40% (50/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7742200Z Receiving objects:  41% (51/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7742785Z Receiving objects:  42% (53/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7743307Z Receiving objects:  43% (54/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7743818Z Receiving objects:  44% (55/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7744299Z Receiving objects:  45% (56/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7744806Z Receiving objects:  46% (58/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7745089Z Receiving objects:  47% (59/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7745367Z Receiving objects:  48% (60/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7868716Z Receiving objects:  49% (61/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7875554Z Receiving objects:  50% (62/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7876341Z Receiving objects:  51% (64/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7877390Z Receiving objects:  52% (65/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7878186Z Receiving objects:  53% (66/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7878959Z Receiving objects:  54% (67/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7879754Z Receiving objects:  55% (69/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7880496Z Receiving objects:  56% (70/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7881202Z Receiving objects:  57% (71/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7961898Z Receiving objects:  58% (72/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7962482Z Receiving objects:  59% (74/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7962969Z Receiving objects:  60% (75/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7963408Z Receiving objects:  61% (76/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7963805Z Receiving objects:  62% (77/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7967354Z Receiving objects:  63% (79/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7967916Z Receiving objects:  64% (80/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7968419Z Receiving objects:  65% (81/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7969231Z Receiving objects:  66% (82/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7969773Z Receiving objects:  67% (84/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7970282Z Receiving objects:  68% (85/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7970770Z Receiving objects:  69% (86/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7971156Z Receiving objects:  70% (87/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7971527Z Receiving objects:  71% (89/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7972019Z Receiving objects:  72% (90/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7972409Z Receiving objects:  73% (91/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7972871Z Receiving objects:  74% (92/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7973333Z Receiving objects:  75% (93/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7973787Z Receiving objects:  76% (95/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7974217Z Receiving objects:  77% (96/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7974616Z Receiving objects:  78% (97/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7975134Z Receiving objects:  79% (98/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7975597Z Receiving objects:  80% (100/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7976071Z Receiving objects:  81% (101/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7976509Z Receiving objects:  82% (102/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7976965Z Receiving objects:  83% (103/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7977718Z Receiving objects:  84% (105/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7978183Z Receiving objects:  85% (106/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7978925Z remote: Total 124 (delta 18), reused 70 (delta 11), pack-reused 0 (from 0)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7979607Z Receiving objects:  86% (107/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7980369Z Receiving objects:  87% (108/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7980890Z Receiving objects:  88% (110/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7981371Z Receiving objects:  89% (111/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7981821Z Receiving objects:  90% (112/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7982236Z Receiving objects:  91% (113/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7982646Z Receiving objects:  92% (115/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7982987Z Receiving objects:  93% (116/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7983306Z Receiving objects:  94% (117/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7983561Z Receiving objects:  95% (118/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7983802Z Receiving objects:  96% (120/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7984047Z Receiving objects:  97% (121/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7984385Z Receiving objects:  98% (122/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7984676Z Receiving objects:  99% (123/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7984954Z Receiving objects: 100% (124/124)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7985288Z Receiving objects: 100% (124/124), 85.51 KiB | 1.47 MiB/s, done.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7985641Z Resolving deltas:   0% (0/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7985890Z Resolving deltas:   5% (1/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7986114Z Resolving deltas:  11% (2/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7986335Z Resolving deltas:  16% (3/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7986605Z Resolving deltas:  22% (4/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7986830Z Resolving deltas:  27% (5/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7987053Z Resolving deltas:  33% (6/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7987566Z Resolving deltas:  38% (7/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7987799Z Resolving deltas:  44% (8/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7988031Z Resolving deltas:  50% (9/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7988256Z Resolving deltas:  55% (10/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7988494Z Resolving deltas:  61% (11/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7988720Z Resolving deltas:  66% (12/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7988942Z Resolving deltas:  72% (13/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7989169Z Resolving deltas:  83% (15/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7989385Z Resolving deltas:  88% (16/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7989610Z Resolving deltas:  94% (17/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7989824Z Resolving deltas: 100% (18/18)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.7990195Z Resolving deltas: 100% (18/18), done.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8095620Z From https://github.com/linksplatform/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8096454Z  * [new ref]         67ef447d8739e30dee596f7e136c4ec1978399f7 -> pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8126870Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8127963Z ##[group]Determining the checkout info
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8129957Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8130604Z ##[group]Checking out the ref
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8134957Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/48/merge
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8222910Z Note: switching to 'refs/remotes/pull/48/merge'.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8223414Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8223811Z You are in 'detached HEAD' state. You can look around, make experimental
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8224653Z changes and commit them, and you can discard any commits you make in this
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8225449Z state without impacting any branches by switching back to a branch.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8225906Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8226256Z If you want to create a new branch to retain commits you create, you may
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8227003Z do so (now or later) by using -c with the switch command. Example:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8227552Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8227675Z   git switch -c <new-branch-name>
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8227862Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8227965Z Or undo this operation with:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8228114Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8228203Z   git switch -
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8228313Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8228540Z Turn off this advice by setting config variable advice.detachedHead to false
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8228839Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8229231Z HEAD is now at 67ef447 Merge aa6b4ddbac977330546c7bd6c77376b2b2ba462f into 69a725305fcbaf81b9a038ce2384c3f111e2fa51
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8230662Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8231282Z ##[group]Setting up auth for fetching submodules
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8235647Z [command]/usr/bin/git config --global http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8272094Z [command]/usr/bin/git config --global --unset-all url.https://github.com/.insteadOf
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8299124Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf git@github.com:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8325638Z [command]/usr/bin/git config --global --add url.https://github.com/.insteadOf org-15116341@github.com:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8349629Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8350197Z ##[group]Fetching submodules
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8352594Z [command]/usr/bin/git submodule sync
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8570491Z [command]/usr/bin/git -c protocol.version=2 submodule update --init --force --depth=1
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8784056Z Submodule 'dev-deps/data-rs' (https://github.com/linksplatform/data-rs) registered for path 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8786319Z Submodule 'dev-deps/mem-rs' (https://github.com/linksplatform/mem-rs) registered for path 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8798783Z Submodule 'dev-deps/trees-rs' (https://github.com/linksplatform/trees-rs) registered for path 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:07.8823787Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/data-rs'...
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:08.4961382Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/mem-rs'...
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:09.1607344Z Cloning into '/home/runner/work/doublets-rs/doublets-rs/dev-deps/trees-rs'...
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:10.9956216Z From https://github.com/linksplatform/data-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:10.9956886Z  * branch            95b7d4deb04e1ba34d2fa3187dca80cc7f62c78e -> FETCH_HEAD
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:11.0015881Z Submodule path 'dev-deps/data-rs': checked out '95b7d4deb04e1ba34d2fa3187dca80cc7f62c78e'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:12.1047374Z From https://github.com/linksplatform/mem-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:12.1048360Z  * branch            260fe8ac0f510a16aae99ff3033348b940a01106 -> FETCH_HEAD
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:12.1109282Z Submodule path 'dev-deps/mem-rs': checked out '260fe8ac0f510a16aae99ff3033348b940a01106'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.5878498Z From https://github.com/linksplatform/trees-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.5879660Z  * branch            de22eef5987a0f241ce124b07e745e4e5ab15c68 -> FETCH_HEAD
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.6460229Z Submodule path 'dev-deps/trees-rs': checked out 'de22eef5987a0f241ce124b07e745e4e5ab15c68'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.6472647Z [command]/usr/bin/git submodule foreach git config --local gc.auto 0
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.6681390Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.6937264Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7393724Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7428096Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7429184Z ##[group]Persisting credentials for submodules
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7436746Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'url\.https\:\/\/github\.com\/\.insteadOf' && git config --local --unset-all 'url.https://github.com/.insteadOf' || :"
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7672043Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7713773Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7755462Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.7808967Z [command]/usr/bin/git submodule foreach sh -c "git config --local 'http.https://github.com/.extraheader' 'AUTHORIZATION: basic ***' && git config --local --show-origin --name-only --get-regexp remote.origin.url"
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8039234Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8355301Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/data-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8359262Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8400562Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/mem-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8404998Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8452643Z file:/home/runner/work/doublets-rs/doublets-rs/.git/modules/dev-deps/trees-rs/config	remote.origin.url
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.8965373Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'git@github.com:'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9200109Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9439857Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9465538Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9500488Z [command]/usr/bin/git submodule foreach git config --local --add 'url.https://github.com/.insteadOf' 'org-15116341@github.com:'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9723066Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:13.9745262Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.0894996Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.0929094Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.0965067Z [command]/usr/bin/git log -1 --format='%H'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.0991455Z '67ef447d8739e30dee596f7e136c4ec1978399f7'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1196797Z ##[group]Run actions-rs/toolchain@v1
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1197359Z with:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1197587Z   profile: minimal
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1197790Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198017Z   components: rustfmt, clippy
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198230Z   default: true
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198400Z   override: false
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198564Z env:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198747Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.1198948Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.2192682Z [command]/home/runner/.cargo/bin/rustup show
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.8366622Z Default host: x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.8367378Z rustup home:  /home/runner/.rustup
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.8367686Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:14.8376634Z info: syncing channel updates for nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:15.0144514Z info: latest update on 2022-08-22 for version 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:15.0145511Z info: downloading 3 components
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2919865Z installed toolchains
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2920250Z --------------------
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2920628Z stable-x86_64-unknown-linux-gnu (default)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2920926Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2921038Z active toolchain
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2921388Z ----------------
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2922712Z name: nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2923633Z active because: overridden by '/home/runner/work/doublets-rs/doublets-rs/rust-toolchain.toml'
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2924590Z installed targets:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.2925001Z   x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3005155Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3058234Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3060327Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3171874Z info: the currently active `rustc` version is `rustc 1.65.0-nightly (c0941dfb5 2022-08-21)`
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3189483Z Installed rustup 1.29.0 support profiles
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3192789Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3243338Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3244202Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3354361Z info: the currently active `rustc` version is `rustc 1.65.0-nightly (c0941dfb5 2022-08-21)`
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3369756Z Installed rustup 1.29.0 support components
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3386294Z [command]/home/runner/.cargo/bin/rustup set profile minimal
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3450384Z info: profile set to minimal
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3464683Z [command]/home/runner/.cargo/bin/rustup toolchain install nightly-2022-08-22 --component rustfmt --component clippy
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.3883791Z info: syncing channel updates for nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.5539668Z info: latest update on 2022-08-22 for version 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:21.5643318Z info: downloading component clippy
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4402659Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4503105Z   nightly-2022-08-22-x86_64-unknown-linux-gnu updated - rustc 1.65.0-nightly (c0941dfb5 2022-08-21) (from rustc 1.65.0-nightly (c0941dfb5 2022-08-21))
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4504051Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4548826Z [command]/home/runner/.cargo/bin/rustup default nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4614088Z info: using existing install for nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4622053Z info: default toolchain set to nightly-2022-08-22-x86_64-unknown-linux-gnu
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4623873Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4723321Z   nightly-2022-08-22-x86_64-unknown-linux-gnu unchanged - rustc 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4724195Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4725101Z info: note that the toolchain 'nightly-2022-08-22-x86_64-unknown-linux-gnu' is currently in use (overridden by '/home/runner/work/doublets-rs/doublets-rs/rust-toolchain.toml')
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4737801Z ##[group]Gathering installed versions
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4749260Z [command]/home/runner/.cargo/bin/rustc -V
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4906258Z rustc 1.65.0-nightly (c0941dfb5 2022-08-21)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4936571Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4953129Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.4954716Z [command]/home/runner/.cargo/bin/cargo -V
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5028233Z cargo 1.65.0-nightly (9809f8ff3 2022-08-16)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5037967Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5043120Z [command]/home/runner/.cargo/bin/rustup -V
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5093058Z rustup 1.29.0 (28d1352db 2026-03-05)
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5093743Z info: This is the version for the rustup toolchain manager, not the rustc compiler.
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5206876Z info: the currently active `rustc` version is `rustc 1.65.0-nightly (c0941dfb5 2022-08-21)`
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5222063Z ##[warning]The `set-output` command is deprecated and will be disabled soon. Please upgrade to using Environment Files. For more information see: https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5224576Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5322730Z ##[group]Run actions-rs/cargo@v1
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5322981Z with:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5323143Z   command: build
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5323339Z   args: --release --all-features
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5323561Z   use-cross: false
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5323735Z env:
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5323901Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.5324125Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.6019806Z [command]/home/runner/.cargo/bin/cargo build --release --all-features
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.6214484Z warning: /home/runner/work/doublets-rs/doublets-rs/doublets/Cargo.toml: version requirement `0.1.0-pre+beta.2` for dependency `mem` includes semver metadata which will be ignored, removing the metadata is recommended to avoid confusion
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.6223785Z ##[warning]warning: /home/runner/work/doublets-rs/doublets-rs/doublets-ffi/Cargo.toml: unused manifest key: package.log
+Benchmark	UNKNOWN STEP	2026-04-13T10:07:22.6727555Z     Updating crates.io index
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.3233579Z  Downloading crates ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4038078Z   Downloaded cfg-if v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4069797Z   Downloaded ansi_term v0.12.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4119166Z   Downloaded beef v0.5.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4139744Z   Downloaded autocfg v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4224171Z   Downloaded crossbeam-deque v0.8.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4276221Z   Downloaded bumpalo v3.11.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4306239Z   Downloaded crossbeam-channel v0.5.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4353723Z   Downloaded num_cpus v1.13.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4381000Z   Downloaded ident_case v1.0.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4391658Z   Downloaded fastrand v1.8.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4404937Z   Downloaded thread_local v1.1.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4418663Z   Downloaded lazy_static v1.4.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4431896Z   Downloaded tap v1.0.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4442312Z   Downloaded memoffset v0.6.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4456105Z   Downloaded scopeguard v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4469721Z   Downloaded fnv v1.0.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4523827Z   Downloaded funty v2.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4540507Z   Downloaded darling_macro v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4578647Z   Downloaded pin-project-lite v0.2.9
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4633414Z   Downloaded darling v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4662943Z   Downloaded remove_dir_all v0.5.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4674473Z   Downloaded strsim v0.10.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4689287Z   Downloaded either v1.7.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4737291Z   Downloaded tracing-log v0.1.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4754704Z   Downloaded once_cell v1.13.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4778059Z   Downloaded memmap2 v0.5.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4796429Z   Downloaded log v0.4.17
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4822039Z   Downloaded thiserror-impl v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4836251Z   Downloaded smallvec v1.9.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4856252Z   Downloaded tracing-attributes v0.1.22
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4876872Z   Downloaded quote v1.0.20
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4906537Z   Downloaded darling_core v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4955792Z   Downloaded proc-macro2 v1.0.42
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.4979550Z   Downloaded thiserror v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5022974Z   Downloaded tempfile v3.3.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5046410Z   Downloaded crossbeam-utils v0.8.11
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5074140Z   Downloaded sharded-slab v0.1.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5105170Z   Downloaded crossbeam-epoch v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5134464Z   Downloaded unicode-ident v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5161949Z   Downloaded num-traits v0.2.15
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5190413Z   Downloaded tracing v0.1.35
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5227980Z   Downloaded serde_derive v1.0.140
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5255923Z   Downloaded serde v1.0.140
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5290271Z   Downloaded tracing-core v0.1.28
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5318446Z   Downloaded rayon-core v1.9.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5360556Z   Downloaded rayon v1.5.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5459623Z   Downloaded tracing-subscriber v0.3.15
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5546442Z   Downloaded syn v1.0.98
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5653449Z   Downloaded platform-mem v0.1.0-pre+beta.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5669177Z   Downloaded libc v0.2.126
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5945525Z   Downloaded platform-num v0.1.0-aplha.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5952396Z   Downloaded leak_slice v0.2.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.5960158Z   Downloaded delegate v0.7.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.6236444Z    Compiling proc-macro2 v1.0.42
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.6237584Z    Compiling quote v1.0.20
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.6238014Z    Compiling unicode-ident v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.6239379Z    Compiling syn v1.0.98
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.7099585Z    Compiling autocfg v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.9199357Z    Compiling cfg-if v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.9268859Z    Compiling once_cell v1.13.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.9496539Z    Compiling libc v0.2.126
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:43.9538250Z    Compiling crossbeam-utils v0.8.11
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.0944012Z    Compiling scopeguard v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.1478089Z    Compiling rayon-core v1.9.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.1688214Z    Compiling remove_dir_all v0.5.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.1729609Z    Compiling fastrand v1.8.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.1970275Z    Compiling funty v2.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.2678350Z    Compiling serde_derive v1.0.140
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.3170065Z    Compiling ident_case v1.0.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.3805150Z    Compiling beef v0.5.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.4879897Z    Compiling fnv v1.0.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.5298253Z    Compiling strsim v0.10.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.5548089Z    Compiling serde v1.0.140
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.5779845Z    Compiling tap v1.0.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.6488254Z    Compiling log v0.4.17
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.8538303Z    Compiling smallvec v1.9.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.8648165Z    Compiling either v1.7.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.8858308Z    Compiling lazy_static v1.4.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.9338235Z    Compiling leak_slice v0.2.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.9700040Z    Compiling bumpalo v3.11.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:44.9728021Z    Compiling ansi_term v0.12.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:45.0828248Z    Compiling pin-project-lite v0.2.9
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:45.2069398Z    Compiling tracing-core v0.1.28
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:45.5388245Z    Compiling thread_local v1.1.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:45.8403910Z    Compiling memoffset v0.6.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:45.9399028Z    Compiling crossbeam-epoch v0.9.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:46.0400727Z    Compiling num-traits v0.2.15
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:46.0715299Z    Compiling rayon v1.5.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:46.2300229Z    Compiling sharded-slab v0.1.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:47.5028301Z    Compiling crossbeam-channel v0.5.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:47.6889389Z    Compiling memmap2 v0.5.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:47.7458395Z    Compiling num_cpus v1.13.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:48.0128229Z    Compiling tempfile v3.3.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:48.7928235Z    Compiling tracing-log v0.1.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:49.1603822Z    Compiling platform-num v0.1.0-aplha.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:49.2218461Z    Compiling crossbeam-deque v0.8.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:49.3858471Z    Compiling tracing-subscriber v0.3.15
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:49.4052548Z    Compiling platform-mem v0.1.0-pre+beta.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:53.4239497Z    Compiling darling_core v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:54.8274470Z    Compiling thiserror-impl v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:54.8368993Z    Compiling delegate v0.7.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:55.6331314Z    Compiling tracing-attributes v0.1.22
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:55.7548743Z    Compiling env-decorators v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi/env-decorators)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:56.7188116Z    Compiling darling_macro v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.4688033Z    Compiling thiserror v1.0.31
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.5188233Z    Compiling darling v0.13.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.5535762Z    Compiling platform-data v0.1.0-beta.3 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/data-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.6748707Z    Compiling platform-mem v0.1.0-pre+beta.2 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/mem-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.8476905Z    Compiling tracing v0.1.35
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:57.8525178Z    Compiling platform-trees v0.1.0-beta.1 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/trees-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.0559548Z    Compiling doublets v0.1.0-pre+beta.15 (/home/runner/work/doublets-rs/doublets-rs/doublets)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1458716Z warning: unused import: `mem::MaybeUninit`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1472975Z ##[warning] --> doublets/src/data/handler.rs:3:32
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1474600Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1497805Z 3 | use std::{marker::PhantomData, mem::MaybeUninit, ops::Try};
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1498412Z   |                                ^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1498825Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1499152Z   = note: `#[warn(unused_imports)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1499498Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1499814Z warning: unused import: `bumpalo::Bump`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1528243Z ##[warning] --> doublets/src/data/traits.rs:1:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1589840Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1590239Z 1 | use bumpalo::Bump;
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1590600Z   |     ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:58.1590849Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3698451Z warning: unused import: `error::Error`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3729667Z ##[warning]  --> doublets/src/mem/unit/store.rs:17:31
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3747893Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3777963Z 17 | use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3787636Z    |                               ^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3817430Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3837965Z warning: unused import: `error::Error`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3848522Z ##[warning] --> doublets/src/mem/split/store.rs:1:44
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3854909Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3855670Z 1 | use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3859268Z   |                                            ^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3859927Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3860327Z warning: unused import: `LinksTree`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3861495Z ##[warning]  --> doublets/src/mem/split/store.rs:10:22
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3863388Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3864022Z 10 |         LinksHeader, LinksTree, SplitList, SplitTree, SplitUpdateMem,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3864814Z    |                      ^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3865237Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3865716Z warning: unused import: `trees::RelativeCircularLinkedList`
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3867004Z ##[warning]  --> doublets/src/mem/split/store.rs:16:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3868723Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3869282Z 16 | use trees::RelativeCircularLinkedList;
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3869902Z    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.3870334Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7298328Z warning: fields `break` and `continue` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7329539Z ##[warning]  --> doublets/src/mem/split/generic/external_recursion_less_base.rs:17:16
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7331659Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7387953Z 14 | pub struct ExternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7389018Z    |            ----------------------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7408035Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7417903Z 17 |     pub(crate) r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7447756Z    |                ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7448149Z 18 |     pub(crate) r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7448487Z    |                ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7448782Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7449080Z    = note: `#[warn(dead_code)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7449398Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7465698Z warning: fields `break` and `continue` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7468033Z ##[warning]  --> doublets/src/mem/split/generic/internal_recursion_less_base.rs:16:16
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7470030Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7472361Z 13 | pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7473409Z    |                   ----------------------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7474155Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7474611Z 16 |     pub(crate) r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7475149Z    |                ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7475698Z 17 |     pub(crate) r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7476255Z    |                ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7476643Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7477061Z warning: fields `continue` and `break` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7478917Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:19:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7507982Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7508688Z 16 | pub struct InternalSourcesLinkedList<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7520143Z    |            ------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7520838Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7521262Z 19 |     r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7521788Z    |     ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7522236Z 20 |     r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7522692Z    |     ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7523036Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7523583Z warning: associated function `get_header` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7525192Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:37:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7556954Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7557830Z 37 |     fn get_header(&self) -> &LinksHeader<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7558491Z    |        ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7558880Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7559356Z warning: associated function `get_mut_header` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7560932Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:41:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7562691Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7574796Z 41 |     fn get_mut_header(&mut self) -> &mut LinksHeader<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7575520Z    |        ^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7575920Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7576495Z warning: associated function `get_mut_data_part` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7578336Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:49:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7589881Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7590557Z 49 |     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7591269Z    |        ^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7592009Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7592465Z warning: associated function `get_link_part` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7593782Z ##[warning]   --> doublets/src/mem/unit/store.rs:131:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7595207Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7597777Z 131 |     fn get_link_part(&self, index: T) -> &LinkPart<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7598539Z     |        ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.7598935Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.9122748Z    Compiling integration v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/integration)
+Benchmark	UNKNOWN STEP	2026-04-13T10:15:59.9280333Z warning: `doublets` (lib) generated 13 warnings
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4134281Z ##[warning]   Compiling ffi-attributes v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi/ffi-attributes)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4672299Z warning: unused import: `parse::Parser`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4674462Z ##[warning] --> doublets-ffi/ffi-attributes/src/lib.rs:8:11
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4676346Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4676764Z 8 | use syn::{parse::Parser, punctuated::Punctuated};
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4677556Z   |           ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4677879Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4678202Z   = note: `#[warn(unused_imports)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4678550Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4678739Z warning: unreachable pattern
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4679692Z ##[warning]   --> doublets-ffi/ffi-attributes/src/lib.rs:139:21
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4680994Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4681286Z 139 |                     _ => {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4681687Z     |                     ^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4682039Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4682420Z     = note: `#[warn(unreachable_patterns)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.4682797Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:02.9995955Z warning: `ffi-attributes` (lib) generated 2 warnings (1 duplicate)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:03.0018960Z ##[warning]   Compiling doublets-ffi v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:04.5853021Z warning: `ffi-attributes` (lib) generated 2 warnings (1 duplicate)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6212928Z ##[warning]    Finished release [optimized] target(s) in 8m 43s
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6551556Z ##[group]Run actions-rs/cargo@v1
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6551807Z with:
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6551970Z   command: bench
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6552155Z   args: --all-features
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6552340Z   use-cross: false
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6552510Z env:
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6552671Z   toolchain: nightly-2022-08-22
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.6552893Z ##[endgroup]
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.7206491Z [command]/home/runner/.cargo/bin/cargo bench --all-features
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.7381697Z warning: /home/runner/work/doublets-rs/doublets-rs/doublets/Cargo.toml: version requirement `0.1.0-pre+beta.2` for dependency `mem` includes semver metadata which will be ignored, removing the metadata is recommended to avoid confusion
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.7385709Z ##[warning]warning: /home/runner/work/doublets-rs/doublets-rs/doublets-ffi/Cargo.toml: unused manifest key: package.log
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.7626145Z  Downloading crates ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8161202Z   Downloaded atty v0.2.14
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8175920Z   Downloaded bitflags v1.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8211163Z   Downloaded cast v0.3.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8263399Z   Downloaded cc v1.0.73
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8457698Z   Downloaded aho-corasick v0.7.18
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8502142Z   Downloaded quickcheck_macros v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8513455Z   Downloaded itoa v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8531642Z   Downloaded rand_chacha v0.3.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8546088Z   Downloaded mimalloc v0.1.29
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8614155Z   Downloaded plotters-backend v0.3.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8630429Z   Downloaded itoa v0.4.8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8646001Z   Downloaded oorandom v11.1.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8654910Z   Downloaded same-file v1.0.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8671178Z   Downloaded rpmalloc v0.2.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8695454Z   Downloaded plotters-svg v0.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8705238Z   Downloaded tinyvec_macros v0.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8726791Z   Downloaded pkg-config v0.3.25
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8744024Z   Downloaded unicode-width v0.1.9
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8759263Z   Downloaded getrandom v0.2.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8788547Z   Downloaded rand_core v0.6.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8804475Z   Downloaded tinytemplate v1.2.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8824043Z   Downloaded walkdir v2.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8844398Z   Downloaded quickcheck v1.0.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8866810Z   Downloaded paste v1.0.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8900628Z   Downloaded ppv-lite86 v0.2.16
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8915187Z   Downloaded textwrap v0.11.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8933781Z   Downloaded static_assertions v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8952513Z   Downloaded env_logger v0.8.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.8978972Z   Downloaded ryu v1.0.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9013068Z   Downloaded half v1.8.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9037757Z   Downloaded csv-core v0.1.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9052872Z   Downloaded criterion-plot v0.4.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9072534Z   Downloaded tinyvec v1.6.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9105728Z   Downloaded serde_cbor v0.11.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9142536Z   Downloaded memchr v2.5.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9222579Z   Downloaded rpmalloc-sys v0.2.3+b097fd0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9268627Z   Downloaded rand v0.8.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9312234Z   Downloaded itertools v0.10.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9381661Z   Downloaded regex-automata v0.1.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9439159Z   Downloaded criterion v0.3.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9522705Z   Downloaded clap v2.34.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9595456Z   Downloaded serde_json v1.0.82
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9675150Z   Downloaded plotters v0.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9777810Z   Downloaded regex v1.6.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9869961Z   Downloaded bstr v0.2.17
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:05.9970825Z   Downloaded regex-syntax v0.6.27
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0153132Z   Downloaded libmimalloc-sys v0.1.25
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0454478Z   Downloaded csv v1.1.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0818843Z    Compiling memchr v2.5.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0819446Z    Compiling cc v1.0.73
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0829297Z    Compiling regex-syntax v0.6.27
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.0837351Z    Compiling ppv-lite86 v0.2.16
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.3488393Z    Compiling pkg-config v0.3.25
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.4780015Z    Compiling serde_json v1.0.82
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.7877891Z    Compiling ryu v1.0.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:06.9426182Z    Compiling plotters-backend v0.3.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.1348039Z    Compiling regex-automata v0.1.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.3941509Z    Compiling unicode-width v0.1.9
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.4204275Z    Compiling itoa v1.0.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.4239101Z    Compiling itoa v0.4.8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.4526287Z    Compiling half v1.8.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.5239437Z    Compiling cast v0.3.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.5388238Z    Compiling bitflags v1.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.5746285Z    Compiling same-file v1.0.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.6920042Z    Compiling tinyvec_macros v0.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.7252974Z    Compiling oorandom v11.1.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.7418202Z    Compiling static_assertions v1.1.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.7796800Z    Compiling paste v1.0.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.8338564Z    Compiling serde v1.0.140
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:07.8598234Z    Compiling itertools v0.10.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:08.2468290Z    Compiling plotters-svg v0.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:08.4318591Z    Compiling rpmalloc-sys v0.2.3+b097fd0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:08.6988214Z    Compiling libmimalloc-sys v0.1.25
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:08.7288240Z    Compiling textwrap v0.11.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:08.9648866Z    Compiling walkdir v2.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:09.4198119Z    Compiling tinyvec v1.6.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:10.4280141Z    Compiling clap v2.34.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:11.4559498Z    Compiling criterion-plot v0.4.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:12.8778264Z    Compiling getrandom v0.2.7
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:13.1491253Z    Compiling atty v0.2.14
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:13.2021571Z    Compiling aho-corasick v0.7.18
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:14.3673288Z    Compiling csv-core v0.1.10
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:14.8921082Z    Compiling rand_core v0.6.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:15.0611248Z    Compiling plotters v0.3.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:15.1768168Z    Compiling regex v1.6.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:17.1118097Z    Compiling rpmalloc v0.2.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:17.1638238Z    Compiling quickcheck_macros v1.0.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:17.3158615Z    Compiling env-decorators v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi/env-decorators)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:17.4430002Z    Compiling rand_chacha v0.3.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:17.7948713Z    Compiling env_logger v0.8.4
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:18.3639724Z    Compiling mimalloc v0.1.29
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:20.1688135Z    Compiling rand v0.8.5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:21.4108397Z    Compiling quickcheck v1.0.3
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.4578665Z    Compiling platform-trees v0.1.0-beta.1 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/trees-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8330701Z warning: unused import: `parse::Parser`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8380299Z ##[warning] --> doublets-ffi/ffi-attributes/src/lib.rs:8:11
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8381704Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8387799Z 8 | use syn::{parse::Parser, punctuated::Punctuated};
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8388338Z   |           ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8388679Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8389006Z   = note: `#[warn(unused_imports)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8389378Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8389602Z warning: unreachable pattern
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8390590Z ##[warning]   --> doublets-ffi/ffi-attributes/src/lib.rs:139:21
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8417624Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8431806Z 139 |                     _ => {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8468129Z     |                     ^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8487681Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8517894Z     = note: `#[warn(unreachable_patterns)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8567449Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8578037Z warning: `ffi-attributes` (lib) generated 2 warnings
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:22.8589153Z ##[warning]   Compiling ffi-attributes v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi/ffi-attributes)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:23.0059959Z warning: `ffi-attributes` (lib test) generated 2 warnings (2 duplicates)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:25.5949362Z ##[warning]   Compiling bstr v0.2.17
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.0228319Z    Compiling serde_cbor v0.11.2
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1368437Z warning: unused import: `mem::MaybeUninit`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1399153Z ##[warning] --> doublets/src/data/handler.rs:3:32
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1401686Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1427948Z 3 | use std::{marker::PhantomData, mem::MaybeUninit, ops::Try};
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1457811Z   |                                ^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1487940Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1488485Z   = note: `#[warn(unused_imports)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1517542Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1547868Z warning: unused import: `bumpalo::Bump`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1558466Z ##[warning] --> doublets/src/data/traits.rs:1:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1577706Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1607718Z 1 | use bumpalo::Bump;
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1637762Z   |     ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1647452Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1667977Z warning: unused import: `error::Error`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1698477Z ##[warning]  --> doublets/src/mem/unit/store.rs:17:31
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1700055Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1727989Z 17 | use std::{cmp, cmp::Ordering, error::Error, mem::transmute, ptr::NonNull};
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1757770Z    |                               ^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1787527Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1804927Z warning: unused import: `error::Error`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1818392Z ##[warning] --> doublets/src/mem/split/store.rs:1:44
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1847675Z   |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1857920Z 1 | use std::{cmp::Ordering, default::default, error::Error, mem::transmute, ptr::NonNull};
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1877786Z   |                                            ^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1907465Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1907743Z warning: unused import: `LinksTree`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1908758Z ##[warning]  --> doublets/src/mem/split/store.rs:10:22
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1910226Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1910685Z 10 |         LinksHeader, LinksTree, SplitList, SplitTree, SplitUpdateMem,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1911312Z    |                      ^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1911603Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1911968Z warning: unused import: `trees::RelativeCircularLinkedList`
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1913665Z ##[warning]  --> doublets/src/mem/split/store.rs:16:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1914893Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1915265Z 16 | use trees::RelativeCircularLinkedList;
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1915772Z    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1916081Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1916390Z warning: fields `break` and `continue` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1948132Z ##[warning]  --> doublets/src/mem/split/generic/external_recursion_less_base.rs:17:16
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1949577Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1950104Z 14 | pub struct ExternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1950912Z    |            ----------------------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1951483Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1951790Z 17 |     pub(crate) r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1952189Z    |                ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1952587Z 18 |     pub(crate) r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1952995Z    |                ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1953352Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1953712Z    = note: `#[warn(dead_code)]` on by default
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1954038Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1954310Z warning: fields `break` and `continue` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1955629Z ##[warning]  --> doublets/src/mem/split/generic/internal_recursion_less_base.rs:16:16
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1957311Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1957869Z 13 | pub(crate) struct InternalRecursionlessSizeBalancedTreeBase<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1958726Z    |                   ----------------------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1959316Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1959610Z 16 |     pub(crate) r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1960015Z    |                ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1960396Z 17 |     pub(crate) r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1960814Z    |                ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1961061Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1961340Z warning: fields `continue` and `break` are never read
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1962642Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:19:5
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1964507Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1964960Z 16 | pub struct InternalSourcesLinkedList<T: LinkType> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1965670Z    |            ------------------------- fields in this struct
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1966173Z ...
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1966469Z 19 |     r#continue: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1966803Z    |     ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1967642Z 20 |     r#break: T,
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1967997Z    |     ^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1968192Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1968482Z warning: associated function `get_header` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1969722Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:37:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1971128Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1971498Z 37 |     fn get_header(&self) -> &LinksHeader<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1971991Z    |        ^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1972211Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1972510Z warning: associated function `get_mut_header` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1973778Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:41:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1975162Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1975575Z 41 |     fn get_mut_header(&mut self) -> &mut LinksHeader<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1976114Z    |        ^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1976365Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1976682Z warning: associated function `get_mut_data_part` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1978210Z ##[warning]  --> doublets/src/mem/split/generic/internal_sources_linked_list.rs:49:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1979616Z    |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1980077Z 49 |     fn get_mut_data_part(&mut self, link: T) -> &mut DataPart<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1980680Z    |        ^^^^^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1980935Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1981249Z warning: associated function `get_link_part` is never used
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1982405Z ##[warning]   --> doublets/src/mem/unit/store.rs:131:8
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1983612Z     |
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1984038Z 131 |     fn get_link_part(&self, index: T) -> &LinkPart<T> {
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1984946Z     |        ^^^^^^^^^^^^^
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1985189Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1985430Z warning: `doublets` (lib) generated 13 warnings
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:27.1986330Z ##[warning]   Compiling tinytemplate v1.2.1
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:28.9238081Z    Compiling csv v1.1.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:29.3548476Z    Compiling doublets-ffi v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/doublets-ffi)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:30.4300769Z    Compiling integration v0.1.0 (/home/runner/work/doublets-rs/doublets-rs/integration)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:30.6995271Z    Compiling criterion v0.3.6
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:30.8840395Z    Compiling platform-mem v0.1.0-pre+beta.2 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/mem-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:31.4218555Z    Compiling platform-data v0.1.0-beta.3 (/home/runner/work/doublets-rs/doublets-rs/dev-deps/data-rs)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:41.8958569Z    Compiling doublets v0.1.0-pre+beta.15 (/home/runner/work/doublets-rs/doublets-rs/doublets)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:43.5778452Z warning: `doublets` (lib test) generated 13 warnings (13 duplicates)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7378267Z ##[warning]    Finished bench [optimized] target(s) in 39.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7426120Z      Running unittests src/lib.rs (target/release/deps/doublets-c79c4f439e97b032)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7439017Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7439199Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7439748Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7440212Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7440816Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7441724Z      Running benches/iter.rs (target/release/deps/iter-bf954035ccf5c799)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7451946Z WARNING: HTML report generation will become a non-default optional feature in Criterion.rs 0.4.0.
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7453433Z This feature is being moved to cargo-criterion (https://github.com/bheisler/cargo-criterion) and will be optional in a future version of Criterion.rs. To silence this warning, either switch to cargo-criterion or enable the 'html_reports' feature in your Cargo.toml.
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7455106Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:44.7455561Z Gnuplot not found, using plotters backend
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:45.5865663Z Benchmarking iter
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:45.5866015Z Benchmarking iter: Warming up for 3.0000 s
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:51.0456146Z Benchmarking iter: Collecting 100 samples in estimated 5.3414 s (500 iterations)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:56.3794877Z Benchmarking iter: Analyzing
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:56.5405854Z iter                    time:   [10.653 ms 10.668 ms 10.685 ms]
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:56.5406625Z Found 8 outliers among 100 measurements (8.00%)
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:56.5407385Z   3 (3.00%) high mild
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:56.5407827Z   5 (5.00%) high severe
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:57.8884304Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:57.8884727Z Benchmarking each
+Benchmark	UNKNOWN STEP	2026-04-13T10:16:57.8885299Z Benchmarking each: Warming up for 3.0000 s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:03.8806672Z Benchmarking each: Collecting 100 samples in estimated 5.8631 s (500 iterations)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:09.7448354Z Benchmarking each: Analyzing
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:09.9052388Z each                    time:   [11.720 ms 11.728 ms 11.739 ms]
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:09.9053310Z Found 4 outliers among 100 measurements (4.00%)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:09.9053985Z   1 (1.00%) high mild
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:09.9054358Z   3 (3.00%) high severe
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:11.2482396Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:11.2483193Z Benchmarking each_with_vec
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:11.2483728Z Benchmarking each_with_vec: Warming up for 3.0000 s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:14.3572350Z Benchmarking each_with_vec: Collecting 100 samples in estimated 6.0957 s (500 iterations)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:20.4726692Z Benchmarking each_with_vec: Analyzing
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:20.6295911Z each_with_vec           time:   [12.217 ms 12.231 ms 12.248 ms]
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:20.6296626Z Found 8 outliers among 100 measurements (8.00%)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:20.6298556Z   2 (2.00%) high mild
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:20.6298890Z   6 (6.00%) high severe
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:21.9817431Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:21.9882500Z Benchmarking create_point/create_point
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:21.9883562Z Benchmarking create_point/create_point: Warming up for 3.0000 s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:26.0393442Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:26.0394496Z Warning: Unable to complete 100 samples in 5.0s. You may wish to increase target time to 6.4s, or reduce sample count to 70.
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:26.0395844Z Benchmarking create_point/create_point: Collecting 100 samples in estimated 6.4302 s (100 iterations)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.0327983Z Benchmarking create_point/create_point: Analyzing
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1881365Z create_point/create_point
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1882055Z                         time:   [67.750 ms 69.933 ms 72.273 ms]
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1884310Z                         thrpt:  [13.837 Melem/s 14.299 Melem/s 14.760 Melem/s]
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1884927Z Found 23 outliers among 100 measurements (23.00%)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1885382Z   7 (7.00%) high mild
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:33.1885701Z   16 (16.00%) high severe
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.4873726Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6845839Z      Running unittests src/lib.rs (target/release/deps/doublets_ffi-f4a25c42100e52aa)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6869376Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6869630Z running 1 test
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6870206Z test tests::error_log ... ignored
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6870545Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6870997Z test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6871376Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6872636Z      Running unittests src/lib.rs (target/release/deps/env_decorators-36d9ea823cd32c20)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6898832Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6899381Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6899601Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6900024Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6900581Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6901924Z      Running unittests src/lib.rs (target/release/deps/ffi_attributes-071801deb42211f4)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6916803Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6916965Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6917509Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6918198Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6918578Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6920679Z      Running unittests src/lib.rs (target/release/deps/integration-b4921415b772c0c3)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6943350Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6943653Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6943865Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6944291Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6944883Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6946320Z      Running unittests src/bins/test-mem.rs (target/release/deps/test_mem-eb06431a3e2f21c5)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6969193Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6969556Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6969699Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6969959Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6970378Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6972078Z      Running unittests src/lib.rs (target/release/deps/platform_data-6dc5e46d8b102e5a)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6993018Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6993676Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6993898Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6994206Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6994765Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.6996092Z      Running unittests src/lib.rs (target/release/deps/platform_mem-0a7d66d7f9ec36b0)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7015315Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7015652Z running 2 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7016352Z test internal::quick_tests::align_slice ... ignored
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7017035Z test internal::quick_tests::align_to_from ... ignored
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7017752Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7018196Z test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7018923Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7019288Z      Running unittests src/lib.rs (target/release/deps/platform_trees-8804cdc09c856d14)
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7040005Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7040298Z running 0 tests
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7040741Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7041008Z test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7041875Z
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.7237595Z Post job cleanup.
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8135880Z [command]/usr/bin/git version
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8173980Z git version 2.53.0
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8225850Z Temporarily overriding HOME='/home/runner/work/_temp/fbcf6a6a-31d8-4f3c-a3cc-56462e05a2d5' before making global git config changes
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8227544Z Adding repository directory to the temporary git global config as a safe directory
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8230921Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/doublets-rs/doublets-rs
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8263463Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8294508Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8495726Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8540509Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8585771Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8641218Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8662507Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8673371Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8703736Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8903874Z Entering 'dev-deps/data-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8927410Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8959527Z Entering 'dev-deps/mem-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.8982247Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.9014144Z Entering 'dev-deps/trees-rs'
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.9037664Z http.https://github.com/.extraheader
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.9213999Z Cleaning up orphan processes
+Benchmark	UNKNOWN STEP	2026-04-13T10:17:34.9580801Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions-rs/cargo@v1, actions-rs/toolchain@v1, actions/checkout@v2. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
