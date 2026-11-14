@@ -114,12 +114,15 @@ Thank you for your interest in contributing! This document provides guidelines a
    bash experiments/issue-22/check-packages.sh
    cargo +stable test --manifest-path doublets-ffi/Cargo.toml --locked
    bash experiments/issue-19/verify.sh
+   bash experiments/issue-18/verify.sh
    ```
 
    Use the latest stable toolchain for development and FFI builds. Some test and
    procedural macro dependencies require newer Rust than the core library's MSRV.
    The Git consumer check tests the committed `HEAD`; commit source changes
-   before using it to verify an external dependency.
+   before using it to verify an external dependency. The registry consumer
+   check packages the working tree as crates.io would receive it and resolves
+   the newest compatible dependencies, as `cargo add doublets` does.
 
 5. **Add a changelog fragment**
 

@@ -148,3 +148,56 @@ to the checked-out commit, and runs CRUD and iterator assertions on both layouts
 with default and full features, with `RUSTC_BOOTSTRAP` unset. See the
 [investigation record](experiments/issue-19/README.md) for the tested revision
 and reproduction commands.
+
+## crates.io releases and issue 18
+
+[Issue 18](https://github.com/linksplatform/doublets-rs/issues/18) ran
+`cargo add doublets` before any stable release existed. Cargo selected the
+2022 pre-release `0.1.0-pre+beta.15`, and its `platform-data 0.1.0-beta.3`
+dependency failed with `unresolved import thiserror` (E0432), a missing
+`std::error::Request` (E0412), the unstable `error_generic_member_access`
+feature (E0658), and a missing `thiserror_provide` method (E0599).
+
+Root cause: both of those old crates derive `thiserror::Error` with a
+`#[backtrace]` source field and only require `thiserror` 1.0.30/1.0.31. A fresh
+resolution selects the newest semver-compatible `thiserror 1.x`, whose derive
+generates code for the newer `std::error::Request` nightly API. Its build
+script does not enable that API on the 2022 nightly, so the generated code
+cannot compile. Separately, `platform-data 0.1.0-beta.3` broke APIs that
+`doublets 0.1.0-pre+beta.15` used. The old release builds only on
+`nightly-2022-07-23` with `thiserror` pinned to 1.0.31 and `platform-data`
+pinned to 0.1.0-beta.1. It cannot build on stable at all (E0554). Published
+crates cannot be edited, so pins are a historical workaround, not a fix.
+
+The fix is the stable release line. Since 0.2.0, `cargo add doublets` selects a
+stable release that depends on `thiserror` 2 and stable `platform-*` crates
+from crates.io. No `#[backtrace]` attribute or nightly feature remains. If an
+existing project still resolves the old pre-release:
+
+```bash
+rustup toolchain install stable
+cargo +stable remove doublets
+cargo +stable add doublets
+cargo +stable tree -i thiserror
+cargo +stable run
+```
+
+A plain `cargo add doublets` keeps an existing `=0.1.0-pre` requirement, so
+remove the dependency first (or run `cargo add` with the version from the
+[installation instructions](README.md#installation)). Cargo then resolves
+`thiserror` 2 instead of 1.x. Afterwards, `cargo tree` must not list
+`doublets v0.1`, `platform-data v0.1`, or `platform-treesmethods`. Replace old
+direct `platform-*` dependencies with the versions used by the current
+`doublets` release, and adapt code written for the 0.1 API to the current
+[examples](README.md#example). Use `+stable` explicitly if the consuming
+project's `rust-toolchain.toml` still selects nightly.
+
+CI runs `bash experiments/issue-18/verify.sh package` on Linux, macOS, and
+Windows. It packages this checkout exactly as it would be published, then
+consumes it through `cargo add` with a fresh lockfile, so every dependency uses
+its newest compatible release. It checks the default and full features on both
+storage layouts, including the derived error impls. On Linux,
+`bash experiments/issue-18/verify.sh crates-io` runs the issue's
+`cargo add doublets` against the release published on crates.io. See the
+[investigation record](experiments/issue-18/README.md) for the historical
+reproduction (`experiments/issue-18/reproduce.sh`).

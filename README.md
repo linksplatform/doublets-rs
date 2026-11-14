@@ -53,7 +53,7 @@ the routes.
 
 ## Installation
 
-Add to your `Cargo.toml`:
+Run `cargo add doublets`, or add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -70,7 +70,10 @@ cargo +stable build
 ```
 
 For source checkouts, standalone FFI builds, and troubleshooting older nightly
-dependency errors, see [Stable Rust Support](STABLE_RUST.md).
+dependency errors, see [Stable Rust Support](STABLE_RUST.md). If a project still
+resolves a 2022 pre-release and reports `unresolved import thiserror` from
+[issue 18](https://github.com/linksplatform/doublets-rs/issues/18), follow the
+[crates.io upgrade steps](STABLE_RUST.md#cratesio-releases-and-issue-18).
 
 To depend on the current Git source instead of a crates.io release:
 

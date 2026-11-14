@@ -1,0 +1,36 @@
+   Compiling platform-data v0.1.0-beta.3
+error[E0432]: unresolved import `thiserror`
+ --> $REPO/target/issue-18-historical/cargo-home/registry/src/index.crates.io-e139d0d48fed7772/platform-data-0.1.0-beta.3/src/links.rs:4:10
+  |
+4 | #[derive(thiserror::Error, Debug)]
+  |          ^^^^^^^^^^^^^^^^ no `ThiserrorProvide` in `__private`
+  |
+  = note: this error originates in the derive macro `thiserror::Error` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0412]: cannot find type `Request` in module `std::error`
+ --> $REPO/target/issue-18-historical/cargo-home/registry/src/index.crates.io-e139d0d48fed7772/platform-data-0.1.0-beta.3/src/links.rs:4:10
+  |
+4 | #[derive(thiserror::Error, Debug)]
+  |          ^^^^^^^^^^^^^^^^ not found in `std::error`
+  |
+  = note: this error originates in the derive macro `thiserror::Error` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0658]: use of unstable library feature 'error_generic_member_access'
+ --> $REPO/target/issue-18-historical/cargo-home/registry/src/index.crates.io-e139d0d48fed7772/platform-data-0.1.0-beta.3/src/links.rs:4:10
+  |
+4 | #[derive(thiserror::Error, Debug)]
+  |          ^^^^^^^^^^^^^^^^
+  |
+  = note: see issue #99301 <https://github.com/rust-lang/rust/issues/99301> for more information
+  = help: add `#![feature(error_generic_member_access)]` to the crate attributes to enable
+  = note: this error originates in the derive macro `thiserror::Error` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0599]: no method named `thiserror_provide` found for reference `&std::io::Error` in the current scope
+  --> $REPO/target/issue-18-historical/cargo-home/registry/src/index.crates.io-e139d0d48fed7772/platform-data-0.1.0-beta.3/src/links.rs:18:13
+   |
+18 |     #[error("unable to allocate memory for links storage: `{0}`")]
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method not found in `&std::io::Error`
+
+Some errors have detailed explanations: E0412, E0432, E0599, E0658.
+For more information about an error, try `rustc --explain E0412`.
+error: could not compile `platform-data` due to 4 previous errors
