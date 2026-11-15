@@ -79,6 +79,10 @@
     dead_code
 )]
 
+/// Optional C ABI bindings, built from the primary package.
+#[cfg(feature = "ffi")]
+pub mod ffi;
+
 pub mod data;
 pub mod decorators;
 pub mod mem;

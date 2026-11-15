@@ -68,11 +68,11 @@ tracked lockfile keeps source builds reproducible. To compile optional features:
 cargo +stable build --workspace --all-features --locked
 ```
 
-FFI is an independent package, excluded from the main workspace. Build it
-explicitly with its own tracked lockfile:
+FFI is available from the primary package behind the `ffi` feature. Build it
+from the workspace root (see [the FFI guide](docs/ffi.md)):
 
 ```bash
-cargo +stable build --manifest-path doublets-ffi/Cargo.toml --release --locked
+cargo +stable build -p doublets --features ffi --release --locked
 ```
 
 For machines with limited memory, set `CARGO_BUILD_JOBS=1` and

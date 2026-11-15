@@ -372,7 +372,7 @@ doublets-rs/
 │   │       ├── unit/   # Combined storage implementation
 │   │       └── split/  # Split storage implementation
 │   └── benches/        # Performance benchmarks
-├── doublets-ffi/       # C FFI bindings
+├── doublets-ffi/       # Unpublished compatibility facade and macro tools
 └── integration/        # Integration tests
 ```
 
@@ -429,3 +429,10 @@ cargo bench --all-features
 ## License
 
 This project is released into the public domain under the [Unlicense](LICENSE).
+
+## FFI and package publishing
+
+The single public package is `doublets`; `doublets-rs` is the repository name.
+Enable its `ffi` feature for `doublets::ffi` and native C exports. See the
+[FFI build and migration guide](docs/ffi.md) for commands, library names, and
+trusted publishing setup. The support packages are unpublished.
