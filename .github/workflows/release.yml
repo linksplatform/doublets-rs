@@ -36,9 +36,6 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -Dwarnings
-  # Support both CARGO_REGISTRY_TOKEN (cargo's native env var) and CARGO_TOKEN (for backwards compatibility)
-  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
-  CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
 
 jobs:
   # === DETECT CHANGES - determines which jobs should run ===
@@ -246,9 +243,14 @@ jobs:
       - name: Test FFI bindings
         run: cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
 
+      - name: Test primary FFI without default features
+        run: cargo test -p doublets --no-default-features --features ffi --test ffi --locked
+
       - name: Test C library ABI
         if: matrix.os == 'ubuntu-latest'
         run: |
+          cargo build -p doublets --features ffi --release --locked
+          python3 experiments/issue-22/ffi-smoke.py target/release/libdoublets.so
           cargo build --manifest-path doublets-ffi/Cargo.toml --release --target-dir target --locked
           python3 experiments/issue-22/ffi-smoke.py target/release/libdoublets_ffi.so
 
@@ -333,8 +335,9 @@ jobs:
       - name: Build release
         run: cargo build --release --verbose
 
-      - name: Check package
-        run: cargo package -p doublets --list --allow-dirty
+      - name: Verify distributable FFI package
+        timeout-minutes: 15
+        run: bash experiments/issue-92/verify-package.sh
 
   # Automatic release on push to main using changelog fragments
   # This job automatically bumps version based on fragments in changelog.d/
@@ -351,6 +354,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -393,12 +397,22 @@ jobs:
         if: steps.check.outputs.should_release == 'true'
         run: cargo build --release
 
+      - name: Authenticate to crates.io with OIDC
+        id: crates-auth
+        uses: rust-lang/crates-io-auth-action@v1
+        if: steps.check.outputs.should_release == 'true'
+
+      - name: Explain trusted publisher setup failure
+        if: failure() && steps.crates-auth.outcome == 'failure'
+        run: |
+          echo "::error::Configure the doublets trusted publisher on crates.io: owner linksplatform, repository doublets-rs, workflow release.yml, no environment; then rerun this release."
+          exit 1
+
       - name: Publish to Crates.io
         if: steps.check.outputs.should_release == 'true'
         id: publish-crate
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
-          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-auth.outputs.token }}
         run: rust-script scripts/publish-crate.rs
 
       - name: Create GitHub Release
@@ -424,10 +438,12 @@ jobs:
       always() && !cancelled() &&
       github.event_name == 'workflow_dispatch' &&
       github.event.inputs.release_mode == 'instant' &&
+      github.ref == 'refs/heads/main' &&
       needs.build.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -458,12 +474,22 @@ jobs:
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         run: cargo build --release
 
+      - name: Authenticate to crates.io with OIDC
+        id: crates-auth
+        uses: rust-lang/crates-io-auth-action@v1
+        if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
+
+      - name: Explain trusted publisher setup failure
+        if: failure() && steps.crates-auth.outcome == 'failure'
+        run: |
+          echo "::error::Configure the doublets trusted publisher on crates.io: owner linksplatform, repository doublets-rs, workflow release.yml, no environment; then rerun this release."
+          exit 1
+
       - name: Publish to Crates.io
         if: steps.version.outputs.version_committed == 'true' || steps.version.outputs.already_released == 'true'
         id: publish-crate
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
-          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-auth.outputs.token }}
         run: rust-script scripts/publish-crate.rs
 
       - name: Create GitHub Release

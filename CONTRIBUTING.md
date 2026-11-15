@@ -293,7 +293,7 @@ Fragments are automatically collected into CHANGELOG.md during the release proce
 │   │   └── decorators/   # Policy wrappers and transactions
 │   ├── tests/            # Integration tests
 │   └── benches/          # Benchmarks
-├── doublets-ffi/         # Stable Rust FFI bindings and procedural macros
+├── doublets-ffi/         # Unpublished FFI facade and procedural macro tools
 ├── integration/          # Integration tests
 ├── scripts/              # Utility scripts
 ├── .gitignore            # Git ignore patterns
@@ -333,3 +333,6 @@ Releases are managed through GitHub releases. To trigger a release:
 - Show empathy towards other community members
 
 Thank you for contributing!
+
+The only public package is `doublets`; its optional `ffi` feature contains the
+C bindings. See [FFI and trusted publishing](docs/ffi.md).
