@@ -240,6 +240,15 @@ jobs:
         shell: bash
         run: bash experiments/issue-19/verify.sh
 
+      - name: Test the packaged crate as a registry dependency on stable Rust
+        shell: bash
+        run: bash experiments/issue-18/verify.sh package
+
+      - name: Test `cargo add doublets` from crates.io on stable Rust
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: bash experiments/issue-18/verify.sh crates-io
+
       - name: Test FFI bindings
         run: cargo test --manifest-path doublets-ffi/Cargo.toml --all-features --locked
 

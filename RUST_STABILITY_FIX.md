@@ -19,6 +19,15 @@ features and both storage layouts on stable; the
 [Git troubleshooting guide](STABLE_RUST.md#git-dependencies-and-issue-19)
 explains how to update old revision pins and lockfiles.
 
+The `unresolved import thiserror` failure after `cargo add doublets` in
+[issue 18](https://github.com/linksplatform/doublets-rs/issues/18) came from the
+2022 nightly-only pre-release and its drifting `thiserror 1.x` dependency.
+Current stable releases on crates.io resolve it. The
+[registry consumer check](experiments/issue-18/README.md) verifies the packaged
+crate and the published release with fresh dependency resolution on stable;
+the [upgrade guide](STABLE_RUST.md#cratesio-releases-and-issue-18) explains
+how to move an existing project off the pre-release.
+
 The original draft of this document incorrectly claimed a complete fix while
 required dependencies were disabled and described edits that were not recorded
 in the dependency submodules. PR 25 now preserves main's complete stable
