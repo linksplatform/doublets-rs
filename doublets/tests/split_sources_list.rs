@@ -2,7 +2,11 @@
 //! list by default, like `useLinkedList: true` of the C# `SplitMemoryLinks`,
 //! and `split::TreeStore` keeps the size-balanced sources tree.
 
-use doublets::{data::Flow, mem::Global, split, Doublets, Link};
+use doublets::{
+    data::Flow,
+    mem::{FileMapped, Global},
+    split, Doublets, Link,
+};
 use rand::{rngs::StdRng, RngExt, SeedableRng};
 use std::collections::BTreeMap;
 
@@ -59,6 +63,34 @@ fn default_split_store_lists_sources_in_insertion_order() {
     assert_eq!(ordered_usages(&store, head), [head, a, c, b]);
     store.delete(a).unwrap();
     assert_eq!(ordered_usages(&store, head), [head, c, b]);
+}
+
+#[test]
+fn sources_lists_survive_reopening_file_memory() {
+    let dir = tempfile::tempdir().unwrap();
+    let open = || {
+        split::Store::<usize, _, _>::new(
+            FileMapped::from_path(dir.path().join("data")).unwrap(),
+            FileMapped::from_path(dir.path().join("index")).unwrap(),
+        )
+        .unwrap()
+    };
+    let (head, [a, b, c], x) = {
+        let mut store = open();
+        let (head, links) = links_with_one_source(&mut store);
+        // `x` heads a list while it is a node of the external sources tree.
+        let x = store.create_link(50, 0).unwrap();
+        store.create_link(x, 1).unwrap();
+        (head, links, x)
+    };
+    let mut store = open();
+    assert_eq!(ordered_usages(&store, head), [head, a, b, c]);
+    assert_eq!(ordered_usages(&store, x).len(), 1);
+    store.update(a, head, x).unwrap();
+    assert_eq!(ordered_usages(&store, head), [head, b, c, a]);
+    store.create_link(x, 2).unwrap();
+    assert_eq!(ordered_usages(&store, x).len(), 2);
+    assert_eq!(usages_by_source(&store, 50), [x]);
 }
 
 #[test]
