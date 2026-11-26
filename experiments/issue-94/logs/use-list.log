@@ -1,0 +1,10 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   <repo>/target/issue-94-before/doublets/Cargo.toml
+workspace: <repo>/target/issue-94-before/Cargo.toml
+   Compiling doublets v0.22.0 (<repo>/target/issue-94-before/doublets)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.74s
+     Running `<repo>/target/issue-94-before-target/debug/examples/issue_94_probe`
+
+thread 'main' (62468) panicked at doublets/src/mem/split/store.rs:975:21:
+not yet implemented
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
