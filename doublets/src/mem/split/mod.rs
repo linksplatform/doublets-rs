@@ -12,4 +12,4 @@ pub use data_part::DataPart;
 pub use index_part::IndexPart;
 
 pub use generic::*;
-pub use store::Store;
+pub use store::{Store, TreeStore};

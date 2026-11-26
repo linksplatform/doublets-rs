@@ -295,6 +295,10 @@ fn seeded_changes_match_a_plain_map() {
             split::Store::<usize, _, _>::new(Global::new(), Global::new()).unwrap(),
             seed,
         );
+        random_changes(
+            split::TreeStore::<usize, _, _>::new(Global::new(), Global::new()).unwrap(),
+            seed,
+        );
         random_changes(unit::Store::<usize, _>::new(Global::new()).unwrap(), seed);
     }
 }

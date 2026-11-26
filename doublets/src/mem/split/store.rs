@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, mem::transmute, ptr::NonNull};
+use std::{mem::transmute, ptr::NonNull};
 
 use crate::{
     mem::{
@@ -9,13 +9,19 @@ use crate::{
         },
         LinksHeader, SplitList, SplitTree, SplitUpdateMem,
     },
-    Doublets, DoubletsExt, Link, Links, LinksError, ReadHandler, WriteHandler,
+    Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
 use data::{Flow, LinkReference, LinksConstants, ToQuery};
 use mem::RawMem;
 
 const DEFAULT_PAGE_SIZE: usize = 8 * 1024;
 
+mod mutation;
+mod sources_list;
+
+#[cfg(test)]
+#[path = "../../../tests/internal/split_sources_list.rs"]
+mod sources_list_tests;
 #[cfg(test)]
 #[path = "../../../tests/internal/split.rs"]
 mod tests;
@@ -30,6 +36,15 @@ mod tests;
 /// (disabled by default).
 /// `delete*` methods use a resetting convenience adapter. For release without
 /// automatic reset, use [`crate::mem::Release`] or [`crate::decorators::CheckedRelease`].
+///
+/// `USE_LIST` selects how links with an internal source are indexed by that
+/// source. With `true` (the default, like `useLinkedList: true` of the C#
+/// `SplitMemoryLinks`) they form a circular linked list in insertion order:
+/// attach and detach are O(1), and searching a `(source, target)` pair uses the
+/// targets tree. With `false` they form a size-balanced tree of the `IS` type,
+/// which is ordered by target. [`TreeStore`] names the store with `false`.
+/// The two layouts store different index metadata, so open an index memory
+/// only with the mode that wrote it.
 pub struct Store<
     T: LinkReference,
     MD: RawMem<Item = DataPart<T>>,
@@ -39,6 +54,7 @@ pub struct Store<
     IT: SplitTree<T> = InternalTargetsRecursionlessTree<T>,
     ET: SplitTree<T> = ExternalTargetsRecursionlessTree<T>,
     UL: SplitList<T> = UnusedLinks<T>,
+    const USE_LIST: bool = true,
 > {
     data_mem: MD,
     index_mem: MI,
@@ -65,30 +81,44 @@ pub struct Store<
     link_lookups: std::sync::atomic::AtomicUsize,
 }
 
+/// A split store that indexes links by internal source with a size-balanced
+/// tree instead of the linked list (`USE_LIST = false`).
+pub type TreeStore<T, MD, MI> = Store<
+    T,
+    MD,
+    MI,
+    InternalSourcesRecursionlessTree<T>,
+    ExternalSourcesRecursionlessTree<T>,
+    InternalTargetsRecursionlessTree<T>,
+    ExternalTargetsRecursionlessTree<T>,
+    UnusedLinks<T>,
+    false,
+>;
+
 impl<
         T: LinkReference,
         MD: RawMem<Item = DataPart<T>>,
         MI: RawMem<Item = IndexPart<T>>,
-        IS: SplitTree<T>,
-        ES: SplitTree<T>,
-        IT: SplitTree<T>,
-        ET: SplitTree<T>,
-        UL: SplitList<T>,
-    > Store<T, MD, MI, IS, ES, IT, ET, UL>
+        const USE_LIST: bool,
+    >
+    Store<
+        T,
+        MD,
+        MI,
+        InternalSourcesRecursionlessTree<T>,
+        ExternalSourcesRecursionlessTree<T>,
+        InternalTargetsRecursionlessTree<T>,
+        ExternalTargetsRecursionlessTree<T>,
+        UnusedLinks<T>,
+        USE_LIST,
+    >
 {
-    const USE_LIST: bool = false;
-    #[cfg(not(miri))]
-    const SIZE_STEP: usize = 2_usize.pow(20);
-    #[cfg(miri)]
-    const SIZE_STEP: usize = 2_usize.pow(10);
-
-    // TODO: create Options
     /// Creates a split store with the given data memory, index memory, and `constants`.
     pub fn with_constants(
         data_mem: MD,
         index_mem: MI,
         constants: LinksConstants<T>,
-    ) -> Result<Store<T, MD, MI>, LinksError<T>> {
+    ) -> Result<Self, LinksError<T>> {
         let dangling_data = NonNull::slice_from_raw_parts(NonNull::dangling(), 0);
         let dangling_index = NonNull::slice_from_raw_parts(NonNull::dangling(), 0);
 
@@ -106,7 +136,7 @@ impl<
             InternalSourcesLinkedList::new(constants.clone(), dangling_data, dangling_index);
         let unused = UnusedLinks::new(dangling_data, dangling_index);
 
-        let mut new = Store {
+        let mut new = Self {
             data_mem,
             index_mem,
             data_ptr: dangling_data,
@@ -134,9 +164,27 @@ impl<
     }
 
     /// Creates a split store using the given memories and default [`LinksConstants`].
-    pub fn new(data_mem: MD, index_mem: MI) -> Result<Store<T, MD, MI>, LinksError<T>> {
+    pub fn new(data_mem: MD, index_mem: MI) -> Result<Self, LinksError<T>> {
         Self::with_constants(data_mem, index_mem, LinksConstants::default())
     }
+}
+
+impl<
+        T: LinkReference,
+        MD: RawMem<Item = DataPart<T>>,
+        MI: RawMem<Item = IndexPart<T>>,
+        IS: SplitTree<T>,
+        ES: SplitTree<T>,
+        IT: SplitTree<T>,
+        ET: SplitTree<T>,
+        UL: SplitList<T>,
+        const USE_LIST: bool,
+    > Store<T, MD, MI, IS, ES, IT, ET, UL, USE_LIST>
+{
+    #[cfg(not(miri))]
+    const SIZE_STEP: usize = 2_usize.pow(20);
+    #[cfg(miri)]
+    const SIZE_STEP: usize = 2_usize.pow(10);
 
     fn mut_from_mem<'a, U>(mut ptr: NonNull<[U]>, index: usize) -> Option<&'a mut U> {
         if index < ptr.len() {
@@ -351,11 +399,13 @@ impl<
         if link <= header.allocated && header.first_free != link {
             let index = self.get_index_part(link);
             let data = self.get_data_part(link);
-            // Free-list slots have no endpoint-tree entries; their data holds
+            // Free-list slots have no endpoint-index entries; their data holds
             // circular-list pointers. A live (source, null) link has no target
-            // entry either, but is still present in its source tree.
+            // entry either, but is still present in its source tree or, in
+            // list mode, in its circular source list (a nonzero next pointer).
             index.size_as_source == T::from_byte(0)
                 && index.size_as_target == T::from_byte(0)
+                && !(USE_LIST && index.right_as_source != T::from_byte(0))
                 && data.source != T::from_byte(0)
         } else {
             true
@@ -387,6 +437,31 @@ impl<
 
         let raw = self.get_data_unchecked(index);
         Link::new(index, raw.source, raw.target)
+    }
+
+    /// Finds the link `(source, target)` with the index that the endpoint
+    /// kinds and the source mode select; returns `null` if there is none.
+    fn search_pair(&self, source: T, target: T, virtual_source: bool, virtual_target: bool) -> T {
+        if virtual_source && virtual_target {
+            self.external_sources.search(source, target)
+        } else if virtual_source {
+            self.internal_targets.search(source, target)
+        } else if virtual_target {
+            // An internal source with a virtual target: in list mode the
+            // sources are not a search tree, so use the external targets tree.
+            if USE_LIST {
+                self.external_targets.search(source, target)
+            } else {
+                self.internal_sources.search(source, target)
+            }
+        } else if USE_LIST
+            || self.internal_sources.count_usages(source)
+                > self.internal_targets.count_usages(target)
+        {
+            self.internal_targets.search(source, target)
+        } else {
+            self.internal_sources.search(source, target)
+        }
     }
 
     fn try_each_by_core(&self, handler: ReadHandler<'_, T>, query: &[T]) -> Flow {
@@ -462,39 +537,14 @@ impl<
                 } else if target == any {
                     if is_virtual_source {
                         self.external_sources.each_usages(source, handler)
-                    } else if Self::USE_LIST {
+                    } else if USE_LIST {
                         self.sources_list.each_usages(source, handler)
                     } else {
                         self.internal_sources.each_usages(source, handler)
                     }
                 } else {
-                    let link = if true {
-                        if is_virtual_source && is_virtual_target {
-                            self.external_sources.search(source, target)
-                        } else if is_virtual_source {
-                            self.internal_targets.search(source, target)
-                        } else if is_virtual_target {
-                            if Self::USE_LIST {
-                                self.external_sources.search(source, target)
-                            } else {
-                                self.internal_sources.search(source, target)
-                            }
-                        } else if Self::USE_LIST
-                            || self.internal_sources.count_usages(source)
-                                > self.internal_targets.count_usages(target)
-                        {
-                            self.internal_targets.search(source, target)
-                        } else {
-                            self.internal_sources.search(source, target)
-                        }
-                    } else if Self::USE_LIST
-                        || self.internal_sources.count_usages(source)
-                            > self.internal_targets.count_usages(target)
-                    {
-                        self.internal_targets.search(source, target)
-                    } else {
-                        self.internal_sources.search(source, target)
-                    };
+                    let link =
+                        self.search_pair(source, target, is_virtual_source, is_virtual_target);
                     return if link == constants.null {
                         Flow::Continue
                     } else {
@@ -533,77 +583,6 @@ impl<
         }
         todo!()
     }
-
-    fn resolve_dangling_internal(&mut self, index: T) {
-        let any = self.constants.any;
-        let links: Vec<_> = self
-            .each_iter([any, index, any])
-            .filter(|link| link.index != index)
-            .collect();
-        let sources = links.len();
-        for link in links {
-            unsafe {
-                self.detach_internal_source(index, link.index);
-                self.attach_external_source(link.index);
-            }
-        }
-
-        let links: Vec<_> = self
-            .each_iter([any, any, index])
-            .filter(|link| link.index != index)
-            .filter(|link| !link.is_full())
-            .collect();
-        let targets = links.len();
-        for link in links {
-            unsafe {
-                self.detach_internal_target(index, link.index);
-                self.attach_external_target(link.index);
-            }
-        }
-        if (sources != 0 || targets != 0)
-            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEXES").is_some()
-        {
-            eprintln!("[doublets split] ID {index}: moved {sources} source and {targets} target entries from internal to external indexes");
-        }
-    }
-
-    fn resolve_dangling_external(&mut self, free: T) {
-        // `free` is already live. Normal queries now select its internal trees,
-        // but references written before allocation still live in the external
-        // trees. Collect from those trees before changing their structure.
-        let mut links = Vec::new();
-        self.external_sources.each_usages(free, &mut |link| {
-            links.push(link.index);
-            Flow::Continue
-        });
-        let sources = links.len();
-        for link in links {
-            unsafe {
-                self.detach_external_source(link);
-                self.attach_internal_source(free, link);
-            }
-        }
-
-        let mut links = Vec::new();
-        self.external_targets.each_usages(free, &mut |link| {
-            links.push(link.index);
-            Flow::Continue
-        });
-        let targets = links.len();
-        for link in links {
-            unsafe {
-                self.detach_external_target(link);
-                self.attach_internal_target(free, link);
-            }
-        }
-        debug_assert_eq!(self.external_sources.count_usages(free), T::from_byte(0));
-        debug_assert_eq!(self.external_targets.count_usages(free), T::from_byte(0));
-        if (sources != 0 || targets != 0)
-            && std::env::var_os("DOUBLETS_TRACE_SPLIT_INDEXES").is_some()
-        {
-            eprintln!("[doublets split] ID {free}: moved {sources} source and {targets} target entries from external to internal indexes");
-        }
-    }
 }
 
 impl<
@@ -615,7 +594,8 @@ impl<
         IT: SplitTree<T>,
         ET: SplitTree<T>,
         UL: SplitList<T>,
-    > Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        const USE_LIST: bool,
+    > Links<T> for Store<T, MD, MI, IS, ES, IT, ET, UL, USE_LIST>
 {
     fn constants(&self) -> &LinksConstants<T> {
         &self.constants
@@ -649,9 +629,8 @@ impl<
                 } else if is_virtual_val {
                     self.external_sources.count_usages(value)
                         + self.external_targets.count_usages(value)
-                } else if Self::USE_LIST {
-                    self.sources_list.count_usages(value)
-                        + self.internal_targets.count_usages(value)
+                } else if USE_LIST {
+                    self.count_list_usages(value) + self.internal_targets.count_usages(value)
                 } else {
                     self.internal_sources.count_usages(value)
                         + self.internal_targets.count_usages(value)
@@ -689,39 +668,14 @@ impl<
                 } else if target == any {
                     if is_virtual_source {
                         self.external_sources.count_usages(source)
-                    } else if Self::USE_LIST {
-                        self.sources_list.count_usages(source)
+                    } else if USE_LIST {
+                        self.count_list_usages(source)
                     } else {
                         self.internal_sources.count_usages(source)
                     }
                 } else {
-                    let link = if true {
-                        if is_virtual_source && is_virtual_target {
-                            self.external_sources.search(source, target)
-                        } else if is_virtual_source {
-                            self.internal_targets.search(source, target)
-                        } else if is_virtual_target {
-                            if Self::USE_LIST {
-                                self.external_sources.search(source, target)
-                            } else {
-                                self.internal_sources.search(source, target)
-                            }
-                        } else if Self::USE_LIST
-                            || self.internal_sources.count_usages(source)
-                                > self.internal_targets.count_usages(target)
-                        {
-                            self.internal_targets.search(source, target)
-                        } else {
-                            self.internal_sources.search(source, target)
-                        }
-                    } else if Self::USE_LIST
-                        || self.internal_sources.count_usages(source)
-                            > self.internal_targets.count_usages(target)
-                    {
-                        self.internal_targets.search(source, target)
-                    } else {
-                        self.internal_sources.search(source, target)
-                    };
+                    let link =
+                        self.search_pair(source, target, is_virtual_source, is_virtual_target);
                     return if link == constants.null {
                         T::from_byte(0)
                     } else {
@@ -832,7 +786,8 @@ impl<
         IT: SplitTree<T>,
         ET: SplitTree<T>,
         UL: SplitList<T>,
-    > Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        const USE_LIST: bool,
+    > Doublets<T> for Store<T, MD, MI, IS, ES, IT, ET, UL, USE_LIST>
 {
     fn get_link(&self, index: T) -> Option<Link<T>> {
         #[cfg(test)]
@@ -855,7 +810,8 @@ unsafe impl<
         IT: SplitTree<T>,
         ET: SplitTree<T>,
         UL: SplitList<T>,
-    > Sync for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        const USE_LIST: bool,
+    > Sync for Store<T, MD, MI, IS, ES, IT, ET, UL, USE_LIST>
 {
 }
 
@@ -868,126 +824,7 @@ unsafe impl<
         IT: SplitTree<T>,
         ET: SplitTree<T>,
         UL: SplitList<T>,
-    > Send for Store<T, MD, MI, IS, ES, IT, ET, UL>
+        const USE_LIST: bool,
+    > Send for Store<T, MD, MI, IS, ES, IT, ET, UL, USE_LIST>
 {
-}
-
-impl<
-        T: LinkReference,
-        MD: RawMem<Item = DataPart<T>>,
-        MI: RawMem<Item = IndexPart<T>>,
-        IS: SplitTree<T>,
-        ES: SplitTree<T>,
-        IT: SplitTree<T>,
-        ET: SplitTree<T>,
-        UL: SplitList<T>,
-    > crate::mem::Release<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
-{
-    #[inline]
-    unsafe fn release_unchecked(&mut self, index: T, handler: WriteHandler<'_, T>) -> Flow {
-        self.resolve_dangling_internal(index);
-
-        let header = self.get_header();
-
-        match index.cmp(&header.allocated) {
-            Ordering::Less => self.unused.attach_as_first(index),
-            Ordering::Greater => unreachable!(),
-            Ordering::Equal => {
-                let allocated = self.get_header().allocated;
-                let header = self.mut_header();
-                header.allocated = allocated - T::from_byte(1);
-
-                loop {
-                    let allocated = self.get_header().allocated;
-                    if !(allocated > T::from_byte(0) && self.is_unused(allocated)) {
-                        break;
-                    }
-                    self.unused.detach(allocated);
-                    self.mut_header().allocated = allocated - T::from_byte(1);
-                }
-            }
-        }
-        handler(
-            Link::new(index, T::from_byte(0), T::from_byte(0)),
-            Link::nothing(),
-        )
-    }
-}
-
-impl<
-        T: LinkReference,
-        MD: RawMem<Item = DataPart<T>>,
-        MI: RawMem<Item = IndexPart<T>>,
-        IS: SplitTree<T>,
-        ES: SplitTree<T>,
-        IT: SplitTree<T>,
-        ET: SplitTree<T>,
-        UL: SplitList<T>,
-    > crate::mem::UncheckedMutation<T> for Store<T, MD, MI, IS, ES, IT, ET, UL>
-{
-    #[inline]
-    unsafe fn update_unchecked(
-        &mut self,
-        index: T,
-        source: T,
-        target: T,
-        handler: WriteHandler<'_, T>,
-    ) -> Flow {
-        #[cfg(test)]
-        {
-            self.update_calls += 1;
-        }
-        let null = T::from_byte(0);
-        let old = self.get_data_part(index).clone();
-        // Detaching a self reference temporarily clears this link's tree
-        // sizes. is_unused uses those sizes, so classify destinations while the
-        // original indexes still describe the link as live.
-        let virtual_source = self.is_virtual(source);
-        let virtual_target = self.is_virtual(target);
-        // SAFETY: the caller guarantees that `index` is live and the indexes are
-        // consistent, so it is a member of the trees of its current nonzero
-        // endpoints. Once detached, it is attached to those of the new ones.
-        unsafe {
-            if old.source != null {
-                if self.is_virtual(old.source) {
-                    self.detach_external_source(index);
-                } else if Self::USE_LIST {
-                    // self.sources_list.attach_as_last(source, index);
-                    todo!()
-                } else {
-                    self.detach_internal_source(old.source, index);
-                }
-            }
-            if old.target != null {
-                if self.is_virtual(old.target) {
-                    self.detach_external_target(index);
-                } else {
-                    self.detach_internal_target(old.target, index);
-                }
-            }
-            let place = self.mut_data_part(index);
-            (place.source, place.target) = (source, target);
-            if source != null {
-                if virtual_source {
-                    self.attach_external_source(index);
-                } else if Self::USE_LIST {
-                    // self.sources_list.attach_as_last(source, index);
-                    todo!()
-                } else {
-                    self.attach_internal_source(source, index);
-                }
-            }
-            if target != null {
-                if virtual_target {
-                    self.attach_external_target(index);
-                } else {
-                    self.attach_internal_target(target, index);
-                }
-            }
-        }
-        handler(
-            Link::new(index, old.source, old.target),
-            Link::new(index, source, target),
-        )
-    }
 }

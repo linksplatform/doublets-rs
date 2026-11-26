@@ -13,11 +13,22 @@ use crate::mem::{
 use data::LinkReference;
 use trees::{LinkedList, RelativeCircularLinkedList, RelativeLinkedList};
 
+/// Circular doubly linked list of the links that share an internal source.
+///
+/// The head is the source link: its `root_as_source` is the first element and
+/// its `size_as_source` the element count. Elements use `left_as_source` and
+/// `right_as_source` as previous and next pointers.
+///
+/// A head that is itself a node of the external sources tree (its own source
+/// is virtual) needs `size_as_source` for that tree. Disable size tracking
+/// with [`Self::set_size_tracking`] while changing such a list and count it
+/// with [`Self::count_by_traversal`] instead of [`Self::count_usages`].
 pub struct InternalSourcesLinkedList<T: LinkReference> {
     data: NonNull<[DataPart<T>]>,
     indexes: NonNull<[IndexPart<T>]>,
     r#continue: T,
     r#break: T,
+    track_size: bool,
 }
 
 impl<T: LinkReference> InternalSourcesLinkedList<T> {
@@ -31,7 +42,13 @@ impl<T: LinkReference> InternalSourcesLinkedList<T> {
             indexes,
             r#continue: constants.r#continue,
             r#break: constants.r#break,
+            track_size: true,
         }
+    }
+
+    /// Selects whether `attach*`/`detach` update the stored size of the head.
+    pub fn set_size_tracking(&mut self, track_size: bool) {
+        self.track_size = track_size;
     }
 
     fn get_header(&self) -> &LinksHeader<T> {
@@ -63,8 +80,19 @@ impl<T: LinkReference> InternalSourcesLinkedList<T> {
         Link::new(link, data.source, data.target)
     }
 
+    /// Returns the stored element count of the list of `head`.
     pub fn count_usages(&self, head: T) -> T {
         self.get_size(head)
+    }
+
+    /// Counts the elements of the list of `head` by walking it.
+    pub fn count_by_traversal(&self, head: T) -> T {
+        let mut count = T::from_byte(0);
+        self.each_usages(head, &mut |_| {
+            count = count + T::from_byte(1);
+            Flow::Continue
+        });
+        count
     }
 
     pub fn each_usages<H: FnMut(Link<T>) -> Flow + ?Sized>(
@@ -122,6 +150,18 @@ impl<T: LinkReference> RelativeLinkedList<T> for InternalSourcesLinkedList<T> {
 
     fn set_size(&mut self, head: T, size: T) {
         self.get_mut_index_part(head).size_as_source = size;
+    }
+
+    fn inc_size(&mut self, head: T) {
+        if self.track_size {
+            self.set_size(head, self.get_size(head) + T::from_byte(1));
+        }
+    }
+
+    fn dec_size(&mut self, head: T) {
+        if self.track_size {
+            self.set_size(head, self.get_size(head) - T::from_byte(1));
+        }
     }
 }
 
