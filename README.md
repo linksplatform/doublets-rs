@@ -185,6 +185,14 @@ fn main() -> Result<(), doublets::Error<usize>> {
 }
 ```
 
+Like the C# `SplitMemoryLinks` (`useLinkedList: true`), `split::Store` keeps the
+links of each internal source in a linked list by default: attaching and
+detaching a link is O(1), and `[any, source, any]` queries return links in
+insertion order. `split::TreeStore` (`USE_LIST = false`) uses a size-balanced
+sources tree instead. The two modes write different index metadata, so open an
+existing index memory with the mode that created it (`split::TreeStore` for
+files written by `doublets` 0.22 or earlier).
+
 ## API Overview
 
 ### Core Traits
@@ -202,7 +210,8 @@ fn main() -> Result<(), doublets::Error<usize>> {
 | `Link<T>` | A triplet of (index, source, target) |
 | `Doublet<T>` | A pair of (source, target) without index |
 | `unit::Store` | Combined memory layout storage |
-| `split::Store` | Separated memory layout storage |
+| `split::Store` | Separated memory layout storage (sources linked list) |
+| `split::TreeStore` | Separated memory layout storage (sources tree) |
 | `Error<T>` | Error type for link operations |
 
 ### Key Operations
