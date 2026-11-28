@@ -229,6 +229,10 @@ jobs:
       - name: Run tests
         run: cargo test --all-features --verbose
 
+      - name: Test file-mapped stores with a 24 MiB memory limit
+        if: runner.os == 'Linux'
+        run: bash experiments/issue-95/test-memory-limit.sh
+
       - name: Run doc tests
         run: cargo test --doc --verbose
 
