@@ -37,7 +37,6 @@ name = "doublets"
 version = "0.23.0"
 dependencies = [
  "cfg-if",
- "leak_slice",
  "libc",
  "log",
  "platform-data",
@@ -93,12 +92,6 @@ name = "lazy_static"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20870f649af7073d53e38067b2a84312175d56ea15217e1b15bc83506ec50afb"
-
-[[package]]
-name = "leak_slice"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecf3387da9fb41906394e1306ddd3cd26dd9b7177af11c19b45b364b743aed26"
 
 [[package]]
 name = "libc"

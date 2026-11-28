@@ -1,7 +1,7 @@
 //! C ABI bindings enabled by the `ffi` feature. See the repository FFI guide.
 // Keep the public compatibility field name and C ABI type names stable.
 #![allow(clippy::pub_underscore_fields, clippy::used_underscore_binding)]
-use std::{error::Error, ffi::CStr, fmt::Display, fs::File, ops::RangeInclusive, ptr::null_mut};
+use std::{error::Error, ffi::CStr, fmt::Display, ops::RangeInclusive, ptr::null_mut};
 
 use crate::{
     data::{
@@ -142,13 +142,7 @@ unsafe fn new_with_constants_united_links<T: LinkReference>(
 ) -> *mut c_void {
     let result: Result<_, Box<dyn Error>> = (|| {
         let path = CStr::from_ptr(path).to_str()?;
-        let file = File::options()
-            .create(true)
-            .truncate(false)
-            .read(true)
-            .write(true)
-            .open(path)?;
-        let mem = FileMapped::new(file)?;
+        let mem = FileMapped::from_path(path)?;
         let links = UnitedLinks::<T>::with_constants(mem, constants.into())?;
         Ok(Box::into_raw(Box::new(links)).cast::<c_void>())
     })();

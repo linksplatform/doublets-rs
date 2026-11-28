@@ -344,16 +344,6 @@ impl<
         self.unused.update_mem(data, index);
     }
 
-    fn align(mut to_align: usize, target: usize) -> usize {
-        debug_assert!(to_align >= target);
-
-        // TODO: optimize this `if`
-        if to_align % target != 0 {
-            to_align = ((to_align / target) * target) + target;
-        }
-        to_align
-    }
-
     unsafe fn init(&mut self) -> Result<(), LinksError<T>> {
         let data = NonNull::from(crate::mem::resize_mem(
             &mut self.data_mem,
@@ -368,16 +358,16 @@ impl<
         let header = self.get_header().clone();
         let allocated = header.allocated.as_();
 
-        let mut data_capacity = allocated;
-        data_capacity = data_capacity.max(self.data_mem.allocated().len());
-        data_capacity = data_capacity.max(self.data_step);
-
-        let mut index_capacity = allocated;
-        index_capacity = index_capacity.max(self.index_mem.allocated().len());
-        index_capacity = index_capacity.max(self.index_step);
-
-        data_capacity = Self::align(data_capacity, self.data_step);
-        index_capacity = Self::align(index_capacity, self.index_step);
+        let data_capacity = allocated
+            .max(self.data_mem.allocated().len())
+            .max(self.data_step)
+            .checked_next_multiple_of(self.data_step)
+            .ok_or(mem::Error::CapacityOverflow)?;
+        let index_capacity = allocated
+            .max(self.index_mem.allocated().len())
+            .max(self.index_step)
+            .checked_next_multiple_of(self.index_step)
+            .ok_or(mem::Error::CapacityOverflow)?;
 
         let data = NonNull::from(crate::mem::resize_mem(&mut self.data_mem, data_capacity)?);
         let index = NonNull::from(crate::mem::resize_mem(&mut self.index_mem, index_capacity)?);
