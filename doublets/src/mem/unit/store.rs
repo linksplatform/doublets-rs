@@ -11,7 +11,6 @@ use crate::{
     Doublets, Link, Links, LinksError, ReadHandler, WriteHandler,
 };
 use data::{Flow, LinkReference, LinksConstants, ToQuery};
-use leak_slice::LeakSliceExt;
 use mem::RawMem;
 
 use std::{cmp, cmp::Ordering, mem::transmute, ptr::NonNull};
@@ -114,7 +113,7 @@ impl<
 
         let header = self.get_header().clone();
         let capacity = cmp::max(self.reserve_step, header.allocated.as_());
-        let mem = crate::mem::resize_mem(&mut self.mem, capacity)?.leak();
+        let mem = NonNull::from(crate::mem::resize_mem(&mut self.mem, capacity)?);
         self.update_mem(mem);
 
         let reserved = self.mem.allocated().len();
@@ -482,7 +481,7 @@ impl<
 
             if header.allocated >= header.reserved - T::from_byte(1) {
                 let new_cap = self.mem.allocated().len() + self.reserve_step;
-                let mem = crate::mem::resize_mem(&mut self.mem, new_cap)?.leak();
+                let mem = NonNull::from(crate::mem::resize_mem(&mut self.mem, new_cap)?);
                 self.update_mem(mem);
                 let reserved = self.mem.allocated().len();
                 let header = self.mut_header();
