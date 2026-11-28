@@ -29,6 +29,7 @@ tap = "1.0.1"
 cfg-if = "1.0.5"
 thiserror = "2.0.21"
 leak_slice = "0.2.0"
+typeid = "1.0.3"
 # platform
 num = { package = "platform-num", version = "0.8.0" }
 data = { package = "platform-data", version = "2.0.0" }
